@@ -38,10 +38,10 @@ class StockController extends Controller
         $typeOptions = ['StockConsumption', 'StockReturn'];
         $statusOptions = ['success','failed','ready to rerun','reversed'];
 
-        $type = $request->query('type', $typeOptions);
+        $type = $request->query('type', 'StockConsumption');
         if (!is_array($type)) $type = [$type];
 
-        $status = $request->query('status', $statusOptions);
+        $status = $request->query('status', 'success','failed','ready to rerun');
         if (!is_array($status)) $status = [$status];
 
         $page = (int) $request->query('page', 1);
@@ -166,7 +166,6 @@ class StockController extends Controller
         return back()->withErrors(['date' => 'Invalid date format']);
     }
 
-    // Terima status & type baik sebagai string atau array
     $statusFilter = $request->query('status', []);
     $typeFilter   = $request->query('type', []);
 
