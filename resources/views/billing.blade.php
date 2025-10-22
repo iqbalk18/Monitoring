@@ -140,18 +140,46 @@
     <form method="GET" class="mb-4">
         <div class="row g-2 align-items-end">
             <div class="col-md-3">
-                <label class="form-control bg-light fw-bold">
+                <label id="slctype" class="form-control">
                     {{ $typeFilter === 'FinalBilling' ? 'Final Billing' : $typeFilter }}
                 </label>
             </div>
-            <div class="col-md-3">
-                <select name="status" class="form-select">
-                    <option value="failed" {{ $statusFilter == 'failed' ? 'selected' : '' }}>Failed</option>
-                    <option value="success" {{ $statusFilter == 'success' ? 'selected' : '' }}>Success</option>
-                    <option value="ready to rerun" {{ $statusFilter == 'ready to rerun' ? 'selected' : '' }}>Ready to rerun</option>
-                    <option value="reversed" {{ $statusFilter == 'reversed' ? 'selected' : '' }}>Reversed</option>
-                </select>
+
+            {{-- Status --}}
+        <div class="col-md-3">
+                <label class="form-label fw-bold">Status</label>
+                <div class="dropdown" data-bs-auto-close="outside">
+                    <button id="btnStatus" class="btn btn-outline-secondary dropdown-toggle w-100 text-start"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Select Status
+                    </button>
+            <div class="dropdown-menu p-3" style="width:100%">
+                        <div class="d-flex justify-content-between mb-2">
+                            <small class="text-muted">Choose one or more</small>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-link p-0 me-2" onclick="selectAll('status')">Select all</button>
+                                <button type="button" class="btn btn-sm btn-link p-0 text-danger" onclick="clearAll('status')">Clear</button>
+                            </div>
+                        </div>
+                        @php
+                            $statusOptions = ['success','failed','ready to rerun','reversed'];
+                            $selectedStatus = (array) ($status ?? $statusOptions);
+                        @endphp
+
+                        @foreach($statusOptions as $st)
+                        <div class="form-check status-option" id="wrap_{{ str_replace(' ', '_', $st) }}">
+                            <input class="form-check-input status-check" type="checkbox" 
+                                name="status[]" value="{{ $st }}"
+                                id="st_{{ str_replace(' ', '_', $st) }}"
+                                {{ in_array($st, $selectedStatus) ? 'checked' : '' }}
+                                onchange="handleStatusChange()">
+                            <label class="form-check-label" for="st_{{ str_replace(' ', '_', $st) }}">{{ ucfirst($st) }}</label>
+                        </div>
+                    @endforeach
+                </div>
             </div>
+        </div>
+        
             <div class="col-md-2">
                 <input type="date" name="fromDate" class="form-control" value="{{ $fromDate }}">
             </div>
@@ -171,7 +199,7 @@
                 <div class="col-md-6">
                     <h5 class="fw-bold text-dark mb-3">Final Billing Recaps</h5>
                     <p><strong>Date Range:</strong> {{ $fromDate }} to {{ $toDate }}</p>
-                    <p><strong>Status:</strong> {{ ucfirst($statusFilter) }}</p>
+                    <p><strong>Status:</strong> {{ implode(', ', array_map('ucfirst', $status)) }}</p>
                     <p><strong>Total Recaps:</strong> {{ $recaps->count() }}</p>
                 </div>
                 <div class="col-md-6 text-end">
@@ -206,7 +234,7 @@
 
                  <!-- Export Excel with active filter -->
                 <a href="{{ route('billing.export', [
-                    'status' => $statusFilter,
+                    'status' => $status,
                     'type' => $typeFilter,
                     'fromDate' => $fromDate,
                     'toDate' => $toDate
@@ -258,10 +286,17 @@
                                             <ul class="mb-0">
                                                 @foreach ($itemsWithError as $item)
                                                     <li>
-                                                        <strong>Material:</strong> {{ $item['material'] }} — 
-                                                        <strong>Qty:</strong> {{ $item['quantity'] }} — 
+                                                        <strong>Material:</strong> {{ $item['material'] ?? '-' }} — 
+                                                        <strong>Qty:</strong> {{ $item['quantity'] ?? 0 }} — 
                                                         <strong>Amount:</strong> Rp{{ number_format($item['finalAmount'] ?? 0, 0, ',', '.') }}<br>
-                                                        <strong>Error:</strong> {{ $item['sapErrorMessage'] }}
+
+                                                        @if(!empty($item['belongsToRefs']))
+                                                            @foreach($item['belongsToRefs'] as $ref)
+                                                                <strong>Ref ID:</strong> {{ $ref['refId'] ?? '-' }}<br>
+                                                            @endforeach
+                                                        @endif
+
+                                                        <strong>Error:</strong> {{ $item['sapErrorMessage'] ?? '-' }}
                                                     </li>
                                                 @endforeach
                                             </ul>
@@ -294,6 +329,9 @@
     © {{ date('Y') }} <span>Bali International Hospital</span> — Developed by IT Department
 </footer>
 
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     let sortAscending = true;
     function sortByRecapCode() {
@@ -314,6 +352,46 @@
         arrow.textContent = sortAscending ? '▲' : '▼';
         sortAscending = !sortAscending;
     }
+
+document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.addEventListener('click', e => e.stopPropagation());
+    });
+    
+// === STATUS LOGIC ===
+function handleStatusChange() {
+    const ready = document.getElementById('wrap_ready_to_rerun');
+    const reversed = document.getElementById('wrap_reversed');
+    const readyCheck = document.getElementById('st_ready_to_rerun');
+    const reversedCheck = document.getElementById('st_reversed');
+
+    if (readyCheck.checked) {
+        // hide reversed
+        reversed.style.display = 'none';
+        reversedCheck.checked = false;
+    } else if (reversedCheck.checked) {
+        // hide ready to rerun
+        ready.style.display = 'none';
+        readyCheck.checked = false;
+    } else {
+        // show all if none selected
+        ready.style.display = '';
+        reversed.style.display = '';
+    }
+}
+
+function selectAll(groupName) {
+    document.querySelectorAll(`input[name="${groupName}[]"]`).forEach(cb => cb.checked = true);
+    handleStatusChange();
+    updateLabel('btnStatus', groupName, 'Select Status');
+}
+
+function clearAll(groupName) {
+    document.querySelectorAll(`input[name="${groupName}[]"]`).forEach(cb => cb.checked = false);
+    handleStatusChange();
+    updateLabel('btnStatus', groupName, 'Select Status');
+}
+
+document.addEventListener('DOMContentLoaded', handleStatusChange);
 </script>
 
 </body>

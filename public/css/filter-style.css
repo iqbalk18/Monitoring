@@ -4,7 +4,7 @@
 
 /* Default tombol dropdown & button */
     .btn-outline-secondary,
-    #btnDataType, #btnOrderType{
+    #btnDataType, #btnOrderType,#btnStatus,#slctype{
         color: white !important;           
         background-color: transparent;      
         border-color: #ffffffff;
@@ -14,7 +14,9 @@
 /* Hover & focus efek untuk tombol */
     .btn-outline-secondary:hover,
     #btnDataType:hover, #btnDataType:focus,
-    #btnOrderType:hover, #btnOrderType:focus {
+    #btnOrderType:hover, #btnOrderType:focus,
+    #btnStatus:hover, #btnStatus:focus,
+    #slctype:hover, #slctype:focus {
         color: black !important;        
         background-color: #abacadff;
         border-color: #000;     

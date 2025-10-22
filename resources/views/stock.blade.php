@@ -128,7 +128,7 @@
         {{-- Type --}}
         <div class="col-md-3">
             <label for="type" class="form-label">Type</label>
-            <select name="type" id="type" class="form-select">
+            <select name="type" id="slctype" class="form-select">
                 @foreach(['StockConsumption','StockReturn'] as $t)
                     <option value="{{ $t }}" {{ ($type ?? 'StockConsumption') == $t ? 'selected' : '' }}>
                         {{ $t }}
@@ -162,18 +162,18 @@
                         @endphp
 
                         @foreach($statusOptions as $st)
-                <div class="form-check status-option" id="wrap_{{ str_replace(' ', '_', $st) }}">
-                    <input class="form-check-input status-check" type="checkbox" 
-                           name="status[]" value="{{ $st }}"
-                           id="st_{{ str_replace(' ', '_', $st) }}"
-                           {{ in_array($st, $selectedStatus) ? 'checked' : '' }}
-                           onchange="handleStatusChange()">
-                    <label class="form-check-label" for="st_{{ str_replace(' ', '_', $st) }}">{{ ucfirst($st) }}</label>
-                </div>
-            @endforeach
+                    <div class="form-check status-option" id="wrap_{{ str_replace(' ', '_', $st) }}">
+                        <input class="form-check-input status-check" type="checkbox" 
+                            name="status[]" value="{{ $st }}"
+                            id="st_{{ str_replace(' ', '_', $st) }}"
+                            {{ in_array($st, $selectedStatus) ? 'checked' : '' }}
+                            onchange="handleStatusChange()">
+                        <label class="form-check-label" for="st_{{ str_replace(' ', '_', $st) }}">{{ ucfirst($st) }}</label>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </div>
-</div>
             
         <!-- <div class="col-md-3">
             <label class="form-label fw-bold">Status</label>
@@ -198,12 +198,28 @@
             <button type="submit" class="btn btn-primary w-100">Filter</button>
         </div>
     </form>
-
+    
+    {{-- Summary --}}
     <div class="card p-3 mb-4">
         <div class="card-body">
-        <h5 class="fw-bold text-dark mb-3">Stock Consumption Recaps</h5>
+            <div class="row align-items-start">
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-dark mb-3">{{ implode(', ', array_map('ucfirst', $type)) }}</h5>
+                    <p><strong>Date Range:</strong> {{ $fromDate }} to {{ $toDate }}</p>
+                    <p><strong>Status:</strong> {{ implode(', ', array_map('ucfirst', $status)) }}</p>
+                    <p><strong>Total Recaps:</strong> {{ $recaps->count() }}</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <h6>Total Recap Code:
+                        <span class="text-info">{{ $totalData ?? 0 }}</span>
+                    </h6>
+                    <h6>Recap on this page:
+                        <span class="text-secondary">{{ $recapCount ?? 0 }}</span>
+                    </h6>
+                </div>
+            </div>
         </div>
-    </div>   
+    </div>
 
     <div class="card p-3"> 
         <div class="card-body"> 

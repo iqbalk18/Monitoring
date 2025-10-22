@@ -33,7 +33,10 @@ class BillingController extends Controller
             return back()->withErrors(['date' => 'Invalid Format Date']);
         }
 
-        $statusFilter = $request->query('status', 'failed','ready to rerun','reversed');
+        $statusOptions = ['success','failed','ready to rerun','reversed'];
+        $status = $request->query('status', 'success','failed','ready to rerun');
+        if (!is_array($status)) $status = [$status];
+
         $typeFilter   = $request->query('type', 'FinalBilling');
         $page         = (int) $request->query('page', 1);
 
@@ -46,7 +49,7 @@ class BillingController extends Controller
                     'page'              => $page,
                     'fromDate'          => $fromDate,
                     'toDate'            => $toDate,
-                    'status'            => $statusFilter,
+                    'status'            => count($status) === count($statusOptions) ? null : implode(',', $status),
                     'includeDetails'    => 1,
                     'type'              => $typeFilter,
                 ]);
@@ -59,7 +62,7 @@ class BillingController extends Controller
                 'error'               => 'Request timeout, Unstable Connection',
                 'currentPage'         => $page,
                 'lastPage'            => 1,
-                'statusFilter'        => $statusFilter,
+                'status'              => $status,
                 'fromDate'            => $fromDateRaw,
                 'toDate'              => $toDateRaw,
                 'totalFinalAmount'    => 0,
@@ -76,7 +79,7 @@ class BillingController extends Controller
             $data = $response->json();
             $recapsRaw = collect($data['data'] ?? []);
 
-            if ($statusFilter === 'failed') {
+            if ($status === 'failed') {
                 $recaps = $recapsRaw->filter(function ($recap) {
                     return !is_null($recap['sapErrorMessage']) ||
                         collect($recap['items'])->contains(fn($item) => !is_null($item['sapErrorMessage']));
@@ -115,7 +118,7 @@ class BillingController extends Controller
                 'recaps'              => $recaps,
                 'currentPage'         => $currentPage,
                 'lastPage'            => $lastPage,
-                'statusFilter'        => $statusFilter,
+                'status'              => $status,
                 'fromDate'            => $fromDateRaw,
                 'toDate'              => $toDateRaw,
                 'totalFinalAmount'    => $totalFinalAmount,
@@ -136,7 +139,7 @@ class BillingController extends Controller
             'error'               => 'Failed get data: ' . $response->body(),
             'currentPage'         => $page,
             'lastPage'            => 1,
-            'statusFilter'        => $statusFilter,
+            'status'              => $status,
             'fromDate'            => $fromDateRaw,
             'toDate'              => $toDateRaw,
             'totalFinalAmount'    => 0,
@@ -169,8 +172,10 @@ class BillingController extends Controller
             return back()->withErrors(['date' => 'Invalid date format']);
         }
 
-        $statusFilter = $request->query('status', 'failed');
+        $status = $request->query('status', []);
         $typeFilter   = $request->query('type', 'FinalBilling');
+
+        if (!is_array($status)) $statusFilter = [$status];
 
         $allRecaps = collect();
         $page = 1;
@@ -185,7 +190,7 @@ class BillingController extends Controller
                         'salesOrganization' => $org,
                         'fromDate'          => $fromDate,
                         'toDate'            => $toDate,
-                        'status'            => $statusFilter,
+                        'status'            => $status,
                         'includeDetails'    => 1,
                         'type'              => $typeFilter,
                         'page'              => $page,
