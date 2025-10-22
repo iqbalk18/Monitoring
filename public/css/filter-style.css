@@ -1,0 +1,54 @@
+/* ================================
+   FILTER FORM & BUTTON STYLE
+   ================================ */
+
+/* Default tombol dropdown & button */
+    .btn-outline-secondary,
+    #btnDataType, #btnOrderType{
+        color: white !important;           
+        background-color: transparent;      
+        border-color: #ffffffff;
+        transition: all 0.2s ease;
+    }
+
+/* Hover & focus efek untuk tombol */
+    .btn-outline-secondary:hover,
+    #btnDataType:hover, #btnDataType:focus,
+    #btnOrderType:hover, #btnOrderType:focus {
+        color: black !important;        
+        background-color: #abacadff;
+        border-color: #000;     
+    }
+
+/* Input tanggal (fromDate & toDate) */
+    input[type="date"] {
+        color: white;                          
+        background-color: transparent;             
+        border: 1px solid #ffffffff;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        transition: all 0.2s ease;
+    }
+
+/* Kalender icon di input date tetap terlihat */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);                    
+    }
+
+    /* Hover dan fokus */
+    input[type="date"]:hover,
+    input[type="date"]:focus {
+        color: black;
+        background-color: #abacadff;
+        border-color: #000;
+        outline: none;
+    }
+
+    /* Label tanggal */
+    .form-label {
+        color: #ffffff;
+    }
+
+    .refid {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+    }
