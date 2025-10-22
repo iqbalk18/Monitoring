@@ -154,141 +154,129 @@ class BillingController extends Controller
 
 
     public function exportExcel(Request $request)
-    {
-        $token = session('token');
-        $org   = session('sales_org');
+{
+    $token = session('token');
+    $org   = session('sales_org');
 
-        if (!$token) {
-            return redirect('/login')->withErrors(['login' => 'Please Login.']);
+    if (!$token) {
+        return redirect('/login')->withErrors(['login' => 'Please Login.']);
+    }
+
+    $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));
+    $toDateRaw   = $request->query('toDate', now()->format('Y-m-d'));
+
+    try {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRaw)->format('Ymd');
+        $toDate   = Carbon::createFromFormat('Y-m-d', $toDateRaw)->format('Ymd');
+    } catch (\Exception $e) {
+        return back()->withErrors(['date' => 'Invalid date format']);
+    }
+
+    $status = $request->query('status', []);
+    $typeFilter = $request->query('type', 'FinalBilling');
+
+    if (!is_array($status)) $status = [$status];
+
+    $allRecaps = collect();
+    $page = 1;
+    $hasMore = true;
+
+    try {
+        while ($hasMore) {
+            $response = Http::withToken($token)
+                ->timeout(60)
+                ->get('https://cerebro.ihc.id/api/sap/monitoring/recap', [
+                    'limit'             => 500,
+                    'salesOrganization' => $org,
+                    'fromDate'          => $fromDate,
+                    'toDate'            => $toDate,
+                    'status'            => count($status) ? implode(',', $status) : null,
+                    'includeDetails'    => 1,
+                    'type'              => $typeFilter,
+                    'page'              => $page,
+                ]);
+
+            if (!$response->successful()) break;
+
+            $data = $response->json();
+            $recaps = collect($data['data'] ?? []);
+            $allRecaps = $allRecaps->merge($recaps);
+
+            $currentPage = $data['current_page'] ?? $page;
+            $lastPage = $data['last_page'] ?? $page;
+            $hasMore = $currentPage < $lastPage;
+            $page++;
         }
+    } catch (ConnectionException $e) {
+        return back()->withErrors(['export' => 'Request timeout or unstable connection']);
+    }
 
-        $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));
-        $toDateRaw   = $request->query('toDate', now()->format('Y-m-d'));
+    if ($allRecaps->isEmpty()) {
+        return back()->withErrors(['export' => 'No data available for export']);
+    }
 
-        try {
-            $fromDate = \Carbon\Carbon::createFromFormat('Y-m-d', $fromDateRaw)->format('Ymd');
-            $toDate   = \Carbon\Carbon::createFromFormat('Y-m-d', $toDateRaw)->format('Ymd');
-        } catch (\Exception $e) {
-            return back()->withErrors(['date' => 'Invalid date format']);
-        }
+    // === CREATE EXCEL ===
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Billing Recap');
 
-        $status = $request->query('status', []);
-        $typeFilter   = $request->query('type', 'FinalBilling');
+    $headers = ['No', 'Recap Code', 'Ref ID', 'Status', 'Final Amount', 'SAP Error Message'];
+    $col = 'A';
+    foreach ($headers as $header) {
+        $sheet->setCellValue($col . '1', $header);
+        $col++;
+    }
+    $sheet->getStyle('A1:F1')->getFont()->setBold(true);
 
-        if (!is_array($status)) $statusFilter = [$status];
+    $row = 2;
+    $no = 1;
 
-        $allRecaps = collect();
-        $page = 1;
-        $hasMore = true;
+    foreach ($allRecaps as $recap) {
+        $recapCode = $recap['recapCode'] ?? '-';
+        $status = $recap['status'] ?? '-';
+        $finalAmount = $recap['totalFinalAmount'] ?? 0;
+        $sapError = $recap['sapErrorMessage'] ?? '';
 
-        try {
-            while ($hasMore) {
-                $response = \Illuminate\Support\Facades\Http::withToken($token)
-                    ->timeout(60)
-                    ->get('https://cerebro.ihc.id/api/sap/monitoring/recap', [
-                        'limit'             => 500,
-                        'salesOrganization' => $org,
-                        'fromDate'          => $fromDate,
-                        'toDate'            => $toDate,
-                        'status'            => $status,
-                        'includeDetails'    => 1,
-                        'type'              => $typeFilter,
-                        'page'              => $page,
-                    ]);
+        $refIds = collect($recap['items'] ?? [])
+            ->flatMap(fn($item) => collect($item['belongsToRefs'] ?? [])->pluck('refId'))
+            ->filter()
+            ->unique()
+            ->values();
 
-                if (!$response->successful()) {
-                    break;
-                }
-
-                $data = $response->json();
-                $recaps = collect($data['data'] ?? []);
-                $allRecaps = $allRecaps->merge($recaps);
-
-                // cek apakah masih ada halaman berikutnya
-                $currentPage = $data['current_page'] ?? $page;
-                $lastPage = $data['last_page'] ?? $page;
-                $hasMore = $currentPage < $lastPage;
-
-                $page++;
-            }
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            return back()->withErrors(['export' => 'Request timeout or unstable connection']);
-        }
-
-        if ($allRecaps->isEmpty()) {
-            return back()->withErrors(['export' => 'No data available for export']);
-        }
-
-        // Buat spreadsheet
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Billing Recap');
-
-        // Header Excel
-        $headers = ['No', 'Recap Code', 'Ref ID', 'Status', 'Final Amount', 'SAP Error Message'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($col . '1', $header);
-            $col++;
-        }
-        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
-
-        // Isi data
-        $row = 2;
-        $no = 1;
-
-        foreach ($allRecaps as $recap) {
-            $recapCode = $recap['recapCode'] ?? '-';
-            $status = $recap['status'] ?? '-';
-            $finalAmount = $recap['totalFinalAmount'] ?? 0;
-            $sapError = $recap['sapErrorMessage'] ?? '';
-
-            // Ambil refIds dari items (seperti di view)
-            $refIds = collect($recap['items'] ?? [])
-                ->flatMap(fn($item) => collect($item['belongsToRefs'] ?? [])->pluck('refId'))
-                ->filter()
-                ->unique()
-                ->values();
-
-            if ($refIds->isNotEmpty()) {
-                foreach ($refIds as $refId) {
-                    $sheet->setCellValue("A{$row}", $no++);
-                    $sheet->setCellValue("B{$row}", $recapCode);
-                    $sheet->setCellValue("C{$row}", $refId);
-                    $sheet->setCellValue("D{$row}", $status);
-                    $sheet->setCellValue("E{$row}", $finalAmount);
-                    $sheet->setCellValue("F{$row}", $sapError);
-                    $row++;
-                }
-            } else {
+        if ($refIds->isNotEmpty()) {
+            foreach ($refIds as $refId) {
                 $sheet->setCellValue("A{$row}", $no++);
                 $sheet->setCellValue("B{$row}", $recapCode);
-                $sheet->setCellValue("C{$row}", '-');
+                $sheet->setCellValue("C{$row}", $refId);
                 $sheet->setCellValue("D{$row}", $status);
                 $sheet->setCellValue("E{$row}", $finalAmount);
                 $sheet->setCellValue("F{$row}", $sapError);
                 $row++;
             }
+        } else {
+            $sheet->setCellValue("A{$row}", $no++);
+            $sheet->setCellValue("B{$row}", $recapCode);
+            $sheet->setCellValue("C{$row}", '-');
+            $sheet->setCellValue("D{$row}", $status);
+            $sheet->setCellValue("E{$row}", $finalAmount);
+            $sheet->setCellValue("F{$row}", $sapError);
+            $row++;
         }
-
-        // Auto-size kolom
-        foreach (range('A', 'F') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        // File name
-        $fileName = 'Billing_Recap_' . now()->format('Ymd_His') . '.xlsx';
-
-        // Stream response
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $response = new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
-            $writer->save('php://output');
-        });
-
-        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        $response->headers->set('Content-Disposition', 'attachment;filename="' . $fileName . '"');
-        $response->headers->set('Cache-Control', 'max-age=0');
-
-        return $response;
     }
+
+    foreach (range('A', 'F') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    $fileName = 'Billing_Recap_' . now()->format('Ymd_His') . '.xlsx';
+
+    // === STREAM RESPONSE ===
+    $writer = new Xlsx($spreadsheet);
+    return response()->streamDownload(function () use ($writer) {
+        $writer->save('php://output');
+    }, $fileName, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Cache-Control' => 'max-age=0',
+    ]);
+}
 }

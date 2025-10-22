@@ -233,7 +233,7 @@
                 <h5 class="fw-bold text-dark">List Recap</h5>
 
                  <!-- Export Excel with active filter -->
-                <a href="{{ route('billing.export', [
+                <a href="{{ route('billing.export') }}?{{ http_build_query( [
                     'status' => $status,
                     'type' => $typeFilter,
                     'fromDate' => $fromDate,
