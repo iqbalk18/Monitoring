@@ -12,9 +12,6 @@ Route::get('/', [AuthController::class, 'showLoginForm']);
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/manual-login', [AuthController::class, 'showManualLogin'])->name('manual.login');
-Route::post('/manual-login', [AuthController::class, 'manualLogin']);
-
 Route::post('/logout', function () {
     Session::flush();
     return redirect('/login')->with('success', 'Berhasil logout.');
