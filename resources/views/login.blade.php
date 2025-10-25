@@ -13,10 +13,38 @@
             font-family: 'Segoe UI', sans-serif;
         }
 
+        /* NAVBAR STYLE */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #ffff;
+            color: white;
+            padding: 10px 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            color: black;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
         .left-section {
             flex: 1;
             padding: 80px;
             color: #1a1a1a;
+            margin-top: 70px; /* space for navbar */
         }
 
         .left-section img {
@@ -45,6 +73,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top: 70px; /* space for navbar */
         }
 
         .login-box {
@@ -104,6 +133,7 @@
             }
             .left-section {
                 padding: 40px 20px;
+                margin-top: 90px;
             }
             .right-section {
                 margin: 0;
@@ -112,11 +142,24 @@
                 box-shadow: none;
                 height: auto;
                 padding: 30px 0;
+                margin-top: 90px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a class="navbar-brand" href="#">
+            <img src="{{ asset('images/bih_logo.png') }}" alt="BIH Logo">
+            Bali International Hospital
+        </a>
+         <form method="POST" action="{{ url('/login') }}" style="margin:0;">
+            @csrf
+            <button type="submit" class="btn btn-outline-secondary">Data Monitoring</button>
+        </form>
+    </nav>
+
     <div class="left-section">
         <img src="{{ asset('images/bih_logo.png') }}" alt="Bali International Hospital Logo">
         <h4 class="card-title">Welcome to <strong>Data Monitoring BIH</strong></h4>
