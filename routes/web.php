@@ -2,15 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuthMonitorController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RejectedController;
 use App\Http\Controllers\StockController;
 
-Route::get('/', [AuthController::class, 'showLoginForm']);
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/', [AuthMonitorController::class, 'showLoginForm']);
+Route::get('/login', [AuthMonitorController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthMonitorController::class, 'login']);
 
 Route::post('/logout', function () {
     Session::flush();
