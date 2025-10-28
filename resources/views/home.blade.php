@@ -94,9 +94,13 @@
             <span class="fw-semibold text-white">Bali International Hospital</span>
         </a>
         <div class="d-flex ms-auto">
+            <form method="GET" action="{{ route('dashboard') }}"class="me-2">
+                @csrf
+                <button type="submit" class="btn btn-outline-primary btn-sm px-3">Home</button>
+            </form>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="btn btn-outline-dark btn-sm px-3">Logout</button>
+                <button type="submit" class="btn btn-outline-danger btn-sm px-3">Logout</button>
             </form>
         </div>
     </div>

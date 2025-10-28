@@ -16,7 +16,7 @@ class RejectedController extends Controller
         $org   = session('sales_org');
 
         if (!$token) {
-            return redirect('/login')->withErrors(['login' => 'Please login.']);
+            return redirect('/loginmdw')->withErrors(['loginmdw' => 'Please login.']);
         }
 
         $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));

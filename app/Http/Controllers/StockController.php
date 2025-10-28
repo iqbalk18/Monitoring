@@ -22,7 +22,7 @@ class StockController extends Controller
         $org   = session('sales_org');
 
         if (!$token) {
-            return redirect('/login')->withErrors(['login' => 'Please login.']);
+            return redirect('/loginmdw')->withErrors(['loginmdw' => 'Please login.']);
         }
 
         $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));
@@ -94,7 +94,7 @@ class StockController extends Controller
 
         if ($response->status() === 401) {
             Session::flush(); 
-            return redirect('/login')->withErrors(['login' => 'Session expired. Please login again.']);
+            return redirect('/loginmdw')->withErrors(['loginmdw' => 'Session expired. Please login again.']);
         }
 
         if (!$response->successful()) {
@@ -153,7 +153,7 @@ class StockController extends Controller
     $org   = session('sales_org'); // pastikan sesuai nama session yang kamu pakai
 
     if (!$token) {
-        return redirect('/login')->withErrors(['login' => 'Session expired. Please login again.']);
+        return redirect('/loginmdw')->withErrors(['loginmdw' => 'Session expired. Please login again.']);
     }
 
     $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));
@@ -196,7 +196,7 @@ class StockController extends Controller
 
             if ($response->status() === 401) {
                 \Illuminate\Support\Facades\Session::flush();
-                return redirect('/login')->withErrors(['login' => 'Session expired. Please login again.']);
+                return redirect('/loginmdw')->withErrors(['loginmdw' => 'Session expired. Please login again.']);
             }
 
             if (!$response->successful()) {

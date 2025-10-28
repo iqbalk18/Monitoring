@@ -10,7 +10,7 @@ class HomeController extends Controller
     public function index()
     {
         if (!Session::has('token')) {
-            return redirect('/login')->withErrors(['login' => 'Please Login.']);
+            return redirect('/loginmdw')->withErrors(['loginmdw' => 'Please Login.']);
         }
 
         return view('home');

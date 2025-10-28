@@ -25,7 +25,7 @@
             letter-spacing: 0.5px;
         }
 
-        .btn-logout {
+        /* .btn-logout {
             border-color: #000;
             color: #000;
         }
@@ -33,7 +33,7 @@
         .btn-logout:hover {
             background-color: #000;
             color: #fff;
-        }
+        } */
 
         /* Card dan Table */
         .card {
@@ -90,9 +90,13 @@
             <span>Bali International Hospital</span>
         </a>
         <div class="d-flex ms-auto">
+            <form method="GET" action="{{ route('dashboard') }}"class="me-2">
+                @csrf
+                <button type="submit" class="btn btn-outline-primary btn-sm px-3 btn-logout">Home</button>
+            </form>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="btn btn-outline-dark btn-sm px-3 btn-logout">Logout</button>
+                <button type="submit" class="btn btn-outline-danger btn-sm px-3 btn-logout">Logout</button>
             </form>
         </div>
     </div>
@@ -104,7 +108,7 @@
             <h3>Stock</h3>
             <p>User: {{ $user }} | Sales Org: {{ $org }}</p>
         </div>
-        <a href="{{ url('/home') }}" class="btn btn-outline-primary align-self-start">🏠 Home</a>
+        <!-- <a href="{{ url('/home') }}" class="btn btn-outline-primary align-self-start">🏠 Home</a> -->
     </div>
 
 

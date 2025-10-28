@@ -20,7 +20,7 @@ class BillingController extends Controller
         $org   = session('sales_org');
 
         if (!$token) {
-            return redirect('/login')->withErrors(['login' => 'Please Login.']);
+            return redirect('/loginmdw')->withErrors(['loginmdw' => 'Please Login.']);
         }
 
         $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));
@@ -159,7 +159,7 @@ class BillingController extends Controller
     $org   = session('sales_org');
 
     if (!$token) {
-        return redirect('/login')->withErrors(['login' => 'Please Login.']);
+        return redirect('/loginmdw')->withErrors(['loginmdw' => 'Please Login.']);
     }
 
     $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));

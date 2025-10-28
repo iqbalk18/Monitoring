@@ -11,10 +11,10 @@ class AuthMonitorController extends Controller
 {
     public function showLoginForm()
     {
-        return view('login');
+        return view('loginmdw');
     }
 
-    public function login(Request $request)
+    public function loginmdw(Request $request)
     {
         Log::info('Login attempt (hardcoded credentials used)');
 
@@ -39,17 +39,17 @@ class AuthMonitorController extends Controller
 
             Log::warning('Login failed response', ['body' => $response->body()]);
             return back()->withErrors([
-                'login' => 'Login Failed: ' . $response->body()
+                'loginmdw' => 'Login Failed: ' . $response->body()
             ]);
         } catch (ConnectionException $e) {
             Log::error('Login connection timeout', ['error' => $e->getMessage()]);
             return back()->withErrors([
-                'login' => 'Server no respond (request timeout). Please try again.'
+                'loginmdw' => 'Server no respond (request timeout). Please try again.'
             ]);
         } catch (\Exception $e) {
             Log::error('Login exception', ['error' => $e->getMessage()]);
             return back()->withErrors([
-                'login' => 'Failed Connect server ' . $e->getMessage()
+                'loginmdw' => 'Failed Connect server ' . $e->getMessage()
             ]);
         }
     }
