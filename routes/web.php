@@ -8,6 +8,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RejectedController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\WebAuthController;
+use App\Http\Controllers\ImportController;
+use App\Http\Controllers\FormStockController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -43,5 +45,11 @@ Route::get('/rejected', [RejectedController::class, 'index'])->name('rejected.in
 
 Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
 Route::get('/stock/export', [StockController::class, 'exportExcel'])->name('stock.export');
+
+Route::get('import', [ImportController::class, 'showForm'])->name('showForm');
+Route::post('import', [ImportController::class, 'import'])->name('import');
+Route::post('save-manual', [FormStockController::class, 'store'])->name('save_manual');
+
+Route::get('download-json', [ImportController::class, 'downloadJson']);
 
 

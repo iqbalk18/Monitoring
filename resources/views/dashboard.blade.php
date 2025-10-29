@@ -32,28 +32,31 @@
 
         {{-- Adjustment Stock --}}
         <div class="col-md-3 mb-4">
-            <a href="#" class="text-decoration-none">
+<form method="GET" action="{{ route('showForm') }}" style="margin:0;">
+                @csrf
+                <button type="submit" class="border-0 bg-transparent w-100 text-decoration-none p-0">
                 <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center card-menu">
                     <div class="card-icon mb-3 fs-1">📦</div>
-                    <h5 class="fw-bold text-primary">Adjustment Stock</h5>
-                    <p class="text-muted small mb-0">Create message for Adjustment Stock.</p>
-                </div>
-            </a>
+                    <h5 class="fw-bold text-primary">Adjusment Stock</h5>
+                        <p class="text-muted small mb-0">Adjustment stock between SAP & TrakCare</p>
+                    </div>
+                </button>
+            </form>
         </div>
 
         {{-- Data Monitoring --}}
         <div class="col-md-3 mb-4">
-    <form method="POST" action="{{ url('/loginmdw') }}" style="margin:0;">
-        @csrf
-        <button type="submit" class="border-0 bg-transparent w-100 text-decoration-none p-0">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center card-menu">
-                <div class="card-icon mb-3 fs-1">📊</div>
-                <h5 class="fw-bold text-primary">Data Monitoring</h5>
-                <p class="text-muted small mb-0">Data Monitoring between TrakCare & SAP.</p>
-            </div>
-        </button>
-    </form>
-</div>
+            <form method="POST" action="{{ url('/loginmdw') }}" style="margin:0;">
+                @csrf
+                <button type="submit" class="border-0 bg-transparent w-100 text-decoration-none p-0">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center card-menu">
+                        <div class="card-icon mb-3 fs-1">📊</div>
+                        <h5 class="fw-bold text-primary">Data Monitoring</h5>
+                        <p class="text-muted small mb-0">Data Monitoring between TrakCare & SAP.</p>
+                    </div>
+                </button>
+            </form>
+        </div>
 
         {{-- Log --}}
         <div class="col-md-3 mb-4">
