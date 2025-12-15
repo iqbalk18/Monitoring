@@ -10,6 +10,9 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\WebAuthController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\FormStockController;
+use App\Http\Controllers\ArcItmMastController;
+use App\Http\Controllers\MarginController;
+use App\Http\Controllers\ARCItemPriceItalyController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -52,4 +55,21 @@ Route::post('save-manual', [FormStockController::class, 'store'])->name('save_ma
 
 Route::get('download-json', [ImportController::class, 'downloadJson']);
 
+Route::resource('arc-itm-mast', ArcItmMastController::class);
+Route::resource('margin', MarginController::class);
+
+Route::get('arc-item-price-italy/create', [ARCItemPriceItalyController::class, 'createPage'])->name('arc-item-price-italy.create');
+Route::post('arc-item-price-italy', [ARCItemPriceItalyController::class, 'store'])->name('arc-item-price-italy.store');
+
+// Manage price routes
+Route::get('arc-item-price-italy/manage/{arcimCode}', [ARCItemPriceItalyController::class, 'managePrice'])->name('arc-item-price-italy.manage');
+Route::post('arc-item-price-italy/manage/{arcimCode}', [ARCItemPriceItalyController::class, 'storeFromManage'])->name('arc-item-price-italy.store-manage');
+Route::put('arc-item-price-italy/manage/{arcimCode}/{id}', [ARCItemPriceItalyController::class, 'updateFromManage'])->name('arc-item-price-italy.update-manage');
+
+Route::prefix('api')->group(function () {
+    Route::get('arc-item-price-italy', [ARCItemPriceItalyController::class, 'index']);
+    Route::post('arc-item-price-italy', [ARCItemPriceItalyController::class, 'store']);
+    Route::get('arc-item-price-italy/{id}', [ARCItemPriceItalyController::class, 'show']);
+    Route::put('arc-item-price-italy/{id}', [ARCItemPriceItalyController::class, 'update']);
+});
 

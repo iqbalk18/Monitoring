@@ -58,6 +58,20 @@
             </form>
         </div>
 
+        {{-- List Item & Pricing --}}
+        <div class="col-md-3 mb-4">
+            <a href="{{ url('/arc-itm-mast') }}" style="margin:0;">
+                @csrf
+                <button type="button" class="border-0 bg-transparent w-100 text-decoration-none p-0">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center card-menu">
+                        <div class="card-icon mb-3 fs-1">📊</div>
+                        <h5 class="fw-bold text-primary">List Item & Pricing</h5>
+                        <p class="text-muted small mb-0">Input Pricing For Item price</p>
+                    </div>
+                </button>
+            </form>
+        </div>
+
         {{-- Log --}}
         <div class="col-md-3 mb-4">
             <a href="#" class="text-decoration-none">
