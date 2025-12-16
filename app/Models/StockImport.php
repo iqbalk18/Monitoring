@@ -9,6 +9,9 @@ class StockImport extends Model
     protected $table = 'stock';
 
     protected $fillable = [
+        'stocktcinc_itmlcbt_id',
+        'stocksap_id',
+        'Combine_Code',
         'materialDocument',
         'movementType',
         'specialStockIndicator',

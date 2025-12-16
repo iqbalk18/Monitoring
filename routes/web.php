@@ -13,6 +13,7 @@ use App\Http\Controllers\FormStockController;
 use App\Http\Controllers\ArcItmMastController;
 use App\Http\Controllers\MarginController;
 use App\Http\Controllers\ARCItemPriceItalyController;
+use App\Http\Controllers\StockManagementController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -48,6 +49,12 @@ Route::get('/rejected', [RejectedController::class, 'index'])->name('rejected.in
 
 Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
 Route::get('/stock/export', [StockController::class, 'exportExcel'])->name('stock.export');
+
+// Stock Management Routes
+Route::get('/stock-management', [StockManagementController::class, 'index'])->name('stock-management.index');
+Route::post('/stock-management/kalkulasi', [StockManagementController::class, 'kalkulasi'])->name('stock-management.kalkulasi');
+Route::match(['get', 'post'], '/stock-management/download-json', [StockManagementController::class, 'downloadJson'])->name('stock-management.download-json');
+Route::post('/stock-management/download-json-by-material-doc', [StockManagementController::class, 'downloadJsonByMaterialDocument'])->name('stock-management.download-json-by-material-doc');
 
 Route::get('import', [ImportController::class, 'showForm'])->name('showForm');
 Route::post('import', [ImportController::class, 'import'])->name('import');

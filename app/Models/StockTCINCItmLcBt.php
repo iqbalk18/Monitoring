@@ -12,7 +12,8 @@ class StockTCINCItmLcBt extends Model
     protected $table = 'StockTCINC_ItmLcBt';
 
     protected $fillable = [
-        'Period_Date',
+        'Combine_Code',
+        'Period_DateTime',
         'INCLB_INCI_Code',
         'INCLB_INCI_Desc',
         'INCLB_INCIB_No',
@@ -25,7 +26,7 @@ class StockTCINCItmLcBt extends Model
     ];
 
     protected $casts = [
-        'Period_Date' => 'date',
+        'Period_DateTime' => 'datetime',
         'INCLB_INCIB_ExpDate' => 'date',
         'INCLB_PhyQty' => 'decimal:2',
     ];

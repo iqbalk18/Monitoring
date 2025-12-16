@@ -13,19 +13,22 @@ return new class extends Migration
     {
         Schema::create('stock', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('stocktcinc_itmlcbt_id')->nullable();
+            $table->unsignedBigInteger('stocksap_id')->nullable();
+            $table->string('Combine_Code')->nullable();
             $table->string('materialDocument'); 
-            $table->string('movementType');
+            $table->string('movementType')->nullable();
             $table->string('specialStockIndicator')->nullable();
             $table->string('indicator');
-            $table->string('material');
-            $table->string('sloc');
-            $table->string('batch');
+            $table->string('material')->nullable();
+            $table->string('sloc')->nullable();
+            $table->string('batch')->nullable();
             $table->date('expiredDate')->nullable();
             $table->string('expiredDateFreeText')->nullable();
             $table->string('qty');
-            $table->string('uom');
+            $table->string('uom')->nullable();
             $table->string('qtySku');
-            $table->string('uomSku');
+            $table->string('uomSku')->nullable();
             $table->string('currency')->nullable();
             $table->string('poBasePricePerUnit')->nullable();
             $table->string('poDiscountPerUnit')->nullable();

@@ -32,7 +32,7 @@
 
         {{-- Adjustment Stock --}}
         <div class="col-md-3 mb-4">
-            <form method="GET" action="{{ route('showForm') }}" style="margin:0;">
+            <form method="GET" action="{{ route('stock-management.index') }}" style="margin:0;">
                 @csrf
                 <button type="submit" class="border-0 bg-transparent w-100 text-decoration-none p-0">
                 <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center card-menu">
