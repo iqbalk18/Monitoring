@@ -138,12 +138,22 @@
             <form action="{{ route('import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-3">
+                    <label for="import_type" class="form-label">Jenis Import</label>
+                    <select name="import_type" class="form-select" id="import_type" required>
+                        <option value="">-- Pilih Jenis Import --</option>
+                        <option value="sap">SAP (StockSAP)</option>
+                        <option value="trakcare">TrakCare (StockTCINC_ItmLcBt)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="file" class="form-label">Choose File Excel (.xlsx, .xls, .csv)</label>
                     <input type="file" name="file" class="form-control" id="file" required>
                 </div>
                 <button type="submit" class="btn btn-outline-primary btn-sm px-3">🚀 Import Data</button>
                 <a href="{{ url('download-json') }}" class="btn btn-outline-primary btn-sm px-3">📥 Download JSON</a>
             </form>
+
+            
 
             <hr>
 

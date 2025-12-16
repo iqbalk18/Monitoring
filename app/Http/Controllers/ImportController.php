@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Imports\StocksImport;
+use App\Imports\StockSAPImport;
+use App\Imports\StockTCINCItmLcBtImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\FormStock;
 
@@ -16,13 +18,23 @@ class ImportController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
-        ]);
-
-        Excel::import(new StocksImport, $request->file('file'));
-
-        return redirect()->back()->with('success', 'Data berhasil diimport!');
+        // $request->validate([
+        //     'file' => 'required|mimes:xlsx,xls,csv',
+        //     // 'import_type' => 'required|in:sap,trakcare'
+        // ]);
+        
+        try {
+            $importType = $request->input('import_type');
+            if ($importType === 'sap') {
+                Excel::import(new StockSAPImport, $request->file('file'));
+                return redirect()->back()->with('success', 'Data SAP berhasil diimport ke tabel StockSAP!');
+            } elseif ($importType === 'trakcare') {
+                Excel::import(new StockTCINCItmLcBtImport, $request->file('file'));
+                return redirect()->back()->with('success', 'Data TrakCare berhasil diimport ke tabel StockTCINC_ItmLcBt!');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error saat import: ' . $e->getMessage());
+        }
     }
 
 
