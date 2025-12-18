@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('formstock', function (Blueprint $table) {
+        Schema::create('tcmon_formstock', function (Blueprint $table) {
             $table->id();
             $table->string('materialDocument')->nullable();
             $table->string('materialDocumentYear')->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('formstock');
+        Schema::dropIfExists('tcmon_formstock');
     }
 };

@@ -9,7 +9,7 @@ class ArcItmMast extends Model
 {
     use HasFactory;
 
-    protected $table = 'arc_itm_mast';
+    protected $table = 'tcmon_arc_itm_mast';
 
     protected $fillable = [
         'ARCIM_Code',

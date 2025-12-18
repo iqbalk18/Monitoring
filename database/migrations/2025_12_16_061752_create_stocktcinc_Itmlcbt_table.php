@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('StockTCINC_ItmLcBt', function (Blueprint $table) {
+        Schema::create('tcmon_StockTCINC_ItmLcBt', function (Blueprint $table) {
             $table->id();
             $table->string('Combine_Code')->nullable();
             $table->datetime('Period_DateTime')->nullable();
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('StockTCINC_ItmLcBt');
+        Schema::dropIfExists('tcmon_StockTCINC_ItmLcBt');
     }
 };

@@ -9,7 +9,7 @@ class StockTCINCItmLcBt extends Model
 {
     use HasFactory;
 
-    protected $table = 'StockTCINC_ItmLcBt';
+    protected $table = 'tcmon_StockTCINC_ItmLcBt';
 
     protected $fillable = [
         'Combine_Code',

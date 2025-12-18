@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class StockImport extends Model
 {
-    protected $table = 'stock';
+    protected $table = 'tcmon_stock';
 
     protected $fillable = [
         'stocktcinc_itmlcbt_id',

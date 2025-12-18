@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('margins', function (Blueprint $table) {
+        Schema::table('tcmon_margins', function (Blueprint $table) {
             $table->decimal('Margin', 5, 2)->nullable()->change();
         });
     }
@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('margins', function (Blueprint $table) {
+        Schema::table('tcmon_margins', function (Blueprint $table) {
             $table->string('Margin')->nullable()->change();
         });
     }

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('margins', function (Blueprint $table) {
+        Schema::create('tcmon_margins', function (Blueprint $table) {
             $table->id();
             $table->string('TypeofItemCode')->nullable();
             $table->string('TypeofItemDesc')->nullable();
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('margins');
+        Schema::dropIfExists('tcmon_margins');
     }
 };

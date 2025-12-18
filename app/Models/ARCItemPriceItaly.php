@@ -9,7 +9,7 @@ class ARCItemPriceItaly extends Model
 {
     use HasFactory;
 
-    protected $table = 'arc_item_price_italy';
+    protected $table = 'tcmon_arc_item_price_italy';
 
     protected $fillable = [
         'ITP_ARCIM_Code',

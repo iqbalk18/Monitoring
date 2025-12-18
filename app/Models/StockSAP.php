@@ -9,7 +9,7 @@ class StockSAP extends Model
 {
     use HasFactory;
 
-    protected $table = 'StockSAP';
+    protected $table = 'tcmon_StockSAP';
 
     protected $fillable = [
         'Combine_Code',

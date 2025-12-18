@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('arc_item_price_italy', function (Blueprint $table) {
+        Schema::create('tcmon_arc_item_price_italy', function (Blueprint $table) {
             $table->id();
             $table->string('ITP_ARCIM_Code')->nullable();
             $table->string('ITP_ARCIM_Desc')->nullable();
@@ -31,6 +31,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('arc_item_price_italy');
+        Schema::dropIfExists('tcmon_arc_item_price_italy');
     }
 };

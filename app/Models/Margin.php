@@ -9,7 +9,7 @@ class Margin extends Model
 {
     use HasFactory;
 
-    protected $table = 'margins';
+    protected $table = 'tcmon_margins';
 
     protected $fillable = [
         'TypeofItemCode',

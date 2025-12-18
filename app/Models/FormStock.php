@@ -9,7 +9,7 @@ class FormStock extends Model
 {
     use HasFactory;
 
-    protected $table = 'formstock';
+    protected $table = 'tcmon_formstock';
 
     protected $fillable = [
         'materialDocument',
