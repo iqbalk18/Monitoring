@@ -32,7 +32,7 @@
 
         {{-- Adjustment Stock --}}
         <div class="col-md-3 mb-4">
-            <a href="{{ url('/stock-management') }}" style="margin:0;">
+            <a href="{{ route('stock-management.index') }}" style="margin:0;">
                 <button type="submit" class="border-0 bg-transparent w-100 text-decoration-none p-0">
                 <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center card-menu">
                     <div class="card-icon mb-3 fs-1">📦</div>
