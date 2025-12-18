@@ -21,14 +21,12 @@ class StockManagementController extends Controller
     public function kalkulasi(Request $request)
     {
         try {
-            // Validasi input tanggal
             $request->validate([
                 'period_date' => 'required|date'
             ]);
 
             $periodDate = $request->input('period_date');
             
-            // Filter data berdasarkan Period_DateTime (hanya tanggal, ignore waktu)
             $stockSAPs = StockSAP::whereNotNull('Combine_Code')
                 ->whereDate('Period_DateTime', $periodDate)
                 ->get();
@@ -37,7 +35,6 @@ class StockManagementController extends Controller
                 ->whereDate('Period_DateTime', $periodDate)
                 ->get();
 
-            // Group StockTC by Combine_Code untuk lookup
             $tcGrouped = $stockTCs->groupBy('Combine_Code');
             
             $processedCount = 0;
@@ -45,52 +42,43 @@ class StockManagementController extends Controller
             $minusCount = 0;
             $skippedCount = 0;
 
-            // Proses setiap data SAP
             foreach ($stockSAPs as $sap) {
                 $combineCode = $sap->Combine_Code;
                 
-                // Cari data TC dengan Combine_Code yang sama
                 if ($tcGrouped->has($combineCode)) {
                     $tcData = $tcGrouped->get($combineCode)->first();
                     
-                    // Perhitungan selisih: SAP.Qty - TC.INCLB_PhyQty
                     $sapQty = $sap->Qty ?? 0;
                     $tcQty = $tcData->INCLB_PhyQty ?? 0;
                     $selisih = $sapQty - $tcQty;
                     
-                    // Skip jika tidak ada selisih
                     if ($selisih == 0) {
                         $skippedCount++;
                         continue;
                     }
                     
-                    // Tentukan indicator dan qty yang akan disimpan
                     if ($selisih > 0) {
-                        $indicator = 'P'; // Plus/Positif
+                        $indicator = 'P'; 
                         $qtyToSave = $selisih;
                         $plusCount++;
                     } else {
-                        $indicator = 'M'; // Minus/Negatif
-                        $qtyToSave = abs($selisih); // Gunakan nilai absolut
+                        $indicator = 'M';
+                        $qtyToSave = abs($selisih);
                         $minusCount++;
                     }
                     
-                    // Validasi expiredDate - hanya simpan jika valid
                     $expiredDate = null;
                     if (!empty($tcData->INCLB_INCIB_ExpDate)) {
                         try {
                             $date = Carbon::parse($tcData->INCLB_INCIB_ExpDate);
-                            // Cek apakah tanggal valid (tidak tahun negatif atau tanggal invalid)
                             if ($date->year > 0 && $date->year < 9999) {
                                 $expiredDate = $date->format('Y-m-d');
                             }
                         } catch (\Exception $e) {
-                            // Jika parsing gagal, set ke null
                             $expiredDate = null;
                         }
                     }
                     
-                    // Simpan ke tabel Stock dengan semua field required
                     Stock::create([
                         'stocksap_id' => $sap->id,
                         'stocktcinc_itmlcbt_id' => $tcData->id,

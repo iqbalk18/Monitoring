@@ -416,14 +416,12 @@
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
   <script>
-    // Setup CSRF Token
     $.ajaxSetup({
       headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       }
     });
 
-    // Initialize DataTable
     $(document).ready(function() {
       $('#stockTable').DataTable({
         order: [
@@ -446,7 +444,6 @@
       });
     });
 
-    // Function to show alert
     function showAlert(message, type = 'success') {
       const alertHtml = `
                 <div class="alert alert-${type} alert-dismissible fade show" role="alert">
@@ -456,20 +453,17 @@
             `;
       $('#alertContainer').html(alertHtml);
 
-      // Auto dismiss after 5 seconds
       setTimeout(() => {
         $('.alert').fadeOut();
       }, 5000);
     }
 
 
-    // Kalkulasi
     $('#btnKalkulasi').click(function() {
       const btn = $(this);
       const spinner = btn.find('.spinner-border');
       const periodDate = $('#period_date').val();
 
-      // Validasi tanggal
       if (!periodDate) {
         $('#kalkulasiResult').html(`
           <div class="alert alert-warning">
@@ -538,14 +532,12 @@
       });
     });
 
-    // Download JSON by Material Document
     $('#btnDownloadJsonByMaterialDoc').click(function() {
       const btn = $(this);
       const spinner = btn.find('.spinner-border');
       const formstockId = $('#formstock_id').val();
       const materialDoc = $('#formstock_id option:selected').data('material-doc');
 
-      // Validasi
       if (!formstockId || !materialDoc) {
         showAlert('Silakan pilih Material Document terlebih dahulu!', 'warning');
         return;
@@ -554,7 +546,6 @@
       btn.prop('disabled', true);
       spinner.removeClass('d-none');
 
-      // Download file JSON dengan format formstock_with_items
       const form = $('<form>', {
         'method': 'POST',
         'action': '{{ route("stock-management.download-json") }}'
@@ -576,7 +567,6 @@
       form.submit();
       form.remove();
 
-      // Close modal after a short delay
       setTimeout(function() {
         $('#modalDownloadJson').modal('hide');
         btn.prop('disabled', false);
@@ -586,20 +576,17 @@
       }, 500);
     });
 
-    // Reset form when modal is closed
     $('#modalDownloadJson').on('hidden.bs.modal', function() {
       $('#formDownloadJson')[0].reset();
       $('#btnDownloadJsonByMaterialDoc').prop('disabled', false);
       $('#btnDownloadJsonByMaterialDoc .spinner-border').addClass('d-none');
     });
 
-    // Reset kalkulasi result when modal is closed
     $('#modalKalkulasi').on('hidden.bs.modal', function() {
       $('#kalkulasiResult').html('<p class="text-muted">Pilih tanggal period dan klik tombol "Hitung" untuk melakukan kalkulasi stock.</p>');
       $('#formKalkulasi')[0].reset();
     });
 
-    // Set default date to today when modal opens
     $('#modalKalkulasi').on('shown.bs.modal', function() {
       if (!$('#period_date').val()) {
         const today = new Date().toISOString().split('T')[0];
@@ -607,7 +594,6 @@
       }
     });
 
-    // Show loading on form submit for Excel import
     $('#modalImportExcel form').on('submit', function() {
       $('#spinnerImportExcel').removeClass('d-none');
       $(this).find('button[type="submit"]').prop('disabled', true);
