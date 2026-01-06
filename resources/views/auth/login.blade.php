@@ -2,207 +2,189 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Bali International Hospital</title>
+    
+    <!-- Bootstrap 5.3.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    
+    <!-- Shadcn-inspired Design System -->
+    <link href="{{ asset('css/shadcn-style.css') }}" rel="stylesheet">
+    
     <style>
         body {
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
             display: flex;
-            align-items: center;
-            background: linear-gradient(135deg, #f7f9fb, #eef3f9);
-            font-family: 'Segoe UI', sans-serif;
+            flex-direction: column;
         }
-
-        /* Navbar */
-        .navbar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            background-color: #fff;
-            padding: 10px 40px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            color: #000;
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .navbar-brand img {
-            height: 40px;
-            margin-right: 10px;
-        }
-
-        .btn-outline-secondary {
-            border: 1px solid #004e89;
-            color: #004e89;
-            border-radius: 8px;
-            padding: 6px 14px;
-            font-weight: 500;
-            transition: 0.2s;
-        }
-
-        .btn-outline-secondary:hover {
-            background-color: #004e89;
-            color: white;
-        }
-
-        /* Layout */
-        .left-section {
+        
+        .login-container {
             flex: 1;
-            padding: 80px;
-            color: #1a1a1a;
-            margin-top: 70px; /* space for navbar */
-        }
-
-        .left-section img {
-            height: 120px;
-            margin-bottom: 30px;
-        }
-
-        .left-section h4 {
-            font-size: 2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .right-section {
-            flex: 0.7;
-            background: #fff;
-            border-radius: 24px 0 0 24px;
-            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.05);
-            height: 80%;
-            margin-right: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 70px;
+            padding: 2rem;
         }
-
-        /* Form Box */
-        .login-box {
+        
+        .login-wrapper {
+            display: flex;
             width: 100%;
-            max-width: 360px;
+            max-width: 900px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
         }
-
-        .login-box h4 {
+        
+        .login-left {
+            flex: 1;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .login-left img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 1.5rem;
+        }
+        
+        .login-left h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--foreground);
+        }
+        
+        .login-left p {
+            color: var(--muted-foreground);
+            font-size: 0.9375rem;
+        }
+        
+        .login-right {
+            flex: 1;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .login-form-title {
+            font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 10px;
-            color: #004e89;
+            margin-bottom: 0.5rem;
         }
-
-        .form-label {
-            font-weight: 500;
-            margin-top: 10px;
+        
+        .login-form-subtitle {
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
         }
-
-        .btn-login {
-            background-color: #004e89;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px;
-            font-weight: 500;
-            transition: 0.2s;
+        
+        .login-footer {
+            text-align: center;
+            padding: 1rem;
+            color: var(--muted-foreground);
+            font-size: 0.8125rem;
+            border-top: 1px solid var(--border);
         }
-
-        .btn-login:hover {
-            background-color: #005fa3;
-        }
-
-        .alert {
-            border-radius: 10px;
-        }
-
-        .footer-text {
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            body {
+        
+        @media (max-width: 768px) {
+            .login-wrapper {
                 flex-direction: column;
+            }
+            
+            .login-left {
+                padding: 2rem;
                 text-align: center;
+                align-items: center;
             }
-
-            .left-section {
-                padding: 40px 20px;
-                margin-top: 90px;
+            
+            .login-left img {
+                width: 60px;
+                height: 60px;
             }
-
-            .right-section {
-                margin: 0;
-                width: 100%;
-                border-radius: 0;
-                box-shadow: none;
-                height: auto;
-                padding: 30px 0;
-                margin-top: 90px;
+            
+            .login-left h1 {
+                font-size: 1.5rem;
+            }
+            
+            .login-right {
+                padding: 2rem;
             }
         }
     </style>
 </head>
 <body>
-
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <a class="navbar-brand" href="#">
-            <img src="{{ asset('images/bih_logo.png') }}" alt="BIH Logo">
-            Bali International Hospital
-        </a>
-
-        <!-- <form method="GET" action="{{ url('/') }}" style="margin:0;">
-            <button type="submit" class="btn btn-outline-secondary">Data Monitoring</button>
-        </form> -->
+    <!-- Navbar -->
+    <nav class="navbar-shadcn">
+        <div class="container-shadcn flex-between">
+            <a class="navbar-brand" href="#">
+                <img src="{{ asset('images/bih_logo.png') }}" alt="BIH Logo">
+                <span>Bali International Hospital</span>
+            </a>
+        </div>
     </nav>
 
-    <div class="left-section">
-        <img src="{{ asset('images/bih_logo.png') }}" alt="Bali International Hospital Logo">
-        <h4>Welcome to <strong>Portal BIH</strong></h4>
-        <p class="text-muted">Please login using your BIH account credentials.</p>
-    </div>
-
-    <div class="right-section">
-        <div class="login-box text-start">
-            <h4>Log In</h4>
-
-            @if(session('success'))
-                <div class="alert alert-success mt-3">{{ session('success') }}</div>
-            @endif
-
-            @if($errors->any())
-                <div class="alert alert-danger mt-3">{{ $errors->first('login') }}</div>
-            @endif
-
-            <form method="POST" action="{{ route('login.post') }}" class="mt-3">
-                @csrf
-                <div class="mb-3">
-                    <label class="form-label">Username</label>
-                    <input type="text" name="username" class="form-control" placeholder="Masukkan username" required>
+    <!-- Login Container -->
+    <div class="login-container">
+        <div class="login-wrapper">
+            <!-- Left Section -->
+            <div class="login-left">
+                <img src="{{ asset('images/bih_logo.png') }}" alt="BIH Logo">
+                <h1>Welcome to Portal BIH</h1>
+                <p>Access your hospital monitoring dashboard with your credentials.</p>
+            </div>
+            
+            <!-- Right Section - Login Form -->
+            <div class="login-right">
+                <h2 class="login-form-title">Sign In</h2>
+                <p class="login-form-subtitle">Enter your credentials to continue</p>
+                
+                @if(session('success'))
+                <div class="alert-shadcn alert-shadcn-success mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <div class="alert-description">{{ session('success') }}</div>
                 </div>
+                @endif
 
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="Masukkan password" required>
+                @if($errors->any())
+                <div class="alert-shadcn alert-shadcn-destructive mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>
+                    <div class="alert-description">{{ $errors->first('login') }}</div>
                 </div>
-
-                <button type="submit" class="btn btn-login w-100 mt-2">Masuk</button>
-            </form>
-
-            <p class="footer-text mt-3 text-center">
-                © {{ date('Y') }} Bali International Hospital | IT Department
-            </p>
+                @endif
+                
+                <form method="POST" action="{{ route('login.post') }}">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="username" class="form-label-shadcn">Username</label>
+                        <input type="text" name="username" id="username" class="form-control-shadcn" placeholder="Enter your username" required autofocus>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label-shadcn">Password</label>
+                        <input type="password" name="password" id="password" class="form-control-shadcn" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-shadcn btn-shadcn-primary w-100" style="height: 2.75rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+                        Sign In
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
+    <!-- Footer -->
+    <div class="login-footer">
+        © {{ date('Y') }} Bali International Hospital — IT Department
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

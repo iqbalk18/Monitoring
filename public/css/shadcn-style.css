@@ -1,0 +1,861 @@
+/* ================================
+   SHADCN-INSPIRED DESIGN SYSTEM
+   For Bootstrap 5.3.3
+   ================================ */
+
+/* Import Inter Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ================================
+   CSS VARIABLES (Design Tokens)
+   ================================ */
+:root {
+    /* Colors - Neutral (Zinc-like) */
+    --background: #fafafa;
+    --foreground: #09090b;
+    --card: #ffffff;
+    --card-foreground: #09090b;
+    --popover: #ffffff;
+    --popover-foreground: #09090b;
+    --primary: #18181b;
+    --primary-foreground: #fafafa;
+    --secondary: #f4f4f5;
+    --secondary-foreground: #18181b;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --accent: #f4f4f5;
+    --accent-foreground: #18181b;
+    --destructive: #ef4444;
+    --destructive-foreground: #fafafa;
+    --border: #e4e4e7;
+    --input: #e4e4e7;
+    --ring: #18181b;
+
+    /* Brand Color */
+    --brand: #0066b3;
+    --brand-foreground: #ffffff;
+    --brand-light: #e0f2fe;
+
+    /* Status Colors */
+    --success: #22c55e;
+    --success-foreground: #ffffff;
+    --warning: #f59e0b;
+    --warning-foreground: #ffffff;
+    --info: #3b82f6;
+    --info-foreground: #ffffff;
+
+    /* Sizing */
+    --radius: 0.5rem;
+    --radius-sm: 0.375rem;
+    --radius-lg: 0.75rem;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* ================================
+   BASE STYLES
+   ================================ */
+* {
+    border-color: var(--border);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================
+   TYPOGRAPHY
+   ================================ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: var(--foreground);
+}
+
+h1 {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+}
+
+h2 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+
+h4 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+}
+
+h5 {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+}
+
+h6 {
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.text-muted {
+    color: var(--muted-foreground) !important;
+}
+
+/* ================================
+   NAVBAR
+   ================================ */
+.navbar-shadcn {
+    background-color: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.navbar-shadcn .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: var(--foreground);
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.navbar-shadcn .navbar-brand img {
+    height: 32px;
+    width: auto;
+}
+
+.navbar-shadcn .navbar-brand:hover {
+    color: var(--foreground);
+}
+
+/* ================================
+   BUTTONS
+   ================================ */
+.btn-shadcn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    height: 2.25rem;
+    padding: 0 1rem;
+    border-radius: var(--radius);
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.btn-shadcn:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+/* Primary Button */
+.btn-shadcn-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+}
+
+.btn-shadcn-primary:hover {
+    background-color: #27272a;
+    border-color: #27272a;
+    color: var(--primary-foreground);
+}
+
+/* Brand Button */
+.btn-shadcn-brand {
+    background-color: var(--brand);
+    color: var(--brand-foreground);
+    border-color: var(--brand);
+}
+
+.btn-shadcn-brand:hover {
+    background-color: #0052a3;
+    border-color: #0052a3;
+    color: var(--brand-foreground);
+}
+
+/* Secondary Button */
+.btn-shadcn-secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    border-color: var(--border);
+}
+
+.btn-shadcn-secondary:hover {
+    background-color: #e4e4e7;
+    color: var(--secondary-foreground);
+}
+
+/* Outline Button */
+.btn-shadcn-outline {
+    background-color: transparent;
+    color: var(--foreground);
+    border-color: var(--input);
+}
+
+.btn-shadcn-outline:hover {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+}
+
+/* Ghost Button */
+.btn-shadcn-ghost {
+    background-color: transparent;
+    color: var(--foreground);
+    border-color: transparent;
+}
+
+.btn-shadcn-ghost:hover {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+}
+
+/* Destructive Button */
+.btn-shadcn-destructive {
+    background-color: var(--destructive);
+    color: var(--destructive-foreground);
+    border-color: var(--destructive);
+}
+
+.btn-shadcn-destructive:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: var(--destructive-foreground);
+}
+
+/* Success Button */
+.btn-shadcn-success {
+    background-color: var(--success);
+    color: var(--success-foreground);
+    border-color: var(--success);
+}
+
+.btn-shadcn-success:hover {
+    background-color: #16a34a;
+    border-color: #16a34a;
+    color: var(--success-foreground);
+}
+
+/* Button Sizes */
+.btn-shadcn-sm {
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
+}
+
+.btn-shadcn-lg {
+    height: 2.75rem;
+    padding: 0 2rem;
+    font-size: 1rem;
+}
+
+.btn-shadcn-icon {
+    width: 2.25rem;
+    padding: 0;
+}
+
+/* ================================
+   CARDS
+   ================================ */
+.card-shadcn {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.card-shadcn-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-shadcn-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--foreground);
+}
+
+.card-shadcn-description {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    margin: 0.25rem 0 0;
+}
+
+.card-shadcn-body {
+    padding: 1.5rem;
+}
+
+.card-shadcn-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    background-color: var(--muted);
+}
+
+/* Dashboard Card */
+.card-dashboard {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-dashboard:hover {
+    border-color: var(--ring);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-dashboard-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.card-dashboard-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--foreground);
+}
+
+.card-dashboard-desc {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    margin: 0;
+}
+
+/* ================================
+   FORMS & INPUTS
+   ================================ */
+.form-control-shadcn {
+    display: flex;
+    height: 2.5rem;
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--input);
+    background-color: var(--card);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: all 0.15s ease;
+    color: var(--foreground);
+}
+
+.form-control-shadcn::placeholder {
+    color: var(--muted-foreground);
+}
+
+.form-control-shadcn:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px rgb(24 24 27 / 0.1);
+}
+
+.form-control-shadcn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Select */
+.form-select-shadcn {
+    display: flex;
+    height: 2.5rem;
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--input);
+    background-color: var(--card);
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: all 0.15s ease;
+    color: var(--foreground);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2371717a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+}
+
+.form-select-shadcn:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px rgb(24 24 27 / 0.1);
+}
+
+/* Label */
+.form-label-shadcn {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* File Input */
+.form-file-shadcn {
+    display: flex;
+    height: 2.5rem;
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--input);
+    background-color: var(--card);
+    font-size: 0.875rem;
+    color: var(--foreground);
+    cursor: pointer;
+}
+
+.form-file-shadcn::file-selector-button {
+    background-color: var(--muted);
+    border: none;
+    border-right: 1px solid var(--input);
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.form-file-shadcn::file-selector-button:hover {
+    background-color: var(--accent);
+}
+
+/* ================================
+   TABLES
+   ================================ */
+.table-shadcn {
+    width: 100%;
+    caption-side: bottom;
+    font-size: 0.875rem;
+    border-collapse: collapse;
+}
+
+.table-shadcn thead {
+    border-bottom: 1px solid var(--border);
+}
+
+.table-shadcn th {
+    height: 3rem;
+    padding: 0 1rem;
+    text-align: left;
+    vertical-align: middle;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    background-color: var(--muted);
+}
+
+.table-shadcn tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.15s;
+}
+
+.table-shadcn tbody tr:hover {
+    background-color: var(--muted);
+}
+
+.table-shadcn td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    color: var(--foreground);
+}
+
+.table-shadcn tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Table Container */
+.table-container-shadcn {
+    width: 100%;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.table-container-shadcn .table-shadcn {
+    margin: 0;
+}
+
+/* ================================
+   BADGES
+   ================================ */
+.badge-shadcn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+    transition: all 0.15s ease;
+}
+
+.badge-shadcn-default {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.badge-shadcn-secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    border: 1px solid var(--border);
+}
+
+.badge-shadcn-success {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-shadcn-destructive {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.badge-shadcn-warning {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.badge-shadcn-info {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+/* ================================
+   ALERTS
+   ================================ */
+.alert-shadcn {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    margin-bottom: 1rem;
+}
+
+.alert-shadcn-success {
+    background-color: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+}
+
+.alert-shadcn-destructive {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.alert-shadcn-warning {
+    background-color: #fffbeb;
+    border-color: #fde68a;
+    color: #b45309;
+}
+
+.alert-shadcn-info {
+    background-color: #eff6ff;
+    border-color: #93c5fd;
+    color: #1e40af;
+}
+
+.alert-shadcn .alert-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.alert-shadcn .alert-description {
+    font-size: 0.875rem;
+}
+
+/* ================================
+   MODALS
+   ================================ */
+.modal-content-shadcn {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    background-color: var(--card);
+}
+
+.modal-header-shadcn {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-header-shadcn .modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.modal-header-shadcn .btn-close {
+    padding: 0.5rem;
+    margin: -0.5rem -0.5rem -0.5rem auto;
+}
+
+.modal-body-shadcn {
+    padding: 1.5rem;
+}
+
+.modal-footer-shadcn {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* ================================
+   DROPDOWNS
+   ================================ */
+.dropdown-menu-shadcn {
+    min-width: 12rem;
+    padding: 0.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background-color: var(--popover);
+    box-shadow: var(--shadow-md);
+}
+
+.dropdown-item-shadcn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: var(--radius-sm);
+    color: var(--popover-foreground);
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.dropdown-item-shadcn:hover {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+}
+
+/* ================================
+   PAGINATION
+   ================================ */
+.pagination-shadcn {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pagination-shadcn .page-item {
+    list-style: none;
+}
+
+.pagination-shadcn .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.25rem;
+    min-width: 2.25rem;
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--radius);
+    border: 1px solid var(--input);
+    background-color: var(--card);
+    color: var(--foreground);
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.pagination-shadcn .page-link:hover {
+    background-color: var(--accent);
+}
+
+.pagination-shadcn .page-item.active .page-link {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+}
+
+.pagination-shadcn .page-item.disabled .page-link {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* ================================
+   FOOTER
+   ================================ */
+.footer-shadcn {
+    margin-top: auto;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border);
+    background-color: var(--card);
+}
+
+.footer-shadcn p {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    margin: 0;
+}
+
+.footer-shadcn a {
+    color: var(--foreground);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.footer-shadcn a:hover {
+    text-decoration: underline;
+}
+
+/* ================================
+   UTILITIES
+   ================================ */
+.container-shadcn {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.section-desc {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+}
+
+/* Spacing */
+.mt-section {
+    margin-top: 2rem;
+}
+
+.mb-section {
+    margin-bottom: 2rem;
+}
+
+.py-section {
+    padding: 2rem 0;
+}
+
+/* Flex utilities */
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flex-gap-2 {
+    gap: 0.5rem;
+}
+
+.flex-gap-3 {
+    gap: 0.75rem;
+}
+
+.flex-gap-4 {
+    gap: 1rem;
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 768px) {
+    .container-shadcn {
+        padding: 0 1rem;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+    }
+
+    .card-shadcn-body,
+    .card-shadcn-header,
+    .card-shadcn-footer {
+        padding: 1rem;
+    }
+
+    .modal-header-shadcn,
+    .modal-body-shadcn,
+    .modal-footer-shadcn {
+        padding: 1rem;
+    }
+
+    .table-shadcn th,
+    .table-shadcn td {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* ================================
+   SCROLLBAR
+   ================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--muted);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+}
