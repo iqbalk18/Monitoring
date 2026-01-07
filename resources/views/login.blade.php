@@ -124,6 +124,51 @@
 
         .alert {
             border-radius: 10px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15em;
+        }
+
+        .alert-danger {
+            background-color: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .alert-success {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
         }
 
         @media (max-width: 992px) {
@@ -170,18 +215,24 @@
             <h4>Log in</h4>
 
             @if(session('success'))
-                <div class="alert alert-success mt-3">{{ session('success') }}</div>
+                <div class="alert alert-success mt-3 d-flex align-items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    {{ session('success') }}
+                </div>
             @endif
 
             @if($errors->any())
-                <div class="alert alert-danger mt-3">{{ $errors->first('login') }}</div>
+                <div class="alert alert-danger mt-3 d-flex align-items-center shake" id="error-alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2 flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>{{ $errors->first('login') ?: 'Username atau password salah' }}</span>
+                </div>
             @endif
 
-            <form method="POST" action="{{ url('/login') }}" class="mt-3">
+            <form method="POST" action="{{ url('/login') }}" class="mt-3" id="loginForm">
                 @csrf
                 <div class="mb-3">
                     <label class="form-label">Email / Username</label>
-                    <input type="text" name="username" class="form-control" placeholder="Enter your email" required>
+                    <input type="text" name="username" class="form-control" placeholder="Enter your email" required value="{{ old('username') }}">
                 </div>
 
                 <div class="mb-3">
@@ -189,12 +240,37 @@
                     <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
                 </div>
 
-                <button type="submit" class="btn btn-login w-100 mt-2">
-                    <i class="bi bi-envelope me-2"></i> Log in
+                <button type="submit" class="btn btn-login w-100 mt-2" id="loginBtn">
+                    <span class="btn-text">Log in</span>
+                    <span class="btn-loading d-none">
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Logging in...
+                    </span>
                 </button>
             </form>
             <p class="footer-text mt-3">© {{ date('Y') }} Bali International Hospital | IT Department</p>
         </div>
     </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('loginBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoading = btn.querySelector('.btn-loading');
+            
+            // Disable button and show spinner
+            btn.disabled = true;
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+        });
+
+        // Remove shake animation after it completes
+        const errorAlert = document.getElementById('error-alert');
+        if (errorAlert) {
+            errorAlert.addEventListener('animationend', function() {
+                this.classList.remove('shake');
+            });
+        }
+    </script>
 </body>
 </html>

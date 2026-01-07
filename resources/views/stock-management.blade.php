@@ -6,12 +6,29 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <style>
     /* DataTables overrides for shadcn style */
-    .dataTables_wrapper .dataTables_length select,
-    .dataTables_wrapper .dataTables_filter input {
+    .dataTables_wrapper .dataTables_length select {
+        height: 32px;
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        padding: 0.375rem 0.75rem;
+        padding: 0 2rem 0 0.75rem;
         font-size: 0.875rem;
+        background-color: var(--card);
+        color: var(--foreground);
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2371717a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25em 1.25em;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        height: 32px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0 0.75rem;
+        font-size: 0.875rem;
+        background-color: var(--card);
+        color: var(--foreground);
     }
     .dataTables_wrapper .dataTables_length select:focus,
     .dataTables_wrapper .dataTables_filter input:focus {
@@ -23,24 +40,153 @@
     .dataTables_wrapper .dataTables_length label,
     .dataTables_wrapper .dataTables_filter label {
         font-size: 0.875rem;
-        color: var(--muted-foreground);
+        color: var(--foreground);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    .dataTables_wrapper .dataTables_filter {
+        display: none !important;
+    }
+    /* Hide empty top controls wrapper - target rows containing length/filter */
+    .dataTables_wrapper > .row:first-child,
+    .dataTables_wrapper > .row:has(.dataTables_length):not(:has(.dataTables_info)),
+    .dataTables_wrapper > div:first-child:not(.table-container-shadcn):not(table) {
+        display: none !important;
+    }
+    .dataTables_wrapper {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    /* Ensure no spacing before table */
+    .dataTables_wrapper table,
+    .dataTables_wrapper > .row:has(table) {
+        margin-top: 0 !important;
+    }
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 0 !important;
+    }
+    /* Compact shadcn pagination - force override */
+    .dataTables_wrapper .dataTables_paginate {
+        float: right !important;
+        text-align: right !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .pagination {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        list-style: none !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .pagination .page-item {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .pagination .page-item .page-link,
     .dataTables_wrapper .dataTables_paginate .paginate_button {
-        border-radius: var(--radius) !important;
-        border: 1px solid var(--border) !important;
-        background: var(--card) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 32px !important;
+        height: 32px !important;
+        padding: 0 8px !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        line-height: 1 !important;
+        border-radius: 6px !important;
+        border: none !important;
+        background: transparent !important;
         color: var(--foreground) !important;
-        margin: 0 2px;
+        margin: 0 !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+        box-shadow: none !important;
     }
-    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    .dataTables_wrapper .dataTables_paginate .pagination .page-item .page-link:hover,
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.disabled):not(.current) {
         background: var(--muted) !important;
-        border-color: var(--border) !important;
         color: var(--foreground) !important;
     }
+    .dataTables_wrapper .dataTables_paginate .pagination .page-item.active .page-link,
     .dataTables_wrapper .dataTables_paginate .paginate_button.current {
         background: var(--primary) !important;
-        border-color: var(--primary) !important;
         color: var(--primary-foreground) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .pagination .page-item.disabled .page-link,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+        opacity: 0.3 !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+        background: transparent !important;
+    }
+    
+    /* Hide ellipsis buttons */
+    .dataTables_wrapper .dataTables_paginate .ellipsis,
+    .dataTables_wrapper .dataTables_paginate .page-item .page-link.ellipsis {
+        display: none !important;
+    }
+    
+    /* Hide empty page links */
+    .dataTables_wrapper .dataTables_paginate .paginate_button.first:empty,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.last:empty,
+    .dataTables_wrapper .dataTables_paginate .page-item .page-link:empty {
+        display: none !important;
+    }
+    
+    /* Previous/Next button styling when disabled - make them less visible */
+    .dataTables_wrapper .dataTables_paginate .page-item:first-child .page-link[aria-disabled="true"],
+    .dataTables_wrapper .dataTables_paginate .page-item:last-child .page-link[aria-disabled="true"],
+    .dataTables_wrapper .dataTables_paginate .paginate_button.previous.disabled,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.next.disabled {
+        border: none !important;
+        background: none !important;
+        opacity: 0.25 !important;
+    }
+    
+    /* Hide length menu from top row */
+    .dataTables_wrapper > .row:first-child .dataTables_length {
+        display: none !important;
+    }
+    
+    /* Bottom wrapper - info + length left, pagination right */
+    .dataTables_wrapper .dataTables_info {
+        padding-top: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+    }
+    .dataTables_wrapper > .row:last-child {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0.75rem 1rem !important;
+        border-top: 1px solid var(--border) !important;
+        margin: 0 !important;
+        flex-wrap: nowrap !important;
+    }
+    .dataTables_wrapper > .row:last-child > div {
+        width: auto !important;
+        max-width: none !important;
+        flex: none !important;
+        padding: 0 !important;
+    }
+    
+    /* Left side container for info + length */
+    .dataTables_wrapper > .row:last-child > div:first-child {
+        display: flex !important;
+        align-items: center !important;
+        gap: 1rem !important;
+    }
+    
+    /* Cloned length menu beside info - inline flex */
+    .dataTables_wrapper .bottom-length-menu {
+        display: inline-flex !important;
+        align-items: center !important;
+        float: none !important;
+    }
+    .dataTables_wrapper .bottom-length-menu label {
+        margin-bottom: 0 !important;
     }
 </style>
 @endpush
@@ -92,14 +238,11 @@
 <!-- Action Buttons -->
 <div class="card-shadcn mb-4">
     <div class="card-shadcn-body">
-        <div class="d-flex flex-wrap" style="gap: 0.75rem;">
+        <div class="d-flex flex-wrap align-items-center" style="gap: 0.75rem;">
+            <!-- Left side buttons -->
             <button type="button" class="btn-shadcn btn-shadcn-primary" data-bs-toggle="modal" data-bs-target="#modalImportExcel">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
                 Import Excel
-            </button>
-            <button type="button" class="btn-shadcn btn-shadcn-success" data-bs-toggle="modal" data-bs-target="#modalKalkulasi">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
-                Calculate
             </button>
             <button type="button" class="btn-shadcn btn-shadcn-secondary" data-bs-toggle="modal" data-bs-target="#modalDownloadJson">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
@@ -109,15 +252,34 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Save Manual
             </button>
+            
+            <!-- Right side: Period Date + Calculate -->
+            <div class="d-flex align-items-center" style="gap: 0.5rem; margin-left: auto;">
+                <label for="period_date_inline" class="form-label-shadcn mb-0" style="white-space: nowrap;">Period Date:</label>
+                <input type="date" class="form-control-shadcn" id="period_date_inline" name="period_date_inline" style="width: auto; min-width: 160px;">
+                <button type="button" class="btn-shadcn btn-shadcn-success" id="btnKalkulasiInline">
+                    <span class="spinner-border spinner-border-sm d-none" id="spinnerKalkulasiInline" role="status" aria-hidden="true"></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+                    Calculate
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Calculation Result Alert (shown inline) -->
+<div id="kalkulasiResultInline" class="mb-4" style="display: none;"></div>
+
 <!-- Stock Table -->
 <div class="card-shadcn">
     <div class="card-shadcn-header flex-between">
-        <h3 class="card-shadcn-title">Stock Data</h3>
-        <span class="badge-shadcn badge-shadcn-secondary">{{ count($stocks) }} records</span>
+        <div class="d-flex align-items-center" style="gap: 0.75rem;">
+            <h3 class="card-shadcn-title mb-0">Stock Data</h3>
+            <span class="badge-shadcn badge-shadcn-secondary">{{ count($stocks) }} records</span>
+        </div>
+        <div class="d-flex align-items-center" style="gap: 0.5rem;">
+            <input type="text" id="customSearch" class="form-control-shadcn" placeholder="Search..." style="width: 200px; height: 32px;">
+        </div>
     </div>
     <div class="card-shadcn-body" style="padding: 0;">
         <div class="table-container-shadcn" style="border: none; border-radius: 0;">
@@ -209,36 +371,7 @@
     </div>
 </div>
 
-<!-- Modal: Calculation -->
-<div class="modal fade" id="modalKalkulasi" tabindex="-1" aria-labelledby="modalKalkulasiLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-content-shadcn">
-            <div class="modal-header-shadcn">
-                <h5 class="modal-title">Stock Calculation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body-shadcn">
-                <form id="formKalkulasi">
-                    <div class="mb-3">
-                        <label for="period_date" class="form-label-shadcn">Period Date</label>
-                        <input type="date" class="form-control-shadcn" id="period_date" name="period_date" required>
-                    </div>
-                </form>
-                <hr style="border-color: var(--border);">
-                <div id="kalkulasiResult">
-                    <p class="text-muted" style="font-size: 0.875rem;">Select a period date and click "Calculate" to process stock calculation.</p>
-                </div>
-            </div>
-            <div class="modal-footer-shadcn">
-                <button type="button" class="btn-shadcn btn-shadcn-outline" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn-shadcn btn-shadcn-success" id="btnKalkulasi">
-                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    Calculate
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Modal: Save Manual -->
 <div class="modal fade" id="modalSaveManual" tabindex="-1" aria-labelledby="modalSaveManualLabel" aria-hidden="true">
@@ -370,18 +503,45 @@
             order: [[0, 'desc']],
             pageLength: 25,
             language: {
-                search: "Search:",
-                lengthMenu: "Show _MENU_ entries per page",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                search: "",
+                searchPlaceholder: "Search...",
+                lengthMenu: "_MENU_ per page",
+                info: "_START_-_END_ of _TOTAL_",
                 infoEmpty: "No entries",
-                infoFiltered: "(filtered from _MAX_ total entries)",
+                infoFiltered: "(filtered from _MAX_)",
                 paginate: {
-                    first: "First",
-                    last: "Last",
-                    next: "Next",
-                    previous: "Prev"
+                    first: "«",
+                    last: "»",
+                    next: "›",
+                    previous: "‹"
+                }
+            },
+            drawCallback: function() {
+                // Move length menu beside info (left side)
+                const wrapper = $(this).closest('.dataTables_wrapper');
+                const lengthMenu = wrapper.find('.row:first-child .dataTables_length').clone(true);
+                const infoDiv = wrapper.find('.dataTables_info');
+                
+                // Remove existing cloned length menu if any
+                wrapper.find('.bottom-length-menu').remove();
+                
+                // Insert length menu after info
+                if (lengthMenu.length && infoDiv.length) {
+                    lengthMenu.addClass('bottom-length-menu');
+                    infoDiv.after(lengthMenu);
+                    
+                    // Sync the select values
+                    lengthMenu.find('select').on('change', function() {
+                        const originalSelect = wrapper.find('.row:first-child .dataTables_length select');
+                        originalSelect.val($(this).val()).trigger('change');
+                    });
                 }
             }
+        });
+
+        // Custom search handler
+        $('#customSearch').on('keyup', function() {
+            $('#stockTable').DataTable().search($(this).val()).draw();
         });
     });
 
@@ -401,13 +561,18 @@
         setTimeout(() => { $('.alert-shadcn').fadeOut(); }, 5000);
     }
 
-    $('#btnKalkulasi').click(function() {
+    // Set today's date on page load for inline datepicker
+    const today = new Date().toISOString().split('T')[0];
+    $('#period_date_inline').val(today);
+
+    // Inline Calculate button handler
+    $('#btnKalkulasiInline').click(function() {
         const btn = $(this);
-        const spinner = btn.find('.spinner-border');
-        const periodDate = $('#period_date').val();
+        const spinner = $('#spinnerKalkulasiInline');
+        const periodDate = $('#period_date_inline').val();
 
         if (!periodDate) {
-            $('#kalkulasiResult').html('<div class="alert-shadcn alert-shadcn-warning"><div class="alert-description">Please select a period date first.</div></div>');
+            $('#kalkulasiResultInline').show().html('<div class="alert-shadcn alert-shadcn-warning"><div class="alert-description">Please select a period date first.</div></div>');
             return;
         }
 
@@ -419,8 +584,9 @@
             method: 'POST',
             data: { period_date: periodDate },
             success: function(response) {
-                $('#kalkulasiResult').html(`
+                $('#kalkulasiResultInline').show().html(`
                     <div class="alert-shadcn alert-shadcn-success">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         <div>
                             <div class="alert-title">${response.message}</div>
                             <div class="alert-description">
@@ -442,10 +608,12 @@
                         </div>
                     </div>
                 `);
+                // Auto-hide after 10 seconds
+                setTimeout(() => { $('#kalkulasiResultInline').fadeOut(); }, 10000);
             },
             error: function(xhr) {
                 const message = xhr.responseJSON?.message || 'An error occurred during calculation';
-                $('#kalkulasiResult').html(`<div class="alert-shadcn alert-shadcn-destructive"><div class="alert-description">${message}</div></div>`);
+                $('#kalkulasiResultInline').show().html(`<div class="alert-shadcn alert-shadcn-destructive"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg><div class="alert-description">${message}</div></div>`);
             },
             complete: function() {
                 btn.prop('disabled', false);
@@ -490,17 +658,8 @@
         $('#btnDownloadJsonByMaterialDoc .spinner-border').addClass('d-none');
     });
 
-    $('#modalKalkulasi').on('hidden.bs.modal', function() {
-        $('#kalkulasiResult').html('<p class="text-muted" style="font-size: 0.875rem;">Select a period date and click "Calculate" to process stock calculation.</p>');
-        $('#formKalkulasi')[0].reset();
-    });
 
-    $('#modalKalkulasi').on('shown.bs.modal', function() {
-        if (!$('#period_date').val()) {
-            const today = new Date().toISOString().split('T')[0];
-            $('#period_date').val(today);
-        }
-    });
+
 
     $('#modalImportExcel form').on('submit', function() {
         $('#spinnerImportExcel').removeClass('d-none');
