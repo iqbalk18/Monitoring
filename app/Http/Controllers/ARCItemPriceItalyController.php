@@ -152,15 +152,24 @@ class ARCItemPriceItalyController extends Controller
      */
     public function storeFromManage(Request $request, string $arcimCode)
     {
-        $validator = Validator::make($request->all(), [
+        $action = $request->input('action', 'generate');
+        
+        $rules = [
             'ITP_DateFrom' => 'required|date',
             'ITP_Price' => 'required|numeric|min:0',
-        ], [
+        ];
+        
+        if ($action === 'manual') {
+            $rules['ITP_EpisodeType'] = 'required|string';
+        }
+        
+        $validator = Validator::make($request->all(), $rules, [
             'ITP_DateFrom.required' => 'Date From wajib diisi',
             'ITP_DateFrom.date' => 'Date From harus berupa tanggal yang valid',
             'ITP_Price.required' => 'Price wajib diisi',
             'ITP_Price.numeric' => 'Price harus berupa angka',
             'ITP_Price.min' => 'Price harus lebih besar atau sama dengan 0',
+            'ITP_EpisodeType.required' => 'Episode Type wajib dipilih untuk input manual',
         ]);
 
         if ($validator->fails()) {
@@ -170,6 +179,10 @@ class ARCItemPriceItalyController extends Controller
         }
 
         $item = ArcItmMast::where('ARCIM_Code', $arcimCode)->firstOrFail();
+        
+        if ($action === 'manual') {
+            return $this->storeManualPrice($request, $arcimCode, $item);
+        }
         
         $baseData = [
             'ITP_ARCIM_Code' => $arcimCode,
@@ -361,5 +374,133 @@ class ARCItemPriceItalyController extends Controller
         }
 
         return redirect($redirectUrl)->with('success', 'Data berhasil diupdate');
+    }
+    
+    private function storeManualPrice(Request $request, string $arcimCode, $item)
+    {
+        $baseData = [
+            'ITP_ARCIM_Code' => $arcimCode,
+            'ITP_ARCIM_Desc' => $item->ARCIM_Desc,
+            'ITP_DateFrom' => $request->ITP_DateFrom,
+            'ITP_DateTo' => $request->ITP_DateTo,
+            'ITP_TAR_Code' => 'REG',
+            'ITP_TAR_Desc' => 'Standar',
+            'ITP_CTCUR_Code' => 'IDR',
+            'ITP_CTCUR_Desc' => 'Indonesian Rupiah',
+            'ITP_HOSP_Code' => 'BI00',
+            'ITP_HOSP_Desc' => 'Bali International Hospital',
+            'ITP_Rank' => '99',
+        ];
+        
+        $originalPrice = (float) $request->ITP_Price;
+        $episodeType = $request->ITP_EpisodeType;
+        
+        $margin = Margin::where('ARCIM_ServMateria', 'S')
+                       ->where('TypeofItemCode', $episodeType)
+                       ->first();
+        
+        $priceData = $baseData;
+        $apiPrice = [
+            'ITPRank' => '99',
+        ];
+        
+        if ($episodeType == 'O') {
+
+            $priceData['ITP_Price'] = $originalPrice;
+            $priceData['ITP_EpisodeType'] = $episodeType;
+            
+            $apiPrice['ITPEpisodeType'] = $episodeType;
+            $apiPrice['ITPPrice'] = (string) $originalPrice;
+        } else {
+
+            if ($margin && $margin->Margin !== null) {
+
+                if ($margin->TypeofItemCode == 'VIP' || $margin->TypeofItemCode == 'VVIP' || 
+                    $margin->TypeofItemCode == 'SUITE' || $margin->TypeofItemCode == 'CU') {
+                    $priceData['ITP_EpisodeType'] = 'I';
+                    $priceData['ITP_ROOMT_Code'] = $margin->TypeofItemCode;
+                    $priceData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc;
+                    
+                    $apiPrice['ITPEpisodeType'] = 'I';
+                    $apiPrice['ITPROOMTCode'] = $margin->TypeofItemCode;
+                } else {
+                    $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
+                    $apiPrice['ITPEpisodeType'] = $margin->TypeofItemCode;
+                }
+                
+                $marginPercentage = (float) $margin->Margin;
+                $calculatedPrice = $originalPrice * ($marginPercentage / 100);
+                $priceData['ITP_Price'] = $calculatedPrice;
+                $apiPrice['ITPPrice'] = (string) $calculatedPrice;
+            } else {
+
+                $priceData['ITP_Price'] = $originalPrice;
+                
+                if (in_array($episodeType, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
+                    $priceData['ITP_EpisodeType'] = 'I';
+                    $priceData['ITP_ROOMT_Code'] = $episodeType;
+                    $priceData['ITP_ROOMT_Desc'] = $margin ? $margin->TypeofItemDesc : $episodeType;
+                    
+                    $apiPrice['ITPEpisodeType'] = 'I';
+                    $apiPrice['ITPROOMTCode'] = $episodeType;
+                } else {
+                    $priceData['ITP_EpisodeType'] = $episodeType;
+                    $apiPrice['ITPEpisodeType'] = $episodeType;
+                }
+                $apiPrice['ITPPrice'] = (string) $originalPrice;
+            }
+        }
+        
+        $apiPayload = [
+            'ITPARCIMCode' => $arcimCode,
+            'ITPDateFrom' => $request->ITP_DateFrom ?? '',
+            'ITPDateTo' => $request->ITP_DateTo ?? '',
+            'ITPTARCode' => 'REG',
+            'ITPCTCURCode' => 'IDR',
+            'ITPHOSPCode' => 'BI00',
+            'prices' => [$apiPrice],
+        ];
+        
+        try {
+            $response = Http::timeout(30)->post('https://trakcare.com/api/prices', $apiPayload);
+            
+            if ($response->successful()) {
+                ARCItemPriceItaly::create($priceData);
+                
+                $message = 'Data manual berhasil ditambahkan dan dikirim ke TrakCare';
+                
+                Log::info('Manual price data sent to TrakCare successfully', [
+                    'arcim_code' => $arcimCode,
+                    'episode_type' => $episodeType,
+                    'response' => $response->json(),
+                ]);
+            } else {
+                Log::error('Failed to send manual price data to TrakCare', [
+                    'arcim_code' => $arcimCode,
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+                
+                return redirect()->back()
+                    ->withErrors(['api' => 'Gagal mengirim data ke TrakCare: ' . $response->status()])
+                    ->withInput();
+            }
+        } catch (\Exception $e) {
+            Log::error('Exception when sending manual data to TrakCare', [
+                'arcim_code' => $arcimCode,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return redirect()->back()
+                ->withErrors(['api' => 'Error: ' . $e->getMessage()])
+                ->withInput();
+        }
+        
+        $redirectUrl = route('arc-item-price-italy.manage', $arcimCode);
+        if ($request->has('status') && $request->status != '') {
+            $redirectUrl .= '?status=' . $request->status;
+        }
+        
+        return redirect($redirectUrl)->with('success', $message);
     }
 }

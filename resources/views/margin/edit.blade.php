@@ -1,123 +1,154 @@
-@extends('layouts.auth')
-@section('title', 'Edit Data Margin')
+@extends('layouts.app')
 
-@section('body')
-<nav class="navbar navbar-expand-lg">
-    <div class="container-fluid px-4">
-        <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}">
-            <img src="{{ asset('images/bih_logo.png') }}" alt="BIH Logo">
-            <span>Bali International Hospital</span>
+@section('title', 'Edit Data Margin - Bali International Hospital')
+
+@section('content')
+<!-- Page Header -->
+<div class="flex-between mb-4" style="flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h2 class="section-title">Edit Data Margin</h2>
+        <p class="section-desc">Update existing margin configuration for pricing calculation.</p>
+    </div>
+    <div class="d-flex align-items-center" style="gap: 0.5rem;">
+        <a href="{{ route('margin.index') }}" class="btn-shadcn btn-shadcn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            Kembali
         </a>
-
-        <div class="d-flex align-items-center ms-auto">
-            <div class="me-3 text-end">
-                <span class="fw-semibold text-dark">Edit Data</span><br>
-                <small class="text-muted">Margin</small>
-            </div>
-            <a href="{{ route('margin.index') }}" class="btn btn-outline-primary btn-sm px-3">Kembali</a>
-        </div>
-    </div>
-</nav>
-
-<div class="container mt-4 pb-5">
-    {{-- Errors --}}
-    @if($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <ul class="mb-0">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    @endif
-
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-warning text-dark p-4">
-                    <h4 class="mb-0 fw-bold">✏️ Edit Data Margin</h4>
-                </div>
-                <div class="card-body p-4">
-                    <form action="{{ route('margin.update', $margin->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">TypeofItem Code</label>
-                                <input type="text" 
-                                       name="TypeofItemCode" 
-                                       class="form-control @error('TypeofItemCode') is-invalid @enderror" 
-                                       value="{{ old('TypeofItemCode', $margin->TypeofItemCode) }}"
-                                       placeholder="Masukkan TypeofItem Code">
-                                @error('TypeofItemCode')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">TypeofItem Description</label>
-                                <input type="text" 
-                                       name="TypeofItemDesc" 
-                                       class="form-control @error('TypeofItemDesc') is-invalid @enderror" 
-                                       value="{{ old('TypeofItemDesc', $margin->TypeofItemDesc) }}"
-                                       placeholder="Masukkan TypeofItem Description">
-                                @error('TypeofItemDesc')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Margin (%)</label>
-                                <div class="input-group">
-                                    <input type="number" 
-                                           step="0.01" 
-                                           min="0" 
-                                           max="100"
-                                           name="Margin" 
-                                           class="form-control @error('Margin') is-invalid @enderror" 
-                                           value="{{ old('Margin', $margin->Margin) }}"
-                                           placeholder="Masukkan Margin">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                @error('Margin')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">ARCIM_ServMateria</label>
-                                <input type="text" 
-                                       name="ARCIM_ServMateria" 
-                                       class="form-control @error('ARCIM_ServMateria') is-invalid @enderror" 
-                                       value="{{ old('ARCIM_ServMateria', $margin->ARCIM_ServMateria) }}"
-                                       placeholder="Masukkan ARCIM_ServMateria">
-                                @error('ARCIM_ServMateria')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <hr class="my-4">
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{{ route('margin.index') }}" class="btn btn-secondary px-4">
-                                ❌ Batal
-                            </a>
-                            <button type="submit" class="btn btn-warning px-4">
-                                💾 Update Data
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
-<footer>
-    © {{ date('Y') }} <span>Bali International Hospital</span> — Developed by IT Department
-</footer>
-@endsection
+<!-- Alerts -->
+<div id="alertContainer">
+    @if($errors->any())
+    <div class="alert-shadcn alert-shadcn-destructive" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>
+        <div>
+            <div class="alert-title">Validation Error</div>
+            <ul class="alert-description mb-0 ps-3">
+                @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+    @endif
+</div>
 
+<!-- Form Card -->
+<div class="card-shadcn">
+    <div class="card-shadcn-header">
+        <div class="d-flex align-items-center" style="gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            <h3 class="card-shadcn-title mb-0">Margin Information</h3>
+        </div>
+        <p class="card-shadcn-description">Update the margin details below.</p>
+    </div>
+    <div class="card-shadcn-body">
+        <form action="{{ route('margin.update', $margin->id) }}" method="POST">
+            @csrf
+            @method('PUT')
+            
+            <div class="row" style="row-gap: 1.5rem;">
+                <!-- TypeofItem Code -->
+                <div class="col-md-6">
+                    <div class="form-group-shadcn">
+                        <label class="form-label-shadcn" for="TypeofItemCode">
+                            TypeofItem Code
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               id="TypeofItemCode"
+                               name="TypeofItemCode" 
+                               class="form-control-shadcn @error('TypeofItemCode') is-invalid @enderror" 
+                               value="{{ old('TypeofItemCode', $margin->TypeofItemCode) }}"
+                               placeholder="Enter TypeofItem Code"
+                               required>
+                        @error('TypeofItemCode')
+                            <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- TypeofItem Description -->
+                <div class="col-md-6">
+                    <div class="form-group-shadcn">
+                        <label class="form-label-shadcn" for="TypeofItemDesc">
+                            TypeofItem Description
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               id="TypeofItemDesc"
+                               name="TypeofItemDesc" 
+                               class="form-control-shadcn @error('TypeofItemDesc') is-invalid @enderror" 
+                               value="{{ old('TypeofItemDesc', $margin->TypeofItemDesc) }}"
+                               placeholder="Enter description"
+                               required>
+                        @error('TypeofItemDesc')
+                            <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Margin -->
+                <div class="col-md-6">
+                    <div class="form-group-shadcn">
+                        <label class="form-label-shadcn" for="Margin">
+                            Margin (%)
+                        </label>
+                        <div class="input-group-shadcn">
+                            <input type="number" 
+                                   id="Margin"
+                                   step="0.01" 
+                                   min="0" 
+                                   max="1000"
+                                   name="Margin" 
+                                   class="form-control-shadcn @error('Margin') is-invalid @enderror" 
+                                   value="{{ old('Margin', $margin->Margin) }}"
+                                   placeholder="0.00">
+                        </div>
+                        @error('Margin')
+                            <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- ARCIM_ServMateria -->
+                <div class="col-md-6">
+                    <div class="form-group-shadcn">
+                        <label class="form-label-shadcn" for="ARCIM_ServMateria">
+                            ARCIM_ServMateria
+                            <span class="text-danger">*</span>
+                        </label>
+                        <select id="ARCIM_ServMateria"
+                                name="ARCIM_ServMateria" 
+                                class="form-select-shadcn @error('ARCIM_ServMateria') is-invalid @enderror"
+                                required>
+                            <option value="">-- Select Type --</option>
+                            <option value="S" {{ old('ARCIM_ServMateria', $margin->ARCIM_ServMateria) == 'S' ? 'selected' : '' }}>S - Service</option>
+                            <option value="M" {{ old('ARCIM_ServMateria', $margin->ARCIM_ServMateria) == 'M' ? 'selected' : '' }}>M - Material</option>
+                        </select>
+                        @error('ARCIM_ServMateria')
+                            <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <!-- Separator -->
+            <div class="separator-shadcn"></div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end align-items-center mt-4" style="gap: 0.75rem;">
+                <a href="{{ route('margin.index') }}" class="btn-shadcn btn-shadcn-outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+                    Batal
+                </a>
+                <button type="submit" class="btn-shadcn btn-shadcn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Update Data
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection
