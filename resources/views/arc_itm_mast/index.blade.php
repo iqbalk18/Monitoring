@@ -3,172 +3,35 @@
 @section('title', 'ARC Item Master - Bali International Hospital')
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <style>
-    /* DataTables overrides for shadcn style */
-    .dataTables_wrapper .dataTables_length select {
-        height: 32px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 0 2rem 0 0.75rem;
-        font-size: 0.875rem;
-        background-color: var(--card);
-        color: var(--foreground);
+    /* Simple table sorting indicators */
+    #arcTable thead th {
+        position: relative;
+        user-select: none;
         cursor: pointer;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2371717a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-        background-position: right 0.5rem center;
-        background-repeat: no-repeat;
-        background-size: 1.25em 1.25em;
+        transition: background-color 0.15s ease;
     }
-    .dataTables_wrapper .dataTables_filter input {
-        height: 32px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 0 0.75rem;
-        font-size: 0.875rem;
-        background-color: var(--card);
-        color: var(--foreground);
+    #arcTable thead th:hover {
+        background-color: var(--muted);
     }
-    .dataTables_wrapper .dataTables_length select:focus,
-    .dataTables_wrapper .dataTables_filter input:focus {
-        outline: none;
-        border-color: var(--ring);
-        box-shadow: 0 0 0 3px rgb(24 24 27 / 0.1);
+    #arcTable thead th.sorted-asc::after,
+    #arcTable thead th.sorted-desc::after {
+        content: '';
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 5px solid transparent;
     }
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_length label,
-    .dataTables_wrapper .dataTables_filter label {
-        font-size: 0.875rem;
-        color: var(--foreground);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+    #arcTable thead th.sorted-asc::after {
+        border-bottom-color: currentColor;
+        border-top-width: 0;
+        margin-top: -3px;
     }
-    .dataTables_wrapper .dataTables_filter {
-        display: none !important;
-    }
-    /* Hide empty top controls wrapper */
-    .dataTables_wrapper > .row:first-child,
-    .dataTables_wrapper > .row:has(.dataTables_length):not(:has(.dataTables_info)),
-    .dataTables_wrapper > div:first-child:not(.table-container-shadcn):not(table) {
-        display: none !important;
-    }
-    .dataTables_wrapper {
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-    }
-    .dataTables_wrapper table,
-    .dataTables_wrapper > .row:has(table) {
-        margin-top: 0 !important;
-    }
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter {
-        margin-bottom: 0 !important;
-    }
-    /* Compact shadcn pagination */
-    .dataTables_wrapper .dataTables_paginate {
-        float: right !important;
-        text-align: right !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .pagination {
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        list-style: none !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .pagination .page-item {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .pagination .page-item .page-link,
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        min-width: 32px !important;
-        height: 32px !important;
-        padding: 0 8px !important;
-        font-size: 0.875rem !important;
-        font-weight: 500 !important;
-        line-height: 1 !important;
-        border-radius: 6px !important;
-        border: none !important;
-        background: transparent !important;
-        color: var(--foreground) !important;
-        margin: 0 !important;
-        transition: all 0.15s ease !important;
-        cursor: pointer !important;
-        box-shadow: none !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .pagination .page-item .page-link:hover,
-    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.disabled):not(.current) {
-        background: var(--muted) !important;
-        color: var(--foreground) !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .pagination .page-item.active .page-link,
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-        background: var(--primary) !important;
-        color: var(--primary-foreground) !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .pagination .page-item.disabled .page-link,
-    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-        opacity: 0.3 !important;
-        cursor: not-allowed !important;
-        pointer-events: none !important;
-        background: transparent !important;
-    }
-    
-    /* Hide ellipsis buttons */
-    .dataTables_wrapper .dataTables_paginate .ellipsis,
-    .dataTables_wrapper .dataTables_paginate .page-item .page-link.ellipsis {
-        display: none !important;
-    }
-    
-    /* Hide length menu from top row */
-    .dataTables_wrapper > .row:first-child .dataTables_length {
-        display: none !important;
-    }
-    
-    /* Bottom wrapper */
-    .dataTables_wrapper .dataTables_info {
-        padding-top: 0 !important;
-        display: inline-flex !important;
-        align-items: center !important;
-    }
-    .dataTables_wrapper > .row:last-child {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        padding: 0.75rem 1rem !important;
-        border-top: 1px solid var(--border) !important;
-        margin: 0 !important;
-        flex-wrap: nowrap !important;
-    }
-    .dataTables_wrapper > .row:last-child > div {
-        width: auto !important;
-        max-width: none !important;
-        flex: none !important;
-        padding: 0 !important;
-    }
-    
-    /* Left side container for info + length */
-    .dataTables_wrapper > .row:last-child > div:first-child {
-        display: flex !important;
-        align-items: center !important;
-        gap: 1rem !important;
-    }
-    
-    /* Cloned length menu beside info */
-    .dataTables_wrapper .bottom-length-menu {
-        display: inline-flex !important;
-        align-items: center !important;
-        float: none !important;
-    }
-    .dataTables_wrapper .bottom-length-menu label {
-        margin-bottom: 0 !important;
+    #arcTable thead th.sorted-desc::after {
+        border-top-color: currentColor;
+        border-bottom-width: 0;
+        margin-top: 3px;
     }
 </style>
 @endpush
@@ -346,27 +209,74 @@
 
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        // Initialize DataTable for client-side filtering only (not paging - use Laravel pagination)
-        var table = $('#arcTable').DataTable({
-            paging: false,
-            ordering: true,
-            info: false,
-            searching: true,
-            language: {
-                search: "",
-                searchPlaceholder: "Search..."
+$(document).ready(function() {
+    // Simple client-side filtering
+    $('#customSearch').on('keyup', function() {
+        var value = $(this).val().toLowerCase();
+        
+        $('#arcTable tbody tr').each(function() {
+            // Skip empty state row (with colspan)
+            if ($(this).find('td[colspan]').length > 0) {
+                return;
             }
+            
+            var text = $(this).text().toLowerCase();
+            $(this).toggle(text.indexOf(value) > -1);
         });
-
-        // Custom search handler
-        $('#customSearch').on('keyup', function() {
-            table.search($(this).val()).draw();
-        });
+        
+        // Show/hide "no results" message
+        var visibleRows = $('#arcTable tbody tr:visible').not(':has(td[colspan])').length;
+        if (visibleRows === 0 && value !== '') {
+            if ($('#noFilterResults').length === 0) {
+                $('#arcTable tbody').append(`
+                    <tr id="noFilterResults">
+                        <td colspan="14" class="text-center" style="padding: 2rem;">
+                            <div style="color: var(--muted-foreground);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                <p class="mb-0" style="font-size: 0.875rem;">No results found for "${value}"</p>
+                            </div>
+                        </td>
+                    </tr>
+                `);
+            }
+        } else {
+            $('#noFilterResults').remove();
+        }
     });
+
+    // Table sorting (click-to-sort on headers)
+    $('#arcTable thead th').on('click', function() {
+        var table = $(this).parents('table').eq(0);
+        var rows = table.find('tbody tr').not(':has(td[colspan])').toArray().sort(comparer($(this).index()));
+        this.asc = !this.asc;
+        
+        if (!this.asc) {
+            rows = rows.reverse();
+        }
+        
+        for (var i = 0; i < rows.length; i++) {
+            table.find('tbody').append(rows[i]);
+        }
+        
+        // Update sort indicator
+        $('#arcTable thead th').removeClass('sorted-asc sorted-desc');
+        $(this).addClass(this.asc ? 'sorted-asc' : 'sorted-desc');
+    });
+
+    function comparer(index) {
+        return function(a, b) {
+            var valA = getCellValue(a, index);
+            var valB = getCellValue(b, index);
+            return $.isNumeric(valA) && $.isNumeric(valB) ? 
+                valA - valB : valA.toString().localeCompare(valB);
+        };
+    }
+
+    function getCellValue(row, index) {
+        return $(row).children('td').eq(index).text();
+    }
+});
 </script>
 @endpush

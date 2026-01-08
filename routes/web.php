@@ -58,6 +58,8 @@ Route::post('/stock-management/download-json-by-material-doc', [StockManagementC
 
 Route::get('import', [ImportController::class, 'showForm'])->name('showForm');
 Route::post('import', [ImportController::class, 'import'])->name('import');
+Route::get('import/progress', [ImportController::class, 'getProgress'])->name('import.progress');
+Route::post('import/clear-progress', [ImportController::class, 'clearProgress'])->name('import.clear-progress');
 Route::post('save-manual', [FormStockController::class, 'store'])->name('save_manual');
 
 Route::get('download-json', [ImportController::class, 'downloadJson']);

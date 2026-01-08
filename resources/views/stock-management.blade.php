@@ -188,6 +188,47 @@
     .dataTables_wrapper .bottom-length-menu label {
         margin-bottom: 0 !important;
     }
+
+    /* Progress Bar Styles */
+    .progress-shadcn {
+        height: 24px;
+        background-color: hsl(var(--muted));
+        border-radius: var(--radius);
+        overflow: hidden;
+        position: relative;
+    }
+    .progress-bar-shadcn {
+        height: 100%;
+        background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%);
+        border-radius: var(--radius);
+        transition: width 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    .progress-bar-shadcn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    .text-xs {
+        font-size: 0.75rem;
+        line-height: 1rem;
+    }
 </style>
 @endpush
 
@@ -343,7 +384,7 @@
                     <div class="alert-shadcn alert-shadcn-info mb-3">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                         <div class="alert-description">
-                            <strong>Step 1:</strong> Import Excel file to StockSAP or StockTCINC_ItmLcBt table first.
+                            <strong>Step 1:</strong> Import Excel file to Stock SAP or Stock TrakCare.
                         </div>
                     </div>
                     <div class="mb-3">
@@ -358,10 +399,35 @@
                         <label for="file" class="form-label-shadcn">Choose Excel File (.xlsx, .xls, .csv)</label>
                         <input type="file" name="file" class="form-file-shadcn" id="file" required>
                     </div>
+                    
+                    <!-- Progress Bar Container -->
+                    <div id="importProgressContainer" class="d-none">
+                        <div class="alert-shadcn alert-shadcn-info mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="spinner-border spinner-border-sm me-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span id="importProgressMessage" class="fw-medium">Processing...</span>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="progress-shadcn mb-2">
+                                <div id="importProgressBar" class="progress-bar-shadcn" role="progressbar" style="width: 0%">
+                                    <span id="importProgressText">0%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Stats -->
+                            <div class="d-flex justify-content-between text-xs text-muted">
+                                <span id="importStats">0 / 0 records</span>
+                                <span id="importSpeed">0 rec/s</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer-shadcn">
-                    <button type="button" class="btn-shadcn btn-shadcn-outline" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn-shadcn btn-shadcn-primary">
+                    <button type="button" class="btn-shadcn btn-shadcn-outline" data-bs-dismiss="modal" id="btnCancelImport">Cancel</button>
+                    <button type="submit" class="btn-shadcn btn-shadcn-primary" id="btnSubmitImport">
                         <span class="spinner-border spinner-border-sm d-none" id="spinnerImportExcel" role="status" aria-hidden="true"></span>
                         Import File
                     </button>
@@ -661,9 +727,138 @@
 
 
 
-    $('#modalImportExcel form').on('submit', function() {
+    // Import with Progress Bar
+    let progressInterval = null;
+    let sessionId = '{{ session()->getId() }}';
+    let startTime = null;
+
+    $('#modalImportExcel form').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        const formData = new FormData(form[0]);
+        formData.append('session_id', sessionId);
+        
+        // Show progress container
+        $('#importProgressContainer').removeClass('d-none');
+        $('#btnSubmitImport').prop('disabled', true);
+        $('#btnCancelImport').prop('disabled', true);
         $('#spinnerImportExcel').removeClass('d-none');
-        $(this).find('button[type="submit"]').prop('disabled', true);
+        
+        // Reset progress
+        updateProgressUI(0, 0, 0, 'Initializing...');
+        startTime = Date.now();
+        
+        // Start progress polling
+        startProgressPolling();
+        
+        // Submit via AJAX
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                stopProgressPolling();
+                
+                if (response.success) {
+                    updateProgressUI(response.imported, response.imported, 100, response.message);
+                    
+                    setTimeout(function() {
+                        $('#modalImportExcel').modal('hide');
+                        showAlert(response.message, 'success');
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(response.message, 'error');
+                    resetImportForm();
+                }
+            },
+            error: function(xhr) {
+                stopProgressPolling();
+                const message = xhr.responseJSON?.message || 'Error during import';
+                showAlert(message, 'error');
+                resetImportForm();
+            }
+        });
     });
+
+    function startProgressPolling() {
+        progressInterval = setInterval(function() {
+            $.get('{{ route("import.progress") }}', { session_id: sessionId }, function(progress) {
+                if (progress && progress.percentage !== undefined) {
+                    updateProgressUI(
+                        progress.imported, 
+                        progress.total, 
+                        progress.percentage, 
+                        progress.message
+                    );
+                }
+            });
+        }, 500); // Poll every 500ms
+    }
+
+    function stopProgressPolling() {
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+    }
+
+    function updateProgressUI(imported, total, percentage, message) {
+        $('#importProgressBar').css('width', percentage + '%');
+        $('#importProgressText').text(Math.round(percentage) + '%');
+        $('#importProgressMessage').text(message);
+        $('#importStats').text(imported + ' / ' + total + ' records');
+        
+        // Calculate speed
+        if (startTime && imported > 0) {
+            const elapsed = (Date.now() - startTime) / 1000; // seconds
+            const speed = Math.round(imported / elapsed);
+            $('#importSpeed').text(speed + ' rec/s');
+        }
+    }
+
+    function resetImportForm() {
+        $('#importProgressContainer').addClass('d-none');
+        $('#btnSubmitImport').prop('disabled', false);
+        $('#btnCancelImport').prop('disabled', false);
+        $('#spinnerImportExcel').addClass('d-none');
+        updateProgressUI(0, 0, 0, 'Initializing...');
+    }
+
+    // Reset form when modal is closed
+    $('#modalImportExcel').on('hidden.bs.modal', function() {
+        stopProgressPolling();
+        resetImportForm();
+        $('#modalImportExcel form')[0].reset();
+        
+        // Clear progress on server
+        $.post('{{ route("import.clear-progress") }}', {
+            _token: '{{ csrf_token() }}',
+            session_id: sessionId
+        });
+    });
+
+    function showAlert(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const alertHtml = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        setTimeout(function() {
+            $('.alert').fadeOut(function() {
+                $(this).remove();
+            });
+        }, 5000);
+    }
 </script>
 @endpush

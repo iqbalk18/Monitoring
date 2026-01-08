@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Cleanup temporary import files every hour
+        $schedule->command('temp:cleanup')->hourly();
     }
 
     /**

@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Imports\StocksImport;
-use App\Imports\StockSAPImport;
-use App\Imports\StockTCINCItmLcBtImport;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Services\ImportService;
 use App\Models\FormStock;
 
 class ImportController extends Controller
 {
+    public function __construct(
+        private readonly ImportService $importService
+    ) {}
+
     public function showForm()
     {
         return view('import');
@@ -20,21 +21,57 @@ class ImportController extends Controller
     {
         // $request->validate([
         //     'file' => 'required|mimes:xlsx,xls,csv',
-        //     // 'import_type' => 'required|in:sap,trakcare'
+        //     'import_type' => 'required|in:sap,trakcare'
         // ]);
-        
-        try {
-            $importType = $request->input('import_type');
-            if ($importType === 'sap') {
-                Excel::import(new StockSAPImport, $request->file('file'));
-                return redirect()->back()->with('success', 'Data SAP berhasil diimport ke tabel StockSAP!');
-            } elseif ($importType === 'trakcare') {
-                Excel::import(new StockTCINCItmLcBtImport, $request->file('file'));
-                return redirect()->back()->with('success', 'Data TrakCare berhasil diimport ke tabel StockTCINC_ItmLcBt!');
+
+        $file = $request->file('file');
+        $importType = $request->input('import_type');
+        $sessionId = $request->input('session_id', session()->getId());
+
+        // For AJAX request
+        if ($request->ajax()) {
+            try {
+                $result = match ($importType) {
+                    'sap' => $this->importService->importSAP($file, $sessionId),
+                    'trakcare' => $this->importService->importTrakCare($file, $sessionId),
+                    default => ['success' => false, 'message' => 'Invalid import type']
+                };
+
+                return response()->json($result);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ], 500);
             }
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error saat import: ' . $e->getMessage());
         }
+
+        // For normal form submission (fallback)
+        $result = match ($importType) {
+            'sap' => $this->importService->importSAP($file, $sessionId),
+            'trakcare' => $this->importService->importTrakCare($file, $sessionId),
+            default => ['success' => false, 'message' => 'Invalid import type']
+        };
+
+        $status = $result['success'] ? 'success' : 'error';
+        
+        return redirect()->back()->with($status, $result['message']);
+    }
+
+    public function getProgress(Request $request)
+    {
+        $sessionId = $request->input('session_id', session()->getId());
+        $progress = $this->importService->getProgress($sessionId);
+        
+        return response()->json($progress);
+    }
+
+    public function clearProgress(Request $request)
+    {
+        $sessionId = $request->input('session_id', session()->getId());
+        $this->importService->clearProgress($sessionId);
+        
+        return response()->json(['success' => true]);
     }
 
 
