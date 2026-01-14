@@ -110,6 +110,40 @@
                     </div>
                 </div>
 
+                <div class="col-md-6">
+                    <div class="form-group-shadcn">
+                        <label class="form-label-shadcn" for="TypeofItemCode">
+                            Type of Item Code
+                        </label>
+                        <input type="text"
+                               id="TypeofItemCode"
+                               name="TypeofItemCode"
+                               class="form-control-shadcn @error('TypeofItemCode') is-invalid @enderror"
+                               value="{{ old('TypeofItemCode', $item->TypeofItemCode) }}"
+                               placeholder="Enter Type of Item Code">
+                        @error('TypeofItemCode')
+                            <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group-shadcn">
+                        <label class="form-label-shadcn" for="TypeofItemDesc">
+                            Type of Item Desc
+                        </label>
+                        <input type="text"
+                               id="TypeofItemDesc"
+                               name="TypeofItemDesc"
+                               class="form-control-shadcn @error('TypeofItemDesc') is-invalid @enderror"
+                               value="{{ old('TypeofItemDesc', $item->TypeofItemDesc) }}"
+                               placeholder="Enter Type of Item Desc">
+                        @error('TypeofItemDesc')
+                            <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
                 {{-- Category Information --}}
                 <div class="col-12 mt-3">
                     <div class="separator-shadcn"></div>
@@ -130,7 +164,6 @@
                         @enderror
                     </div>
                 </div>
-
                 <div class="col-md-6">
                     <div class="form-group-shadcn">
                         <label class="form-label-shadcn" for="ARCIC_Desc">Item Category Desc (ARCIC_Desc)</label>

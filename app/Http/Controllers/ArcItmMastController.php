@@ -17,30 +17,30 @@ class ArcItmMastController extends Controller
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('ARCIM_Code', 'like', "%{$search}%")
-                  ->orWhere('ARCIM_Desc', 'like', "%{$search}%")
-                  ->orWhere('ARCIC_Code', 'like', "%{$search}%")
-                  ->orWhere('ORCAT_Code', 'like', "%{$search}%");
+                    ->orWhere('ARCIM_Desc', 'like', "%{$search}%")
+                    ->orWhere('ARCIC_Code', 'like', "%{$search}%")
+                    ->orWhere('ORCAT_Code', 'like', "%{$search}%");
             });
         }
-        
+
         if ($request->has('status') && $request->status != '') {
             $today = now()->startOfDay();
-            
+
             if ($request->status == 'active') {
-                $query->where(function($q) use ($today) {
+                $query->where(function ($q) use ($today) {
                     $q->whereNull('ARCIM_EffDateTo')
-                      ->orWhere('ARCIM_EffDateTo', '>=', $today);
+                        ->orWhere('ARCIM_EffDateTo', '>=', $today);
                 });
             } elseif ($request->status == 'non_active') {
                 $query->where('ARCIM_EffDateTo', '<', $today)
-                      ->whereNotNull('ARCIM_EffDateTo');
+                    ->whereNotNull('ARCIM_EffDateTo');
             }
         }
 
         $items = $query->with('prices')->orderBy('created_at', 'desc')->paginate(15);
-        
+
         $items->appends($request->only(['search', 'status']));
 
         return view('arc_itm_mast.index', compact('items'));
@@ -76,6 +76,8 @@ class ArcItmMastController extends Controller
             'ARCIM_ReorderOnItsOwn' => 'nullable|string|max:255',
             'ARCIM_EffDate' => 'nullable|date',
             'ARCIM_EffDateTo' => 'nullable|date',
+            'TypeofItemCode' => 'nullable|string|max:255',
+            'TypeofItemDesc' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
