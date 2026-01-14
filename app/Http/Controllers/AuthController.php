@@ -19,7 +19,7 @@ class AuthController extends Controller
 
             if ($currentUser->role !== 'ADMIN') {
                 return response()->json([
-                    'status'  => 'failed',
+                    'status' => 'failed',
                     'message' => 'Hanya ADMIN yang dapat menambahkan user baru.'
                 ], 403);
             }
@@ -27,32 +27,32 @@ class AuthController extends Controller
             $validator = Validator::make($request->all(), [
                 'username' => 'required|string|max:255|unique:users',
                 'password' => 'required|string|min:6|confirmed',
-                'role'     => 'required|in:USER,ADMIN',
+                'role' => 'required|in:USER,ADMIN,PRICE_STRATEGY,PRICE_ENTRY,PRICE_APPROVER',
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
-                    'status'  => 'failed',
+                    'status' => 'failed',
                     'message' => 'Validasi gagal',
-                    'errors'  => $validator->errors()
+                    'errors' => $validator->errors()
                 ], 422);
             }
 
             $user = User::create([
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
-                'role'     => $request->role,
+                'role' => $request->role,
             ]);
 
             return response()->json([
-                'status'  => 'success',
+                'status' => 'success',
                 'message' => 'User baru berhasil ditambahkan.',
-                'user'    => $user
+                'user' => $user
             ], 201);
 
         } catch (JWTException $e) {
             return response()->json([
-                'status'  => 'failed',
+                'status' => 'failed',
                 'message' => 'Token tidak valid atau tidak ditemukan.'
             ], 401);
         }
@@ -65,23 +65,23 @@ class AuthController extends Controller
 
             if ($currentUser->role !== 'ADMIN') {
                 return response()->json([
-                    'status'  => 'failed',
+                    'status' => 'failed',
                     'message' => 'Hanya ADMIN yang dapat menghapus user.'
                 ], 403);
             }
 
             $user = User::find($id);
 
-            if (! $user) {
+            if (!$user) {
                 return response()->json([
-                    'status'  => 'failed',
+                    'status' => 'failed',
                     'message' => 'User tidak ditemukan.'
                 ], 404);
             }
 
             if ($user->id === $currentUser->id) {
                 return response()->json([
-                    'status'  => 'failed',
+                    'status' => 'failed',
                     'message' => 'Anda tidak dapat menghapus akun Anda sendiri.'
                 ], 400);
             }
@@ -89,13 +89,13 @@ class AuthController extends Controller
             $user->delete();
 
             return response()->json([
-                'status'  => 'success',
+                'status' => 'success',
                 'message' => 'User berhasil dihapus.'
             ]);
 
         } catch (JWTException $e) {
             return response()->json([
-                'status'  => 'failed',
+                'status' => 'failed',
                 'message' => 'Token tidak valid atau tidak ditemukan.'
             ], 401);
         }
@@ -108,20 +108,20 @@ class AuthController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'current_password' => 'required|string',
-                'new_password'     => 'required|string|min:6|confirmed',
+                'new_password' => 'required|string|min:6|confirmed',
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
-                    'status'  => 'failed',
+                    'status' => 'failed',
                     'message' => 'Validasi gagal',
-                    'errors'  => $validator->errors()
+                    'errors' => $validator->errors()
                 ], 422);
             }
 
-            if (! Hash::check($request->current_password, $user->password)) {
+            if (!Hash::check($request->current_password, $user->password)) {
                 return response()->json([
-                    'status'  => 'failed',
+                    'status' => 'failed',
                     'message' => 'Password lama tidak sesuai.'
                 ], 400);
             }
@@ -130,13 +130,13 @@ class AuthController extends Controller
             $user->save();
 
             return response()->json([
-                'status'  => 'success',
+                'status' => 'success',
                 'message' => 'Password berhasil diubah.'
             ]);
 
         } catch (JWTException $e) {
             return response()->json([
-                'status'  => 'failed',
+                'status' => 'failed',
                 'message' => 'Token tidak valid atau tidak ditemukan.'
             ], 401);
         }
@@ -159,7 +159,7 @@ class AuthController extends Controller
 
         $credentials = $request->only('username', 'password');
 
-        if (! $token = auth('api')->attempt($credentials)) {
+        if (!$token = auth('api')->attempt($credentials)) {
             return response()->json([
                 'status' => 'failed',
                 'message' => 'Username atau password salah.',
@@ -175,7 +175,7 @@ class AuthController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
             return response()->json([
                 'status' => 'success',
-                'user'   => $user,
+                'user' => $user,
             ]);
         } catch (JWTException $e) {
             return response()->json([
@@ -217,11 +217,11 @@ class AuthController extends Controller
     protected function respondWithToken($token)
     {
         return response()->json([
-            'status'       => 'success',
+            'status' => 'success',
             'access_token' => $token,
-            'token_type'   => 'bearer',
-            'expires_in'   => auth('api')->factory()->getTTL() * 60,
-            'user'         => auth('api')->user(),
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'user' => auth('api')->user(),
         ]);
     }
 }

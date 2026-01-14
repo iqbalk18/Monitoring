@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ARCItemPriceItaly;
 use App\Models\ArcItmMast;
 use App\Models\Margin;
+use App\Models\PriceSubmission;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -200,6 +201,87 @@ class ARCItemPriceItalyController extends Controller
 
         if ($action === 'manual') {
             return $this->storeManualPrice($request, $arcimCode, $item);
+        }
+
+        if (session('user') && session('user')['role'] == 'PRICE_ENTRY') {
+            // Check for existing pending submission
+            $existingPending = PriceSubmission::where('ITP_ARCIM_Code', $arcimCode)
+                ->where('status', 'PENDING')
+                ->exists();
+
+            if ($existingPending) {
+                return redirect()->back()
+                    ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                    ->withInput();
+            }
+
+            $baseData = [
+                'ITP_ARCIM_Code' => $arcimCode,
+                'ITP_ARCIM_Desc' => $item->ARCIM_Desc,
+                'ITP_DateFrom' => $request->ITP_DateFrom,
+                'ITP_DateTo' => $request->ITP_DateTo,
+                'ITP_TAR_Code' => 'REG',
+                'ITP_TAR_Desc' => 'Standar',
+                'ITP_CTCUR_Code' => 'IDR',
+                'ITP_CTCUR_Desc' => 'Indonesian Rupiah',
+                'ITP_HOSP_Code' => 'BI00',
+                'ITP_HOSP_Desc' => 'Bali International Hospital',
+                'ITP_Rank' => '99',
+                'status' => 'PENDING',
+                'submitted_by' => session('user')['id'],
+            ];
+
+            if ($request->ITP_Price !== null) {
+                $margins = Margin::where('ARCIM_ServMateria', 'S')->get();
+
+                if ($margins->count() > 0) {
+                    $originalPrice = (float) $request->ITP_Price;
+
+                    foreach ($margins as $margin) {
+                        $priceData = $baseData;
+
+                        if ($margin->TypeofItemCode == 'O') {
+                            $priceData['ITP_Price'] = $originalPrice;
+                            $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
+                        } else {
+                            if ($margin->Margin !== null) {
+                                if (in_array($margin->TypeofItemCode, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
+                                    $priceData['ITP_EpisodeType'] = 'I';
+                                    $priceData['ITP_ROOMT_Code'] = $margin->TypeofItemCode;
+                                    $priceData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc;
+                                } else {
+                                    $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
+                                }
+
+                                $marginPercentage = (float) $margin->Margin;
+                                $calculatedPrice = $originalPrice * ($marginPercentage / 100);
+                                $priceData['ITP_Price'] = $calculatedPrice;
+                            } else {
+                                $priceData['ITP_Price'] = $originalPrice;
+
+                                if (in_array($margin->TypeofItemCode, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
+                                    $priceData['ITP_EpisodeType'] = 'I';
+                                    $priceData['ITP_ROOMT_Code'] = $margin->TypeofItemCode;
+                                    $priceData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc;
+                                } else {
+                                    $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
+                                }
+                            }
+                        }
+
+                        PriceSubmission::create($priceData);
+                    }
+                } else {
+                    $baseData['ITP_Price'] = (float) $request->ITP_Price;
+                    $baseData['ITP_EpisodeType'] = 'O';
+                    PriceSubmission::create($baseData);
+                }
+            } else {
+                $baseData['ITP_EpisodeType'] = 'O';
+                PriceSubmission::create($baseData);
+            }
+
+            return redirect()->back()->with('success', 'Harga berhasil diajukan dan menunggu persetujuan.');
         }
 
         $baseData = [
@@ -469,6 +551,25 @@ class ARCItemPriceItalyController extends Controller
                 }
                 $apiPrice['ITPPrice'] = (string) $originalPrice;
             }
+        }
+
+        if (session('user') && session('user')['role'] == 'PRICE_ENTRY') {
+            // Check for existing pending submission
+            $existingPending = PriceSubmission::where('ITP_ARCIM_Code', $arcimCode)
+                ->where('status', 'PENDING')
+                ->exists();
+
+            if ($existingPending) {
+                return redirect()->back()
+                    ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                    ->withInput();
+            }
+
+            $priceData['status'] = 'PENDING';
+            $priceData['submitted_by'] = session('user')['id'];
+            PriceSubmission::create($priceData);
+
+            return redirect()->back()->with('success', 'Harga berhasil diajukan dan menunggu persetujuan.');
         }
 
         $apiPayload = [

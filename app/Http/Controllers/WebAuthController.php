@@ -29,7 +29,7 @@ class WebAuthController extends Controller
             return back()->withErrors(['login' => 'Username dan password wajib diisi.'])->withInput();
         }
 
-        if (! $token = auth('api')->attempt($request->only('username', 'password'))) {
+        if (!$token = auth('api')->attempt($request->only('username', 'password'))) {
             return back()->withErrors(['login' => 'Username atau password salah.'])->withInput();
         }
 
@@ -46,7 +46,13 @@ class WebAuthController extends Controller
         }
 
         $user = $request->session()->get('user');
-        return view('dashboard', compact('user'));
+        $pendingApprovals = 0;
+
+        if (isset($user['role']) && $user['role'] == 'PRICE_APPROVER') {
+            $pendingApprovals = \App\Models\PriceSubmission::where('status', 'PENDING')->count();
+        }
+
+        return view('dashboard', compact('user', 'pendingApprovals'));
     }
 
     public function settingsPage(Request $request)

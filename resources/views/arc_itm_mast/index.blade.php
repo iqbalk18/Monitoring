@@ -48,14 +48,16 @@
             <p class="section-desc">Manage master data items and pricing configuration.</p>
         </div>
         <div class="d-flex align-items-center" style="gap: 0.5rem;">
-            <a href="{{ route('margin.index') }}" class="btn-shadcn btn-shadcn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 3v18h18" />
-                    <path d="m19 9-5 5-4-4-3 3" />
-                </svg>
-                Kelola Margin
-            </a>
+            @if(session('user') && session('user')['role'] !== 'PRICE_ENTRY')
+                <a href="{{ route('margin.index') }}" class="btn-shadcn btn-shadcn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18" />
+                        <path d="m19 9-5 5-4-4-3 3" />
+                    </svg>
+                    Kelola Margin
+                </a>
+            @endif
         </div>
     </div>
 
@@ -202,6 +204,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center" style="gap: 0.375rem;">
+                                        @if(session('user') && session('user')['role'] !== 'PRICE_ENTRY')
                                         <a href="{{ route('arc-itm-mast.edit', $item->id) }}"
                                             class="btn-shadcn btn-shadcn-outline btn-shadcn-sm" title="Edit">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -212,6 +215,7 @@
                                             </svg>
                                             Edit
                                         </a>
+                                        @endif
                                         <a href="{{ route('arc-item-price-italy.manage', $item->ARCIM_Code) }}"
                                             class="btn-shadcn btn-shadcn-secondary btn-shadcn-sm" title="Manage Price">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -285,15 +289,15 @@
                 if (visibleRows === 0 && value !== '') {
                     if ($('#noFilterResults').length === 0) {
                         $('#arcTable tbody').append(`
-                            <tr id="noFilterResults">
-                                <td colspan="14" class="text-center" style="padding: 2rem;">
-                                    <div style="color: var(--muted-foreground);">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                                        <p class="mb-0" style="font-size: 0.875rem;">No results found for "${value}"</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        `);
+                                <tr id="noFilterResults">
+                                    <td colspan="14" class="text-center" style="padding: 2rem;">
+                                        <div style="color: var(--muted-foreground);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                            <p class="mb-0" style="font-size: 0.875rem;">No results found for "${value}"</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `);
                     }
                 } else {
                     $('#noFilterResults').remove();

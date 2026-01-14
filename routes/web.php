@@ -75,6 +75,13 @@ Route::get('arc-item-price-italy/manage/{arcimCode}', [ARCItemPriceItalyControll
 Route::post('arc-item-price-italy/manage/{arcimCode}', [ARCItemPriceItalyController::class, 'storeFromManage'])->name('arc-item-price-italy.store-manage');
 Route::put('arc-item-price-italy/manage/{arcimCode}/{id}', [ARCItemPriceItalyController::class, 'updateFromManage'])->name('arc-item-price-italy.update-manage');
 
+// Price Submission Approval Workflow
+use App\Http\Controllers\PriceSubmissionController;
+Route::get('/price-submissions', [PriceSubmissionController::class, 'index'])->name('price-submissions.index');
+Route::get('/price-submissions/{id}', [PriceSubmissionController::class, 'show'])->name('price-submissions.show');
+Route::post('/price-submissions/{id}/approve', [PriceSubmissionController::class, 'approve'])->name('price-submissions.approve');
+Route::post('/price-submissions/{id}/reject', [PriceSubmissionController::class, 'reject'])->name('price-submissions.reject');
+
 Route::prefix('api')->group(function () {
     Route::get('arc-item-price-italy', [ARCItemPriceItalyController::class, 'index']);
     Route::post('arc-item-price-italy', [ARCItemPriceItalyController::class, 'store']);
