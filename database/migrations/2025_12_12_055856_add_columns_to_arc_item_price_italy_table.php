@@ -59,24 +59,26 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('tcmon_arc_item_price_italy', function (Blueprint $table) {
-            $table->dropColumn([
-                'ITP_ARCIM_Code',
-                'ITP_ARCIM_Desc',
-                'ITP_DateFrom',
-                'ITP_DateTo',
-                'ITP_TAR_Code',
-                'ITP_TAR_Desc',
-                'ITP_Price',
-                'ITP_CTCUR_Code',
-                'ITP_CTCUR_Desc',
-                'ITP_ROOMT_Code',
-                'ITP_ROOMT_Desc',
-                'ITP_HOSP_Code',
-                'ITP_HOSP_Desc',
-                'ITP_Rank',
-                'ITP_EpisodeType',
-            ]);
-        });
+        if (Schema::hasTable('tcmon_arc_item_price_italy')) {
+            Schema::table('tcmon_arc_item_price_italy', function (Blueprint $table) {
+                $table->dropColumn([
+                    'ITP_ARCIM_Code',
+                    'ITP_ARCIM_Desc',
+                    'ITP_DateFrom',
+                    'ITP_DateTo',
+                    'ITP_TAR_Code',
+                    'ITP_TAR_Desc',
+                    'ITP_Price',
+                    'ITP_CTCUR_Code',
+                    'ITP_CTCUR_Desc',
+                    'ITP_ROOMT_Code',
+                    'ITP_ROOMT_Desc',
+                    'ITP_HOSP_Code',
+                    'ITP_HOSP_Desc',
+                    'ITP_Rank',
+                    'ITP_EpisodeType',
+                ]);
+            });
+        }
     }
 };

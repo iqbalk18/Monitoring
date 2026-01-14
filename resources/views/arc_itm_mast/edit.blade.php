@@ -115,12 +115,27 @@
                         <label class="form-label-shadcn" for="TypeofItemCode">
                             Type of Item Code
                         </label>
-                        <input type="text"
-                               id="TypeofItemCode"
-                               name="TypeofItemCode"
-                               class="form-control-shadcn @error('TypeofItemCode') is-invalid @enderror"
-                               value="{{ old('TypeofItemCode', $item->TypeofItemCode) }}"
-                               placeholder="Enter Type of Item Code">
+                        @if($item->ARCIM_ServMaterial == 'M' && isset($materialMargins) && $materialMargins->count() > 0)
+                            {{-- Dropdown for Material (M) --}}
+                            <select name="TypeofItemCode" 
+                                    id="TypeofItemCode"
+                                    class="form-select-shadcn @error('TypeofItemCode') is-invalid @enderror">
+                                <option value="">-- Select Type of Item --</option>
+                                @foreach($materialMargins as $margin)
+                                    <option value="{{ $margin->TypeofItemCode }}" {{ old('TypeofItemCode', $item->TypeofItemCode) == $margin->TypeofItemCode ? 'selected' : '' }}>
+                                        {{ $margin->TypeofItemCode }} - {{ $margin->TypeofItemDesc ?? '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        @else
+                            {{-- Text input for Service (S) or if no margins available --}}
+                            <input type="text"
+                                   id="TypeofItemCode"
+                                   name="TypeofItemCode"
+                                   class="form-control-shadcn @error('TypeofItemCode') is-invalid @enderror"
+                                   value="{{ old('TypeofItemCode', $item->TypeofItemCode) }}"
+                                   placeholder="Enter Type of Item Code">
+                        @endif
                         @error('TypeofItemCode')
                             <div class="invalid-feedback-shadcn">{{ $message }}</div>
                         @enderror
@@ -389,6 +404,9 @@
 </div>
 
 <script>
+// Material margins data from PHP
+const materialMarginsData = @json($materialMargins ?? []);
+
 function handleOrderOnItsOwnChange() {
     const orderCheckbox = document.getElementById('ARCIM_OrderOnItsOwn');
     const orderHidden = document.getElementById('ARCIM_OrderOnItsOwn_hidden');
@@ -408,6 +426,118 @@ function handleOrderOnItsOwnChange() {
         reorderHidden.value = 'N';
     }
 }
+
+// Handle Type of Item Code field based on ARCIM_ServMaterial
+document.addEventListener('DOMContentLoaded', function() {
+    const servMaterialField = document.getElementById('ARCIM_ServMaterial');
+    const typeOfItemContainer = document.querySelector('.form-group-shadcn:has(#TypeofItemCode)');
+    
+    if (!servMaterialField || !typeOfItemContainer) return;
+    
+    function updateTypeOfItemField() {
+        const servMaterial = servMaterialField.value;
+        const currentField = document.getElementById('TypeofItemCode');
+        if (!currentField) return;
+        
+        const currentValue = currentField.value || '';
+        const label = typeOfItemContainer.querySelector('label');
+        const errorDiv = typeOfItemContainer.querySelector('.invalid-feedback-shadcn');
+        
+        // Get material margins data from global variable
+        const materialMargins = materialMarginsData;
+        
+        if (servMaterial === 'M' && materialMargins.length > 0) {
+            // Create dropdown
+            const errorClass = currentField.classList.contains('is-invalid') ? ' is-invalid' : '';
+            
+            if (currentField.tagName === 'INPUT') {
+                // Replace input with select
+                const select = document.createElement('select');
+                select.name = 'TypeofItemCode';
+                select.id = 'TypeofItemCode';
+                select.className = 'form-select-shadcn' + errorClass;
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- Select Type of Item --';
+                select.appendChild(defaultOption);
+                
+                materialMargins.forEach(function(margin) {
+                    const option = document.createElement('option');
+                    option.value = margin.TypeofItemCode;
+                    option.textContent = margin.TypeofItemCode + ' - ' + (margin.TypeofItemDesc || '');
+                    if (currentValue == margin.TypeofItemCode) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+                
+                currentField.parentNode.replaceChild(select, currentField);
+            } else if (currentField.tagName === 'SELECT') {
+                // Already a select, just update options while preserving value
+                const selectedValue = currentField.value;
+                currentField.innerHTML = '';
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- Select Type of Item --';
+                currentField.appendChild(defaultOption);
+                
+                materialMargins.forEach(function(margin) {
+                    const option = document.createElement('option');
+                    option.value = margin.TypeofItemCode;
+                    option.textContent = margin.TypeofItemCode + ' - ' + (margin.TypeofItemDesc || '');
+                    if (selectedValue == margin.TypeofItemCode || currentValue == margin.TypeofItemCode) {
+                        option.selected = true;
+                    }
+                    currentField.appendChild(option);
+                });
+            }
+        } else {
+            // Create text input
+            const errorClass = currentField.classList.contains('is-invalid') ? ' is-invalid' : '';
+            
+            if (currentField.tagName === 'SELECT') {
+                // Replace select with input
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'TypeofItemCode';
+                input.name = 'TypeofItemCode';
+                input.className = 'form-control-shadcn' + errorClass;
+                input.value = currentValue;
+                input.placeholder = 'Enter Type of Item Code';
+                
+                currentField.parentNode.replaceChild(input, currentField);
+            } else if (currentField.tagName === 'INPUT') {
+                // Already an input, just update placeholder and ensure name attribute
+                currentField.name = 'TypeofItemCode';
+                currentField.placeholder = 'Enter Type of Item Code';
+            }
+        }
+        
+        // Re-attach error message if exists
+        if (errorDiv && typeOfItemContainer.querySelector('.invalid-feedback-shadcn') === null) {
+            typeOfItemContainer.appendChild(errorDiv);
+        }
+    }
+    
+    // Initial update
+    updateTypeOfItemField();
+    
+    // Update on change
+    servMaterialField.addEventListener('change', updateTypeOfItemField);
+    
+    // Ensure field has correct name attribute before form submit
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const typeOfItemField = document.getElementById('TypeofItemCode');
+            if (typeOfItemField && !typeOfItemField.name) {
+                typeOfItemField.name = 'TypeofItemCode';
+            }
+        });
+    }
+});
 
 function handleReorderOnItsOwnChange() {
     const reorderCheckbox = document.getElementById('ARCIM_ReorderOnItsOwn');

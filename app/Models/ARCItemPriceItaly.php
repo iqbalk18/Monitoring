@@ -19,6 +19,7 @@ class ARCItemPriceItaly extends Model
         'ITP_TAR_Code',
         'ITP_TAR_Desc',
         'ITP_Price',
+        'hna',
         'ITP_CTCUR_Code',
         'ITP_CTCUR_Desc',
         'ITP_ROOMT_Code',
@@ -33,5 +34,6 @@ class ARCItemPriceItaly extends Model
         'ITP_DateFrom' => 'date',
         'ITP_DateTo' => 'date',
         'ITP_Price' => 'decimal:2',
+        'hna' => 'decimal:2',
     ];
 }

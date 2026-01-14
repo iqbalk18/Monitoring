@@ -145,7 +145,12 @@ class ARCItemPriceItalyController extends Controller
 
         $prices->appends($request->only(['status']));
 
-        return view('arc_item_price_italy.manage', compact('item', 'prices'));
+        // Get margins for Material type (M) for Type of Item Code dropdown
+        $materialMargins = Margin::where('ARCIM_ServMateria', 'M')
+            ->orderBy('TypeofItemCode', 'asc')
+            ->get();
+
+        return view('arc_item_price_italy.manage', compact('item', 'prices', 'materialMargins'));
     }
 
     /**
@@ -153,8 +158,102 @@ class ARCItemPriceItalyController extends Controller
      */
     public function storeFromManage(Request $request, string $arcimCode)
     {
+        $item = ArcItmMast::where('ARCIM_Code', $arcimCode)->firstOrFail();
         $action = $request->input('action', 'generate');
 
+        // Handle Material (M) type
+        if ($item->ARCIM_ServMaterial == 'M') {
+            $rules = [
+                'ITP_DateFrom' => 'required|date',
+                'hna' => 'required|numeric|min:0',
+                'TypeofItemCode' => 'required|string',
+            ];
+
+            $validator = Validator::make($request->all(), $rules, [
+                'ITP_DateFrom.required' => 'Date From wajib diisi',
+                'ITP_DateFrom.date' => 'Date From harus berupa tanggal yang valid',
+                'hna.required' => 'HNA wajib diisi',
+                'hna.numeric' => 'HNA harus berupa angka',
+                'hna.min' => 'HNA harus lebih besar atau sama dengan 0',
+                'TypeofItemCode.required' => 'Type of Item Code wajib dipilih',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Validation for ITP_DateTo
+            $latestPrice = ARCItemPriceItaly::where('ITP_ARCIM_Code', $arcimCode)
+                ->whereNotNull('ITP_DateTo')
+                ->orderBy('ITP_DateTo', 'desc')
+                ->first();
+
+            if ($latestPrice && $latestPrice->ITP_DateTo > now()) {
+                $inputDateFrom = \Carbon\Carbon::parse($request->ITP_DateFrom);
+                $latestDateTo = \Carbon\Carbon::parse($latestPrice->ITP_DateTo);
+
+                if ($inputDateFrom->lte($latestDateTo)) {
+                    return redirect()->back()
+                        ->withErrors(['ITP_DateFrom' => 'You have active price until (' . $latestDateTo->format('d M Y') . ')'])
+                        ->withInput();
+                }
+            }
+
+            // Get margin based on Type of Item Code for Material
+            $typeOfItemCode = $request->TypeofItemCode;
+            $margin = Margin::where('ARCIM_ServMateria', 'M')
+                ->where('TypeofItemCode', $typeOfItemCode)
+                ->first();
+
+            if (!$margin) {
+                return redirect()->back()
+                    ->withErrors(['TypeofItemCode' => 'Margin tidak ditemukan untuk Type of Item Code yang dipilih'])
+                    ->withInput();
+            }
+
+            // Calculate price: (margin/100 + 1) × HNA
+            // Margin is stored as percentage (e.g., 28 for 28%), so divide by 100 first
+            $hna = (float) $request->hna;
+            $marginValue = (float) $margin->Margin;
+            $calculatedPrice = (($marginValue / 100) + 1) * $hna;
+
+            // Store Material price
+            // Handle Episode Type: if empty string, set to null, otherwise use the value
+            $episodeType = $request->ITP_EpisodeType;
+            if ($episodeType === '' || $episodeType === null) {
+                $episodeType = null;
+            }
+            
+            $priceData = [
+                'ITP_ARCIM_Code' => $arcimCode,
+                'ITP_ARCIM_Desc' => $item->ARCIM_Desc,
+                'ITP_DateFrom' => $request->ITP_DateFrom,
+                'ITP_DateTo' => $request->ITP_DateTo,
+                'ITP_TAR_Code' => 'REG',
+                'ITP_TAR_Desc' => 'Standar',
+                'ITP_CTCUR_Code' => 'IDR',
+                'ITP_CTCUR_Desc' => 'Indonesian Rupiah',
+                'ITP_HOSP_Code' => 'BI00',
+                'ITP_HOSP_Desc' => 'Bali International Hospital',
+                'ITP_Rank' => '99',
+                'hna' => $hna,
+                'ITP_Price' => $calculatedPrice,
+                'ITP_EpisodeType' => $episodeType,
+            ];
+
+            ARCItemPriceItaly::create($priceData);
+
+            $redirectUrl = route('arc-item-price-italy.manage', $arcimCode);
+            if ($request->has('status') && $request->status != '') {
+                $redirectUrl .= '?status=' . $request->status;
+            }
+
+            return redirect($redirectUrl)->with('success', 'Data HNA berhasil ditambahkan dengan harga: ' . number_format($calculatedPrice, 2));
+        }
+
+        // Handle Service (S) type - existing logic
         $rules = [
             'ITP_DateFrom' => 'required|date',
             'ITP_Price' => 'required|numeric|min:0',
@@ -196,8 +295,6 @@ class ARCItemPriceItalyController extends Controller
                     ->withInput();
             }
         }
-
-        $item = ArcItmMast::where('ARCIM_Code', $arcimCode)->firstOrFail();
 
         if ($action === 'manual') {
             return $this->storeManualPrice($request, $arcimCode, $item);
@@ -445,6 +542,73 @@ class ARCItemPriceItalyController extends Controller
      */
     public function updateFromManage(Request $request, string $arcimCode, string $id)
     {
+        $item = ArcItmMast::where('ARCIM_Code', $arcimCode)->firstOrFail();
+        $price = ARCItemPriceItaly::findOrFail($id);
+
+        // Handle Material (M) type
+        if ($item->ARCIM_ServMaterial == 'M') {
+            $validator = Validator::make($request->all(), [
+                'ITP_DateFrom' => 'required|date',
+                'hna' => 'required|numeric|min:0',
+                'TypeofItemCode' => 'required|string',
+            ], [
+                'ITP_DateFrom.required' => 'Date From wajib diisi',
+                'ITP_DateFrom.date' => 'Date From harus berupa tanggal yang valid',
+                'hna.required' => 'HNA wajib diisi',
+                'hna.numeric' => 'HNA harus berupa angka',
+                'hna.min' => 'HNA harus lebih besar atau sama dengan 0',
+                'TypeofItemCode.required' => 'Type of Item Code wajib dipilih',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Get margin based on Type of Item Code for Material
+            $typeOfItemCode = $request->TypeofItemCode;
+            $margin = Margin::where('ARCIM_ServMateria', 'M')
+                ->where('TypeofItemCode', $typeOfItemCode)
+                ->first();
+
+            if (!$margin) {
+                return redirect()->back()
+                    ->withErrors(['TypeofItemCode' => 'Margin tidak ditemukan untuk Type of Item Code yang dipilih'])
+                    ->withInput();
+            }
+
+            // Calculate price: (margin/100 + 1) × HNA
+            // Margin is stored as percentage (e.g., 28 for 28%), so divide by 100 first
+            $hna = (float) $request->hna;
+            $marginValue = (float) $margin->Margin;
+            $calculatedPrice = (($marginValue / 100) + 1) * $hna;
+
+            // Handle Episode Type: if empty string, set to null, otherwise use the value
+            $episodeType = $request->ITP_EpisodeType;
+            if ($episodeType === '' || $episodeType === null) {
+                $episodeType = null;
+            }
+
+            $updateData = [
+                'ITP_DateFrom' => $request->ITP_DateFrom,
+                'ITP_DateTo' => $request->ITP_DateTo,
+                'hna' => $hna,
+                'ITP_Price' => $calculatedPrice,
+                'ITP_EpisodeType' => $episodeType,
+            ];
+
+            $price->update($updateData);
+
+            $redirectUrl = route('arc-item-price-italy.manage', $arcimCode);
+            if ($request->has('status') && $request->status != '') {
+                $redirectUrl .= '?status=' . $request->status;
+            }
+
+            return redirect($redirectUrl)->with('success', 'Data HNA berhasil diupdate dengan harga: ' . number_format($calculatedPrice, 2));
+        }
+
+        // Handle Service (S) type
         $validator = Validator::make($request->all(), [
             'ITP_DateFrom' => 'required|date',
             'ITP_Price' => 'required|numeric|min:0',
@@ -461,8 +625,6 @@ class ARCItemPriceItalyController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
-
-        $price = ARCItemPriceItaly::findOrFail($id);
 
         $updateData = $request->only(['ITP_DateFrom', 'ITP_DateTo', 'ITP_Price']);
 

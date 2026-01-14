@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ArcItmMast;
+use App\Models\Margin;
 use Illuminate\Support\Facades\Validator;
 
 class ArcItmMastController extends Controller
@@ -52,7 +53,13 @@ class ArcItmMastController extends Controller
     public function edit(string $id)
     {
         $item = ArcItmMast::findOrFail($id);
-        return view('arc_itm_mast.edit', compact('item'));
+        
+        // Get margins for Material type (M) for Type of Item Code dropdown
+        $materialMargins = Margin::where('ARCIM_ServMateria', 'M')
+            ->orderBy('TypeofItemCode', 'asc')
+            ->get();
+        
+        return view('arc_itm_mast.edit', compact('item', 'materialMargins'));
     }
 
     /**

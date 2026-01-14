@@ -77,7 +77,7 @@
             <input type="hidden" name="status" value="{{ request('status') }}">
             
             <!-- Mode Selection -->
-            <div class="mb-4" id="modeSelectionContainer">
+            <div class="mb-4" id="modeSelectionContainer" @if($item->ARCIM_ServMaterial == 'M') style="display: none;" @endif>
                 <label class="form-label-shadcn mb-3">Select Input Mode <span class="text-danger">*</span></label>
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -189,19 +189,23 @@
 
                 <div class="col-md-6">
                     <div class="form-group-shadcn">
-                        <label class="form-label-shadcn" for="ITP_Price">
-                            Price <span class="text-danger">*</span>
+                        <label class="form-label-shadcn" for="ITP_Price" id="priceLabel">
+                            <span id="priceLabelText">Price</span> <span class="text-danger">*</span>
                         </label>
                         <input type="number" 
                                id="ITP_Price"
                                step="0.01" 
                                name="ITP_Price" 
-                               class="form-control-shadcn @error('ITP_Price') is-invalid @enderror" 
+                               class="form-control-shadcn @error('ITP_Price') is-invalid @enderror @error('hna') is-invalid @enderror" 
                                value="{{ old('ITP_Price') }}"
                                placeholder="Enter price"
                                min="0"
                                required>
+                        <input type="hidden" id="hnaField" name="hna" value="{{ old('hna') }}">
                         @error('ITP_Price')
+                            <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                        @enderror
+                        @error('hna')
                             <div class="invalid-feedback-shadcn">{{ $message }}</div>
                         @enderror
                     </div>
@@ -291,7 +295,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-6" id="episodeTypeContainer">
+                <div class="col-md-6" id="episodeTypeContainer" @if($item->ARCIM_ServMaterial == 'M') style="display: none;" @endif>
                     <div class="form-group-shadcn">
                         <label class="form-label-shadcn" for="ITP_EpisodeType">
                             Episode Type <span class="text-danger manual-required" style="display:none;">*</span>
@@ -314,6 +318,74 @@
                         <p class="form-description-shadcn" id="episodeTypeHelp" style="display:none;">Select episode type for manual input</p>
                     </div>
                 </div>
+
+                <div class="col-md-6" id="episodeTypeMaterialContainer" @if($item->ARCIM_ServMaterial != 'M') style="display: none;" @endif>
+                    <div class="form-group-shadcn">
+                        <label class="form-label-shadcn" for="ITP_EpisodeType_Material">
+                            Episode Type
+                        </label>
+                        <select name="ITP_EpisodeType" 
+                                id="ITP_EpisodeType_Material"
+                                class="form-select-shadcn @error('ITP_EpisodeType') is-invalid @enderror">
+                            <option value="">-- Select Episode Type --</option>
+                            <option value="O" {{ old('ITP_EpisodeType') == 'O' ? 'selected' : '' }}>O - Outpatient</option>
+                        </select>
+                        @error('ITP_EpisodeType')
+                            <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                        @enderror
+                        <p class="form-description-shadcn">Select episode type (null or O) for Material</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6" id="typeOfItemContainer" @if($item->ARCIM_ServMaterial != 'M') style="display: none;" @endif>
+                    <div class="form-group-shadcn">
+                        <label class="form-label-shadcn" for="TypeofItemCode">
+                            Type of Item Code <span class="text-danger">*</span>
+                        </label>
+                        @if($item->ARCIM_ServMaterial == 'M')
+                            @php
+                                $typeOfItemCode = $item->TypeofItemCode ?? '';
+                                $typeOfItemDesc = $item->TypeofItemDesc ?? '';
+                                $displayValue = $typeOfItemCode;
+                                if ($typeOfItemDesc) {
+                                    $displayValue .= ' - ' . $typeOfItemDesc;
+                                }
+                            @endphp
+                            <input type="text"
+                                   id="TypeofItemCode"
+                                   name="TypeofItemCode"
+                                   class="form-control-shadcn @error('TypeofItemCode') is-invalid @enderror"
+                                   value="{{ old('TypeofItemCode', $typeOfItemCode) }}"
+                                   readonly
+                                   required>
+                            @if($typeOfItemDesc)
+                                <input type="hidden" name="TypeofItemDesc" value="{{ $typeOfItemDesc }}">
+                                <p class="form-description-shadcn mt-1" style="font-size: 0.875rem; color: var(--muted-foreground);">
+                                    {{ $displayValue }}
+                                </p>
+                            @endif
+                        @else
+                            <select name="TypeofItemCode" 
+                                    id="TypeofItemCode"
+                                    class="form-select-shadcn @error('TypeofItemCode') is-invalid @enderror">
+                                <option value="">-- Select Type of Item --</option>
+                                @if(isset($materialMargins) && $materialMargins->count() > 0)
+                                    @foreach($materialMargins as $margin)
+                                        <option value="{{ $margin->TypeofItemCode }}" {{ old('TypeofItemCode') == $margin->TypeofItemCode ? 'selected' : '' }}>
+                                            {{ $margin->TypeofItemCode }} - {{ $margin->TypeofItemDesc ?? '' }}
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        @endif
+                        @error('TypeofItemCode')
+                            <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                        @enderror
+                        @if($item->ARCIM_ServMaterial == 'M')
+                            <p class="form-description-shadcn">Type of item code is read-only and retrieved from database</p>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             <div class="separator-shadcn"></div>
@@ -324,11 +396,15 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
                     Cancel
                 </button>
-                <button type="submit" class="btn-shadcn btn-shadcn-success" id="manualBtn" name="action" value="manual" style="display:none;">
+                <button type="submit" class="btn-shadcn btn-shadcn-success" id="manualBtn" name="action" value="manual" @if($item->ARCIM_ServMaterial != 'M') style="display:none;" @endif>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                    Save Manual Data
+                    @if($item->ARCIM_ServMaterial == 'M')
+                        Save HNA Data
+                    @else
+                        Save Manual Data
+                    @endif
                 </button>
-                <button type="submit" class="btn-shadcn btn-shadcn-primary" id="generateBtn" name="action" value="generate">
+                <button type="submit" class="btn-shadcn btn-shadcn-primary" id="generateBtn" name="action" value="generate" @if($item->ARCIM_ServMaterial == 'M') style="display: none;" @endif>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                     Generate Data
                 </button>
@@ -396,9 +472,9 @@
                         <td><code style="font-size: 0.8125rem;">{{ $price->ITP_TAR_Code ?? '-' }}</code></td>
                         <td>{{ Str::limit($price->ITP_TAR_Desc ?? '-', 30) }}</td>
                         <td>
-                            <span class="badge-shadcn badge-shadcn-success">
-                                {{ number_format($price->ITP_Price) }}
-                            </span>
+                                <span class="badge-shadcn badge-shadcn-success">
+                                    {{ number_format($price->ITP_Price) }}
+                                </span>
                         </td>
                         <td>{{ $price->ITP_CTCUR_Code ?? '-' }}</td>
                         <td>{{ Str::limit($price->ITP_ROOMT_Desc ?? '-', 20) }}</td>
@@ -514,7 +590,45 @@ function editPrice(id) {
             
             document.querySelector('input[name="ITP_TAR_Code"]').value = data.ITP_TAR_Code || '';
             document.querySelector('input[name="ITP_TAR_Desc"]').value = data.ITP_TAR_Desc || '';
-            document.querySelector('input[name="ITP_Price"]').value = data.ITP_Price || '';
+            
+            // Handle Material type - set hna value
+            const servMaterial = '{{ $item->ARCIM_ServMaterial }}';
+            const priceInput = document.getElementById('ITP_Price');
+            const hnaField = document.getElementById('hnaField');
+            const typeOfItemField = document.getElementById('TypeofItemCode');
+            
+            if (servMaterial === 'M') {
+                // For Material, use hna value
+                if (data.hna !== null && data.hna !== undefined) {
+                    priceInput.value = data.hna;
+                    hnaField.value = data.hna;
+                } else {
+                    priceInput.value = '';
+                    hnaField.value = '';
+                }
+                
+                // Show Type of Item Code field (readonly, value from item master database)
+                const typeOfItemContainer = document.getElementById('typeOfItemContainer');
+                if (typeOfItemContainer) {
+                    typeOfItemContainer.style.display = 'block';
+                }
+                // Type of Item Code is readonly and comes from item master (arc_itm_mast) table
+                // Value is already set in the view from $item->TypeofItemCode
+                
+                // Show Material-specific Episode Type field and set value
+                const episodeTypeMaterialContainer = document.getElementById('episodeTypeMaterialContainer');
+                if (episodeTypeMaterialContainer) {
+                    episodeTypeMaterialContainer.style.display = 'block';
+                }
+                const episodeTypeMaterialField = document.getElementById('ITP_EpisodeType_Material');
+                if (episodeTypeMaterialField) {
+                    episodeTypeMaterialField.value = data.ITP_EpisodeType || '';
+                }
+            } else {
+                // For Service, use ITP_Price
+                priceInput.value = data.ITP_Price || '';
+            }
+            
             document.querySelector('input[name="ITP_CTCUR_Code"]').value = data.ITP_CTCUR_Code || '';
             document.querySelector('input[name="ITP_CTCUR_Desc"]').value = data.ITP_CTCUR_Desc || '';
             document.querySelector('input[name="ITP_ROOMT_Code"]').value = data.ITP_ROOMT_Code || '';
@@ -524,8 +638,19 @@ function editPrice(id) {
             document.querySelector('input[name="ITP_Rank"]').value = data.ITP_Rank || '';
             
             // Set episode type value for select element
-            const episodeTypeSelect = document.getElementById('ITP_EpisodeType');
-            episodeTypeSelect.value = data.ITP_EpisodeType || '';
+            if (servMaterial === 'M') {
+                // For Material, use the Material-specific Episode Type field
+                const episodeTypeMaterialSelect = document.getElementById('ITP_EpisodeType_Material');
+                if (episodeTypeMaterialSelect) {
+                    episodeTypeMaterialSelect.value = data.ITP_EpisodeType || '';
+                }
+            } else {
+                // For Service, use the standard Episode Type field
+                const episodeTypeSelect = document.getElementById('ITP_EpisodeType');
+                if (episodeTypeSelect) {
+                    episodeTypeSelect.value = data.ITP_EpisodeType || '';
+                }
+            }
             
             // Scroll to form
             document.getElementById('priceForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -559,23 +684,38 @@ function resetForm() {
     document.querySelector('label[for="modeGenerate"]').classList.add('active');
     
     // Reset episode type
+    const servMaterial = '{{ $item->ARCIM_ServMaterial }}';
     document.getElementById('ITP_EpisodeType').disabled = true;
     document.getElementById('ITP_EpisodeType').required = false;
     document.getElementById('ITP_EpisodeType').value = 'O';
     document.getElementById('episodeTypeHelp').style.display = 'none';
     document.querySelector('.manual-required').style.display = 'none';
     
+    // Reset Type of Item Code for Material
+    if (servMaterial === 'M') {
+        const typeOfItemField = document.getElementById('TypeofItemCode');
+        if (typeOfItemField) {
+            typeOfItemField.value = '';
+        }
+    }
+    
     // Reset buttons
-    document.getElementById('manualBtn').style.display = 'none';
-    document.getElementById('generateBtn').innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-        Generate Data
-    `;
-    document.getElementById('generateBtn').style.display = 'inline-block';
+    if (servMaterial === 'M') {
+        document.getElementById('manualBtn').style.display = 'inline-block';
+        document.getElementById('generateBtn').style.display = 'none';
+    } else {
+        document.getElementById('manualBtn').style.display = 'none';
+        document.getElementById('generateBtn').innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            Generate Data
+        `;
+        document.getElementById('generateBtn').style.display = 'inline-block';
+    }
 }
 
 // Handle mode selection (Manual or Generate)
 document.addEventListener('DOMContentLoaded', function() {
+    const servMaterial = '{{ $item->ARCIM_ServMaterial }}';
     const modeManual = document.getElementById('modeManual');
     const modeGenerate = document.getElementById('modeGenerate');
     const episodeTypeField = document.getElementById('ITP_EpisodeType');
@@ -583,9 +723,78 @@ document.addEventListener('DOMContentLoaded', function() {
     const manualRequired = document.querySelector('.manual-required');
     const manualBtn = document.getElementById('manualBtn');
     const generateBtn = document.getElementById('generateBtn');
+    const priceInput = document.getElementById('ITP_Price');
+    const hnaField = document.getElementById('hnaField');
+    const priceLabelText = document.getElementById('priceLabelText');
     
-    // Function to toggle mode
+    // Initialize form based on serv/material type
+    const typeOfItemContainer = document.getElementById('typeOfItemContainer');
+    const typeOfItemField = document.getElementById('TypeofItemCode');
+    
+    if (servMaterial === 'M') {
+        // Material mode: Change label to HNA, disable episode type, hide generate, show Type of Item
+        priceLabelText.textContent = 'HNA';
+        // Keep the input name as ITP_Price for display, but we'll handle it in form submit
+        // Hide standard Episode Type field for Material
+        if (episodeTypeField) {
+            episodeTypeField.disabled = true;
+            episodeTypeField.required = false;
+            episodeTypeField.value = '';
+            episodeTypeField.name = 'ITP_EpisodeType';
+        }
+        if (episodeTypeHelp) {
+            episodeTypeHelp.style.display = 'none';
+        }
+        manualRequired.style.display = 'none';
+        manualBtn.style.display = 'inline-block';
+        generateBtn.style.display = 'none';
+        
+        // Show Material-specific Episode Type field
+        const episodeTypeMaterialContainer = document.getElementById('episodeTypeMaterialContainer');
+        if (episodeTypeMaterialContainer) {
+            episodeTypeMaterialContainer.style.display = 'block';
+        }
+        
+        // Show Type of Item Code field for Material (readonly, value from database)
+        if (typeOfItemContainer) {
+            typeOfItemContainer.style.display = 'block';
+        }
+        if (typeOfItemField) {
+            // Field is readonly, so we don't need to set required
+            // Value is already set from database in the view
+        }
+        
+        // Show manual button as default for Material
+        if (modeManual) {
+            modeManual.checked = true;
+        }
+    } else {
+        // Service mode: Standard behavior
+        priceLabelText.textContent = 'Price';
+        priceInput.name = 'ITP_Price';
+        priceInput.id = 'ITP_Price';
+        
+        // Hide Type of Item Code field for Service
+        if (typeOfItemContainer) {
+            typeOfItemContainer.style.display = 'none';
+        }
+        if (typeOfItemField) {
+            typeOfItemField.required = false;
+        }
+        
+        // Hide Material-specific Episode Type field for Service
+        const episodeTypeMaterialContainerService = document.getElementById('episodeTypeMaterialContainer');
+        if (episodeTypeMaterialContainerService) {
+            episodeTypeMaterialContainerService.style.display = 'none';
+        }
+    }
+    
+    // Function to toggle mode (only for Service)
     function toggleMode() {
+        if (servMaterial === 'M') {
+            return; // Don't toggle for Material
+        }
+        
         // Update card styles
         document.querySelectorAll('.mode-card').forEach(card => card.classList.remove('active'));
         
@@ -615,12 +824,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Add event listeners to radio buttons
-    modeManual.addEventListener('change', toggleMode);
-    modeGenerate.addEventListener('change', toggleMode);
+    // Add event listeners to radio buttons (only for Service)
+    if (servMaterial !== 'M') {
+        if (modeManual) {
+            modeManual.addEventListener('change', toggleMode);
+        }
+        if (modeGenerate) {
+            modeGenerate.addEventListener('change', toggleMode);
+        }
+        // Initialize on page load
+        toggleMode();
+    }
     
-    // Initialize on page load
-    toggleMode();
+    // Handle form submission for Material - copy value to hna field
+    if (servMaterial === 'M') {
+        const form = document.getElementById('priceForm');
+        form.addEventListener('submit', function(e) {
+            // Copy value from price input to hna hidden field
+            hnaField.value = priceInput.value;
+            // Change input name to hna for submission
+            priceInput.name = 'hna';
+            
+            // Handle Episode Type for Material - get value from Material-specific field
+            const episodeTypeMaterialField = document.getElementById('ITP_EpisodeType_Material');
+            if (episodeTypeMaterialField) {
+                // Create or update hidden field with Episode Type value
+                let episodeTypeHidden = document.querySelector('input[name="ITP_EpisodeType"][type="hidden"]');
+                if (!episodeTypeHidden) {
+                    episodeTypeHidden = document.createElement('input');
+                    episodeTypeHidden.type = 'hidden';
+                    episodeTypeHidden.name = 'ITP_EpisodeType';
+                    form.appendChild(episodeTypeHidden);
+                }
+                // If empty string, set to null (will be converted in controller)
+                episodeTypeHidden.value = episodeTypeMaterialField.value || '';
+            }
+            
+            // Ensure Type of Item Code is submitted
+            if (typeOfItemField && !typeOfItemField.value) {
+                e.preventDefault();
+                alert('Type of Item Code wajib dipilih');
+                return false;
+            }
+        });
+    }
 });
 </script>
 @endpush

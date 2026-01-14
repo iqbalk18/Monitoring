@@ -27,6 +27,8 @@ class ArcItmMast extends Model
         'ARCIM_ReorderOnItsOwn',
         'ARCIM_EffDate',
         'ARCIM_EffDateTo',
+        'TypeofItemCode',
+        'TypeofItemDesc',
     ];
 
     protected $casts = [
