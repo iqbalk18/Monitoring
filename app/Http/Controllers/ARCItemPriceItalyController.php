@@ -74,7 +74,7 @@ class ARCItemPriceItalyController extends Controller
     public function show(string $id)
     {
         $price = ARCItemPriceItaly::findOrFail($id);
-        
+
         $priceData = $price->toArray();
         if ($price->ITP_DateFrom) {
             $priceData['ITP_DateFrom'] = $price->ITP_DateFrom->format('Y-m-d');
@@ -82,7 +82,7 @@ class ARCItemPriceItalyController extends Controller
         if ($price->ITP_DateTo) {
             $priceData['ITP_DateTo'] = $price->ITP_DateTo->format('Y-m-d');
         }
-        
+
         return response()->json($priceData);
     }
 
@@ -123,25 +123,25 @@ class ARCItemPriceItalyController extends Controller
     public function managePrice(Request $request, string $arcimCode)
     {
         $item = ArcItmMast::where('ARCIM_Code', $arcimCode)->firstOrFail();
-        
+
         $query = ARCItemPriceItaly::where('ITP_ARCIM_Code', $arcimCode);
 
         if ($request->has('status') && $request->status != '') {
             $today = now()->startOfDay();
-            
+
             if ($request->status == 'active') {
-                $query->where(function($q) use ($today) {
+                $query->where(function ($q) use ($today) {
                     $q->whereNull('ITP_DateTo')
-                      ->orWhere('ITP_DateTo', '>=', $today);
+                        ->orWhere('ITP_DateTo', '>=', $today);
                 });
             } elseif ($request->status == 'non_active') {
                 $query->where('ITP_DateTo', '<', $today)
-                      ->whereNotNull('ITP_DateTo');
+                    ->whereNotNull('ITP_DateTo');
             }
         }
 
         $prices = $query->orderBy('created_at', 'desc')->paginate(15);
-        
+
         $prices->appends($request->only(['status']));
 
         return view('arc_item_price_italy.manage', compact('item', 'prices'));
@@ -153,16 +153,16 @@ class ARCItemPriceItalyController extends Controller
     public function storeFromManage(Request $request, string $arcimCode)
     {
         $action = $request->input('action', 'generate');
-        
+
         $rules = [
             'ITP_DateFrom' => 'required|date',
             'ITP_Price' => 'required|numeric|min:0',
         ];
-        
+
         if ($action === 'manual') {
             $rules['ITP_EpisodeType'] = 'required|string';
         }
-        
+
         $validator = Validator::make($request->all(), $rules, [
             'ITP_DateFrom.required' => 'Date From wajib diisi',
             'ITP_DateFrom.date' => 'Date From harus berupa tanggal yang valid',
@@ -172,18 +172,36 @@ class ARCItemPriceItalyController extends Controller
             'ITP_EpisodeType.required' => 'Episode Type wajib dipilih untuk input manual',
         ]);
 
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
 
+        // Validation for ITP_DateTo
+        $latestPrice = ARCItemPriceItaly::where('ITP_ARCIM_Code', $arcimCode)
+            ->whereNotNull('ITP_DateTo')
+            ->orderBy('ITP_DateTo', 'desc')
+            ->first();
+
+        if ($latestPrice && $latestPrice->ITP_DateTo > now()) {
+            $inputDateFrom = \Carbon\Carbon::parse($request->ITP_DateFrom);
+            $latestDateTo = \Carbon\Carbon::parse($latestPrice->ITP_DateTo);
+
+            if ($inputDateFrom->lte($latestDateTo)) {
+                return redirect()->back()
+                    ->withErrors(['ITP_DateFrom' => 'You have active price until (' . $latestDateTo->format('d M Y') . ')'])
+                    ->withInput();
+            }
+        }
+
         $item = ArcItmMast::where('ARCIM_Code', $arcimCode)->firstOrFail();
-        
+
         if ($action === 'manual') {
             return $this->storeManualPrice($request, $arcimCode, $item);
         }
-        
+
         $baseData = [
             'ITP_ARCIM_Code' => $arcimCode,
             'ITP_ARCIM_Desc' => $item->ARCIM_Desc,
@@ -204,48 +222,48 @@ class ARCItemPriceItalyController extends Controller
 
         if ($request->ITP_Price !== null) {
             $margins = Margin::where('ARCIM_ServMateria', 'S')->get();
-            
+
             if ($margins->count() > 0) {
                 $originalPrice = (float) $request->ITP_Price;
-                
+
                 foreach ($margins as $margin) {
                     $priceData = $baseData;
                     $apiPrice = [
                         'ITPRank' => '99',
                     ];
-                    
+
                     if ($margin->TypeofItemCode == 'O') {
                         $priceData['ITP_Price'] = $originalPrice;
                         $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
-                        
+
                         $apiPrice['ITPEpisodeType'] = $margin->TypeofItemCode;
                         $apiPrice['ITPPrice'] = (string) $originalPrice;
                     } else {
                         if ($margin->Margin !== null) {
-                            if($margin->TypeofItemCode == 'VIP' || $margin->TypeofItemCode == 'VVIP' || $margin->TypeofItemCode == 'SUITE' || $margin->TypeofItemCode == 'CU'){
+                            if ($margin->TypeofItemCode == 'VIP' || $margin->TypeofItemCode == 'VVIP' || $margin->TypeofItemCode == 'SUITE' || $margin->TypeofItemCode == 'CU') {
                                 $priceData['ITP_EpisodeType'] = 'I';
                                 $priceData['ITP_ROOMT_Code'] = $margin->TypeofItemCode;
                                 $priceData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc;
-                                
+
                                 $apiPrice['ITPEpisodeType'] = 'I';
                                 $apiPrice['ITPROOMTCode'] = $margin->TypeofItemCode;
                             } else {
                                 $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
                                 $apiPrice['ITPEpisodeType'] = $margin->TypeofItemCode;
                             }
-                            
+
                             $marginPercentage = (float) $margin->Margin;
                             $calculatedPrice = $originalPrice * ($marginPercentage / 100);
                             $priceData['ITP_Price'] = $calculatedPrice;
                             $apiPrice['ITPPrice'] = (string) $calculatedPrice;
                         } else {
                             $priceData['ITP_Price'] = $originalPrice;
-                            
-                            if($margin->TypeofItemCode == 'VIP' || $margin->TypeofItemCode == 'VVIP' || $margin->TypeofItemCode == 'SUITE' || $margin->TypeofItemCode == 'CU'){
+
+                            if ($margin->TypeofItemCode == 'VIP' || $margin->TypeofItemCode == 'VVIP' || $margin->TypeofItemCode == 'SUITE' || $margin->TypeofItemCode == 'CU') {
                                 $priceData['ITP_EpisodeType'] = 'I';
                                 $priceData['ITP_ROOMT_Code'] = $margin->TypeofItemCode;
                                 $priceData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc;
-                                
+
                                 $apiPrice['ITPEpisodeType'] = 'I';
                                 $apiPrice['ITPROOMTCode'] = $margin->TypeofItemCode;
                             } else {
@@ -255,7 +273,7 @@ class ARCItemPriceItalyController extends Controller
                             $apiPrice['ITPPrice'] = (string) $originalPrice;
                         }
                     }
-                    
+
                     $pricesForDb[] = $priceData;
                     $pricesForApi[] = $apiPrice;
                     $createdCount++;
@@ -264,7 +282,7 @@ class ARCItemPriceItalyController extends Controller
                 $baseData['ITP_Price'] = (float) $request->ITP_Price;
                 $baseData['ITP_EpisodeType'] = 'O';
                 $pricesForDb[] = $baseData;
-                
+
                 $pricesForApi[] = [
                     'ITPEpisodeType' => 'O',
                     'ITPPrice' => (string) $request->ITP_Price,
@@ -275,7 +293,7 @@ class ARCItemPriceItalyController extends Controller
         } else {
             $baseData['ITP_EpisodeType'] = 'O';
             $pricesForDb[] = $baseData;
-            
+
             $pricesForApi[] = [
                 'ITPEpisodeType' => 'O',
                 'ITPPrice' => '0',
@@ -293,17 +311,17 @@ class ARCItemPriceItalyController extends Controller
             'ITPHOSPCode' => 'BI00',
             'prices' => $pricesForApi,
         ];
-        
+
         try {
             $response = Http::timeout(30)->post('https://trakcare.com/api/prices', $apiPayload);
-            
+
             if ($response->successful()) {
                 foreach ($pricesForDb as $priceData) {
                     ARCItemPriceItaly::create($priceData);
                 }
 
-                $message = $createdCount > 1 
-                    ? "Data berhasil ditambahkan ({$createdCount} record) dan dikirim ke TrakCare" 
+                $message = $createdCount > 1
+                    ? "Data berhasil ditambahkan ({$createdCount} record) dan dikirim ke TrakCare"
                     : 'Data berhasil ditambahkan dan dikirim ke TrakCare';
 
                 Log::info('Price data sent to TrakCare successfully', [
@@ -363,7 +381,7 @@ class ARCItemPriceItalyController extends Controller
         }
 
         $price = ARCItemPriceItaly::findOrFail($id);
-        
+
         $updateData = $request->only(['ITP_DateFrom', 'ITP_DateTo', 'ITP_Price']);
 
         $price->update($updateData);
@@ -375,7 +393,7 @@ class ARCItemPriceItalyController extends Controller
 
         return redirect($redirectUrl)->with('success', 'Data berhasil diupdate');
     }
-    
+
     private function storeManualPrice(Request $request, string $arcimCode, $item)
     {
         $baseData = [
@@ -391,43 +409,45 @@ class ARCItemPriceItalyController extends Controller
             'ITP_HOSP_Desc' => 'Bali International Hospital',
             'ITP_Rank' => '99',
         ];
-        
+
         $originalPrice = (float) $request->ITP_Price;
         $episodeType = $request->ITP_EpisodeType;
-        
+
         $margin = Margin::where('ARCIM_ServMateria', 'S')
-                       ->where('TypeofItemCode', $episodeType)
-                       ->first();
-        
+            ->where('TypeofItemCode', $episodeType)
+            ->first();
+
         $priceData = $baseData;
         $apiPrice = [
             'ITPRank' => '99',
         ];
-        
+
         if ($episodeType == 'O') {
 
             $priceData['ITP_Price'] = $originalPrice;
             $priceData['ITP_EpisodeType'] = $episodeType;
-            
+
             $apiPrice['ITPEpisodeType'] = $episodeType;
             $apiPrice['ITPPrice'] = (string) $originalPrice;
         } else {
 
             if ($margin && $margin->Margin !== null) {
 
-                if ($margin->TypeofItemCode == 'VIP' || $margin->TypeofItemCode == 'VVIP' || 
-                    $margin->TypeofItemCode == 'SUITE' || $margin->TypeofItemCode == 'CU') {
+                if (
+                    $margin->TypeofItemCode == 'VIP' || $margin->TypeofItemCode == 'VVIP' ||
+                    $margin->TypeofItemCode == 'SUITE' || $margin->TypeofItemCode == 'CU'
+                ) {
                     $priceData['ITP_EpisodeType'] = 'I';
                     $priceData['ITP_ROOMT_Code'] = $margin->TypeofItemCode;
                     $priceData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc;
-                    
+
                     $apiPrice['ITPEpisodeType'] = 'I';
                     $apiPrice['ITPROOMTCode'] = $margin->TypeofItemCode;
                 } else {
                     $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
                     $apiPrice['ITPEpisodeType'] = $margin->TypeofItemCode;
                 }
-                
+
                 $marginPercentage = (float) $margin->Margin;
                 $calculatedPrice = $originalPrice * ($marginPercentage / 100);
                 $priceData['ITP_Price'] = $calculatedPrice;
@@ -435,12 +455,12 @@ class ARCItemPriceItalyController extends Controller
             } else {
 
                 $priceData['ITP_Price'] = $originalPrice;
-                
+
                 if (in_array($episodeType, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
                     $priceData['ITP_EpisodeType'] = 'I';
                     $priceData['ITP_ROOMT_Code'] = $episodeType;
                     $priceData['ITP_ROOMT_Desc'] = $margin ? $margin->TypeofItemDesc : $episodeType;
-                    
+
                     $apiPrice['ITPEpisodeType'] = 'I';
                     $apiPrice['ITPROOMTCode'] = $episodeType;
                 } else {
@@ -450,7 +470,7 @@ class ARCItemPriceItalyController extends Controller
                 $apiPrice['ITPPrice'] = (string) $originalPrice;
             }
         }
-        
+
         $apiPayload = [
             'ITPARCIMCode' => $arcimCode,
             'ITPDateFrom' => $request->ITP_DateFrom ?? '',
@@ -460,15 +480,15 @@ class ARCItemPriceItalyController extends Controller
             'ITPHOSPCode' => 'BI00',
             'prices' => [$apiPrice],
         ];
-        
+
         try {
             $response = Http::timeout(30)->post('https://trakcare.com/api/prices', $apiPayload);
-            
+
             if ($response->successful()) {
                 ARCItemPriceItaly::create($priceData);
-                
+
                 $message = 'Data manual berhasil ditambahkan dan dikirim ke TrakCare';
-                
+
                 Log::info('Manual price data sent to TrakCare successfully', [
                     'arcim_code' => $arcimCode,
                     'episode_type' => $episodeType,
@@ -480,7 +500,7 @@ class ARCItemPriceItalyController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body(),
                 ]);
-                
+
                 return redirect()->back()
                     ->withErrors(['api' => 'Gagal mengirim data ke TrakCare: ' . $response->status()])
                     ->withInput();
@@ -490,17 +510,17 @@ class ARCItemPriceItalyController extends Controller
                 'arcim_code' => $arcimCode,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return redirect()->back()
                 ->withErrors(['api' => 'Error: ' . $e->getMessage()])
                 ->withInput();
         }
-        
+
         $redirectUrl = route('arc-item-price-italy.manage', $arcimCode);
         if ($request->has('status') && $request->status != '') {
             $redirectUrl .= '?status=' . $request->status;
         }
-        
+
         return redirect($redirectUrl)->with('success', $message);
     }
 }
