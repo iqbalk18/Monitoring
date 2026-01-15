@@ -72,7 +72,7 @@
                             <tbody>
                                 @foreach($submissions as $sub)
                                     <tr>
-                                        <td><code class="fw-bold">{{ $sub->TypeofItemCode ?? '-' }}</code></td>
+                                        <td><span style="color: black;">{{ $sub->item->TypeofItemCode ?? '-' }}</span></td>
                                         <td>{{ $sub->ITP_EpisodeType }}</td>
                                         <td>{{ $sub->ITP_ROOMT_Desc ?? '-' }}</td>
                                         <td class="text-end fw-bold">{{ number_format($sub->ITP_Price, 2) }}</td>
