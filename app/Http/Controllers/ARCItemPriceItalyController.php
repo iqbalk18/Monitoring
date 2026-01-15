@@ -201,6 +201,22 @@ class ARCItemPriceItalyController extends Controller
                 }
             }
 
+            // Logic for PRICE_ENTRY (Submission) or Normal Entry
+            $isPriceEntry = session('user') && session('user')['role'] == 'PRICE_ENTRY';
+
+            if ($isPriceEntry) {
+                // Check for existing pending submission
+                $existingPending = PriceSubmission::where('ITP_ARCIM_Code', $arcimCode)
+                    ->where('status', 'PENDING')
+                    ->exists();
+
+                if ($existingPending) {
+                    return redirect()->back()
+                        ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                        ->withInput();
+                }
+            }
+
             // Get margin based on Type of Item Code for Material
             $typeOfItemCode = $request->TypeofItemCode;
             $margin = Margin::where('ARCIM_ServMateria', 'M')
@@ -214,19 +230,11 @@ class ARCItemPriceItalyController extends Controller
             }
 
             // Calculate price: (margin/100 + 1) × HNA
-            // Margin is stored as percentage (e.g., 28 for 28%), so divide by 100 first
             $hna = (float) $request->hna;
             $marginValue = (float) $margin->Margin;
             $calculatedPrice = (($marginValue / 100) + 1) * $hna;
 
-            // Store Material price
-            // Handle Episode Type: if empty string, set to null, otherwise use the value
-            $episodeType = $request->ITP_EpisodeType;
-            if ($episodeType === '' || $episodeType === null) {
-                $episodeType = null;
-            }
-            
-            $priceData = [
+            $baseData = [
                 'ITP_ARCIM_Code' => $arcimCode,
                 'ITP_ARCIM_Desc' => $item->ARCIM_Desc,
                 'ITP_DateFrom' => $request->ITP_DateFrom,
@@ -240,17 +248,85 @@ class ARCItemPriceItalyController extends Controller
                 'ITP_Rank' => '99',
                 'hna' => $hna,
                 'ITP_Price' => $calculatedPrice,
-                'ITP_EpisodeType' => $episodeType,
             ];
 
-            ARCItemPriceItaly::create($priceData);
+            $apiPrice = [
+                'ITPRank' => '99',
+                'ITPPrice' => (string) $calculatedPrice,
+            ];
+
+            if (in_array($typeOfItemCode, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
+                $baseData['ITP_EpisodeType'] = 'I';
+                $baseData['ITP_ROOMT_Code'] = $typeOfItemCode;
+                $baseData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc ?? $typeOfItemCode;
+
+                $apiPrice['ITPEpisodeType'] = 'I';
+                $apiPrice['ITPROOMTCode'] = $typeOfItemCode;
+            } else {
+                $baseData['ITP_EpisodeType'] = $typeOfItemCode;
+                $apiPrice['ITPEpisodeType'] = $typeOfItemCode;
+            }
+
+            if ($isPriceEntry) {
+                $baseData['status'] = 'PENDING';
+                $baseData['submitted_by'] = session('user')['id'];
+                PriceSubmission::create($baseData);
+
+                return redirect()->back()->with('success', 'Harga berhasil diajukan dan menunggu persetujuan.');
+            }
+
+            // API Submission for Non-PRICE_ENTRY
+            $apiPayload = [
+                'ITPARCIMCode' => $arcimCode,
+                'ITPDateFrom' => $request->ITP_DateFrom ?? '',
+                'ITPDateTo' => $request->ITP_DateTo ?? '',
+                'ITPTARCode' => 'REG',
+                'ITPCTCURCode' => 'IDR',
+                'ITPHOSPCode' => 'BI00',
+                'prices' => [$apiPrice],
+            ];
+
+            try {
+                $response = Http::timeout(30)->post('https://trakcare.com/api/prices', $apiPayload);
+
+                if ($response->successful()) {
+                    ARCItemPriceItaly::create($baseData);
+
+                    Log::info('Price data (M - Single) sent to TrakCare successfully', [
+                        'arcim_code' => $arcimCode,
+                        'response' => $response->json(),
+                    ]);
+
+                    $message = 'Data HNA berhasil ditambahkan dengan harga: ' . number_format($calculatedPrice, 2);
+
+                } else {
+                    Log::error('Failed to send price data (M - Single) to TrakCare', [
+                        'arcim_code' => $arcimCode,
+                        'status' => $response->status(),
+                        'response' => $response->body(),
+                    ]);
+
+                    return redirect()->back()
+                        ->withErrors(['api' => 'Gagal mengirim data ke TrakCare: ' . $response->status()])
+                        ->withInput();
+                }
+            } catch (\Exception $e) {
+                Log::error('Exception when sending to TrakCare (M - Single)', [
+                    'arcim_code' => $arcimCode,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return redirect()->back()
+                    ->withErrors(['api' => 'Error: ' . $e->getMessage()])
+                    ->withInput();
+            }
 
             $redirectUrl = route('arc-item-price-italy.manage', $arcimCode);
             if ($request->has('status') && $request->status != '') {
                 $redirectUrl .= '?status=' . $request->status;
             }
 
-            return redirect($redirectUrl)->with('success', 'Data HNA berhasil ditambahkan dengan harga: ' . number_format($calculatedPrice, 2));
+            return redirect($redirectUrl)->with('success', $message);
         }
 
         // Handle Service (S) type - existing logic
