@@ -67,7 +67,7 @@
                             <th>Item Code</th>
                             <th>Type Item</th>
                             <th>Description</th>
-                            <th>Total Items</th>
+                            <th class="text-center">Total Items</th>
                             <th>Submitted By</th>
                             <th>Approved By</th>
                             <th>Status</th>
@@ -82,7 +82,7 @@
                                 <td>{{ $submission->ITP_ARCIM_Code }}</td>
                                 <td><code class="fw-bold">{{ $submission->TypeofItemCode ?? '-' }}</code></td>
                                 <td>{{ Str::limit($submission->ITP_ARCIM_Desc, 30) }}</td>
-                                <td>
+                                <td class="text-center">
                                     <span class="badge-shadcn badge-shadcn-secondary">{{ $submission->total_items }}
                                         Prices</span>
                                 </td>

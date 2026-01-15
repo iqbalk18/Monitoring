@@ -169,6 +169,7 @@ h6 {
     transition: all 0.15s ease;
     border: 1px solid transparent;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .btn-shadcn:focus-visible {
@@ -360,7 +361,6 @@ h6 {
    FORMS & INPUTS
    ================================ */
 .form-control-shadcn {
-    display: flex;
     height: 2.5rem;
     width: 100%;
     border-radius: var(--radius);
@@ -372,6 +372,13 @@ h6 {
     color: var(--foreground);
 }
 
+.input-group .form-control-shadcn {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+}
+
 .form-control-shadcn::placeholder {
     color: var(--muted-foreground);
 }
@@ -380,6 +387,7 @@ h6 {
     outline: none;
     border-color: var(--ring);
     box-shadow: 0 0 0 3px rgb(24 24 27 / 0.1);
+    z-index: 3;
 }
 
 .form-control-shadcn:disabled {
@@ -518,6 +526,7 @@ h6 {
     font-weight: 500;
     line-height: 1;
     transition: all 0.15s ease;
+    white-space: nowrap;
 }
 
 .badge-shadcn-default {
