@@ -234,6 +234,9 @@ class ARCItemPriceItalyController extends Controller
             $marginValue = (float) $margin->Margin;
             $calculatedPrice = (($marginValue / 100) + 1) * $hna;
 
+            // Decouple Episode Type: Use user selection for Episode Type
+            $selectedEpisodeType = $request->ITP_EpisodeType;
+
             $baseData = [
                 'ITP_ARCIM_Code' => $arcimCode,
                 'ITP_ARCIM_Desc' => $item->ARCIM_Desc,
@@ -248,6 +251,7 @@ class ARCItemPriceItalyController extends Controller
                 'ITP_Rank' => '99',
                 'hna' => $hna,
                 'ITP_Price' => $calculatedPrice,
+                'TypeofItemCode' => $typeOfItemCode, // Save the Margin Type
             ];
 
             $apiPrice = [
@@ -255,27 +259,83 @@ class ARCItemPriceItalyController extends Controller
                 'ITPPrice' => (string) $calculatedPrice,
             ];
 
-            if (in_array($typeOfItemCode, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
+            // Map selected Episode Type to Episode Type and Room Type codes
+            if (in_array($selectedEpisodeType, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
                 $baseData['ITP_EpisodeType'] = 'I';
-                $baseData['ITP_ROOMT_Code'] = $typeOfItemCode;
-                $baseData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc ?? $typeOfItemCode;
+                $baseData['ITP_ROOMT_Code'] = $selectedEpisodeType;
+
+                // Get Room Type Desc from Margin if possible, or mapping, or just code
+                // Since we decoupled, we might not have a direct mapping from TypeofItemCode to Room Desc if they differ
+                // For simplified logic, use the selected code as description if margin description doesn't match or isn't available for this specific episode type
+                // Actually, if we selected 'VIP' but margin was 'O', we don't have 'VIP' description handy unless we query it or hardcode it.
+                // Let's use the code as desc for now or null, ensuring it saves.
+                // Better approach: If the selected episode type matches a known Margin type, grab desc from there? 
+                // Creating a comprehensive lookup or just using code as desc for now to be safe.
+                $baseData['ITP_ROOMT_Desc'] = $selectedEpisodeType;
 
                 $apiPrice['ITPEpisodeType'] = 'I';
-                $apiPrice['ITPROOMTCode'] = $typeOfItemCode;
+                $apiPrice['ITPROOMTCode'] = $selectedEpisodeType;
             } else {
-                $baseData['ITP_EpisodeType'] = $typeOfItemCode;
-                $apiPrice['ITPEpisodeType'] = $typeOfItemCode;
+                $baseData['ITP_EpisodeType'] = $selectedEpisodeType;
+                $apiPrice['ITPEpisodeType'] = $selectedEpisodeType;
+            }
+
+            // Collect all prices to be processed (Submission or API)
+            $pricesToProcess = [];
+            $pricesToProcess[] = [
+                'db_data' => $baseData,
+                'api_data' => $apiPrice
+            ];
+
+            // AUTOMATIC GENERATION FOR 'D' ITEMS
+            // Rule: If ItemCode starts with 'D', generate automatically Episode Type = O
+            // Calculation: HNA * (1 + (Margin + 11) / 100)
+            if (str_starts_with($arcimCode, 'D')) {
+                $marginWithExtra = $marginValue + 11;
+                $calculatedPriceO = (($marginWithExtra / 100) + 1) * $hna;
+
+                $baseDataO = $baseData; // Copy base structure
+                $baseDataO['ITP_Price'] = $calculatedPriceO;
+                $baseDataO['ITP_EpisodeType'] = 'O';
+                // For the auto-generated O price, we keep the TypeofItemCode (Margin Type) reference
+                // But we clear Room Type fields
+                unset($baseDataO['ITP_ROOMT_Code']);
+                unset($baseDataO['ITP_ROOMT_Desc']);
+
+                $apiPriceO = [
+                    'ITPRank' => '99',
+                    'ITPPrice' => (string) $calculatedPriceO,
+                    'ITPEpisodeType' => 'O'
+                ];
+
+                $pricesToProcess[] = [
+                    'db_data' => $baseDataO,
+                    'api_data' => $apiPriceO
+                ];
             }
 
             if ($isPriceEntry) {
-                $baseData['status'] = 'PENDING';
-                $baseData['submitted_by'] = session('user')['id'];
-                PriceSubmission::create($baseData);
+                // Generate Batch ID
+                $batchId = 'BATCH-' . now()->format('YmdHis') . '-' . strtoupper(uniqid());
 
-                return redirect()->back()->with('success', 'Harga berhasil diajukan dan menunggu persetujuan.');
+                foreach ($pricesToProcess as $priceItem) {
+                    $submissionData = $priceItem['db_data'];
+                    $submissionData['status'] = 'PENDING';
+                    $submissionData['submitted_by'] = session('user')['id'];
+                    $submissionData['batch_id'] = $batchId;
+                    PriceSubmission::create($submissionData);
+                }
+
+                $msg = 'Harga berhasil diajukan dan menunggu persetujuan.';
+                if (count($pricesToProcess) > 1) {
+                    $msg .= ' (' . count($pricesToProcess) . ' item generated)';
+                }
+                return redirect()->back()->with('success', $msg);
             }
 
             // API Submission for Non-PRICE_ENTRY
+            $apiPricesList = array_column($pricesToProcess, 'api_data');
+
             $apiPayload = [
                 'ITPARCIMCode' => $arcimCode,
                 'ITPDateFrom' => $request->ITP_DateFrom ?? '',
@@ -283,24 +343,37 @@ class ARCItemPriceItalyController extends Controller
                 'ITPTARCode' => 'REG',
                 'ITPCTCURCode' => 'IDR',
                 'ITPHOSPCode' => 'BI00',
-                'prices' => [$apiPrice],
+                'prices' => $apiPricesList,
             ];
 
             try {
                 $response = Http::timeout(30)->post('https://trakcare.com/api/prices', $apiPayload);
 
                 if ($response->successful()) {
-                    ARCItemPriceItaly::create($baseData);
+                    // Generate Batch ID for direct submission
+                    $batchId = 'BATCH-' . now()->format('YmdHis') . '-' . strtoupper(uniqid());
 
-                    Log::info('Price data (M - Single) sent to TrakCare successfully', [
+                    foreach ($pricesToProcess as $priceItem) {
+                        $dbData = $priceItem['db_data'];
+                        if (!isset($dbData['batch_id'])) {
+                            $dbData['batch_id'] = $batchId;
+                        }
+                        ARCItemPriceItaly::create($dbData);
+                    }
+
+                    Log::info('Price data (M) sent to TrakCare successfully', [
                         'arcim_code' => $arcimCode,
                         'response' => $response->json(),
+                        'count' => count($pricesToProcess)
                     ]);
 
                     $message = 'Data HNA berhasil ditambahkan dengan harga: ' . number_format($calculatedPrice, 2);
+                    if (count($pricesToProcess) > 1) {
+                        $message .= ' (+ Auto Generated Episode O)';
+                    }
 
                 } else {
-                    Log::error('Failed to send price data (M - Single) to TrakCare', [
+                    Log::error('Failed to send price data (M) to TrakCare', [
                         'arcim_code' => $arcimCode,
                         'status' => $response->status(),
                         'response' => $response->body(),
@@ -311,7 +384,7 @@ class ARCItemPriceItalyController extends Controller
                         ->withInput();
                 }
             } catch (\Exception $e) {
-                Log::error('Exception when sending to TrakCare (M - Single)', [
+                Log::error('Exception when sending to TrakCare (M)', [
                     'arcim_code' => $arcimCode,
                     'error' => $e->getMessage(),
                 ]);
@@ -388,6 +461,9 @@ class ARCItemPriceItalyController extends Controller
                     ->withInput();
             }
 
+            // Generate Batch ID
+            $batchId = 'BATCH-' . now()->format('YmdHis') . '-' . strtoupper(uniqid());
+
             $baseData = [
                 'ITP_ARCIM_Code' => $arcimCode,
                 'ITP_ARCIM_Desc' => $item->ARCIM_Desc,
@@ -402,6 +478,7 @@ class ARCItemPriceItalyController extends Controller
                 'ITP_Rank' => '99',
                 'status' => 'PENDING',
                 'submitted_by' => session('user')['id'],
+                'batch_id' => $batchId,
             ];
 
             if ($request->ITP_Price !== null) {
@@ -805,6 +882,11 @@ class ARCItemPriceItalyController extends Controller
 
             $priceData['status'] = 'PENDING';
             $priceData['submitted_by'] = session('user')['id'];
+
+            // Generate Batch ID
+            $batchId = 'BATCH-' . now()->format('YmdHis') . '-' . strtoupper(uniqid());
+            $priceData['batch_id'] = $batchId;
+
             PriceSubmission::create($priceData);
 
             return redirect()->back()->with('success', 'Harga berhasil diajukan dan menunggu persetujuan.');

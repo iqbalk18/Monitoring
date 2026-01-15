@@ -27,7 +27,8 @@ class PriceSubmission extends Model
         'submitted_by',
         'approved_by',
         'rejection_reason',
-        'hna'
+        'hna',
+        'batch_id'
     ];
 
     public function submitter()

@@ -10,15 +10,15 @@ use Illuminate\Support\Facades\Log;
 
 class PriceSubmissionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $role = session('user')['role'] ?? null;
 
-        $query = PriceSubmission::select('ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by')
+        $query = PriceSubmission::select('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by')
             ->selectRaw('COUNT(*) as total_items')
             ->selectRaw('MIN(id) as id') // Use one ID for linking
-            ->with('submitter')
-            ->groupBy('ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by')
+            ->with(['submitter', 'approver'])
+            ->groupBy('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by')
             ->orderBy('created_at', 'desc');
 
         if ($role == 'PRICE_APPROVER') {
@@ -27,7 +27,25 @@ class PriceSubmissionController extends Controller
             $query->where('submitted_by', session('user')['id']);
         }
 
-        $submissions = $query->paginate(15);
+        // Search Filter (Batch ID, Item Code, Description, Submitted By)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('batch_id', 'like', "%{$search}%")
+                    ->orWhere('ITP_ARCIM_Code', 'like', "%{$search}%")
+                    ->orWhere('ITP_ARCIM_Desc', 'like', "%{$search}%")
+                    ->orWhereHas('submitter', function ($subQ) use ($search) {
+                        $subQ->where('username', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Date Filter
+        if ($request->filled('date_filter')) {
+            $query->whereDate('created_at', $request->date_filter);
+        }
+
+        $submissions = $query->paginate(15)->withQueryString();
 
         return view('price_submissions.index', compact('submissions'));
     }
@@ -53,13 +71,21 @@ class PriceSubmissionController extends Controller
 
         $baseSubmission = PriceSubmission::findOrFail($id);
 
-        // Fetch all PENDING submissions for this item
-        $submissions = PriceSubmission::where('ITP_ARCIM_Code', $baseSubmission->ITP_ARCIM_Code)
-            ->where('status', 'PENDING')
-            ->get();
+        // Fetch all PENDING submissions for this BATCH
+        // If batch_id exists, use it. Fallback to old logic if null (legacy support)
+        if ($baseSubmission->batch_id) {
+            $submissions = PriceSubmission::where('batch_id', $baseSubmission->batch_id)
+                ->where('status', 'PENDING')
+                ->get();
+        } else {
+            $submissions = PriceSubmission::where('ITP_ARCIM_Code', $baseSubmission->ITP_ARCIM_Code)
+                ->where('created_at', $baseSubmission->created_at) // More specific than just status
+                ->where('status', 'PENDING')
+                ->get();
+        }
 
         if ($submissions->isEmpty()) {
-            return redirect()->back()->withErrors(['status' => 'No pending submissions found.']);
+            return redirect()->back()->withErrors(['status' => 'No pending submissions found for this batch.']);
         }
 
         // Prepare TrakCare Payload (Batch)
@@ -113,6 +139,7 @@ class PriceSubmissionController extends Controller
                         'ITP_HOSP_Desc' => $sub->ITP_HOSP_Desc,
                         'ITP_Rank' => $sub->ITP_Rank,
                         'ITP_EpisodeType' => $sub->ITP_EpisodeType,
+                        'batch_id' => $sub->batch_id,
                     ]);
 
                     $sub->update([

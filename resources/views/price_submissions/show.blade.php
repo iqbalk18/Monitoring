@@ -39,6 +39,12 @@
                     </div>
                 </div>
                 <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label class="form-label-shadcn">Batch ID</label>
+                        <p><code class="fw-bold">{{ $baseSubmission->batch_id }}</code></p>
+                    </div>
+                </div>
+                <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label-shadcn">Date From</label>
                         <p>{{ $baseSubmission->ITP_DateFrom ? \Carbon\Carbon::parse($baseSubmission->ITP_DateFrom)->format('d M Y') : '-' }}
@@ -57,6 +63,7 @@
                         <table class="table-shadcn w-100">
                             <thead>
                                 <tr>
+                                    <th>Type of Item Code</th>
                                     <th>Episode Type</th>
                                     <th>Room Type</th>
                                     <th class="text-end">Submitted Price (IDR)</th>
@@ -65,6 +72,7 @@
                             <tbody>
                                 @foreach($submissions as $sub)
                                     <tr>
+                                        <td><code class="fw-bold">{{ $sub->TypeofItemCode ?? '-' }}</code></td>
                                         <td>{{ $sub->ITP_EpisodeType }}</td>
                                         <td>{{ $sub->ITP_ROOMT_Desc ?? '-' }}</td>
                                         <td class="text-end fw-bold">{{ number_format($sub->ITP_Price, 2) }}</td>
@@ -117,7 +125,8 @@
                 <div class="card-shadcn">
                     <div class="card-shadcn-body">
                         <h4 class="card-shadcn-title mb-3">Approve Batch Submission</h4>
-                        <p class="text-muted small mb-3">This will sync <strong>{{ $submissions->count() }} prices</strong> to TrakCare and activate them in the system.</p>
+                        <p class="text-muted small mb-3">This will sync <strong>{{ $submissions->count() }} prices</strong> to
+                            TrakCare and activate them in the system.</p>
                         <form action="{{ route('price-submissions.approve', $baseSubmission->id) }}" method="POST">
                             @csrf
                             <button type="submit" class="btn-shadcn btn-shadcn-success w-100">

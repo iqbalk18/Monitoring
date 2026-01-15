@@ -28,6 +28,7 @@ class ARCItemPriceItaly extends Model
         'ITP_HOSP_Desc',
         'ITP_Rank',
         'ITP_EpisodeType',
+        'batch_id',
     ];
 
     protected $casts = [

@@ -17,6 +17,42 @@
         </div>
     @endif
 
+    <!-- Filter Card -->
+    <div class="card-shadcn mb-4">
+        <div class="card-shadcn-body">
+            <form action="{{ route('price-submissions.index') }}" method="GET">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label-shadcn" for="search">Search</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="text-muted">
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="m21 21-4.3-4.3" />
+                                </svg>
+                            </span>
+                            <input type="text" class="form-control-shadcn border-start-0 ps-0" id="search" name="search"
+                                placeholder="Search by Batch ID, Item Code, Description, or User..."
+                                value="{{ request('search') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label-shadcn" for="date_filter">Date Submitted</label>
+                        <input type="date" class="form-control-shadcn" id="date_filter" name="date_filter"
+                            value="{{ request('date_filter') }}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn-shadcn btn-shadcn-primary w-100">
+                            Apply Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card-shadcn">
         <div class="card-shadcn-header">
             <h3 class="card-shadcn-title">Pending Approvals</h3>
@@ -27,7 +63,9 @@
                     <thead>
                         <tr>
                             <th>Date Submitted</th>
+                            <th>Batch ID</th>
                             <th>Item Code</th>
+                            <th>Type Item</th>
                             <th>Description</th>
                             <th>Total Items</th>
                             <th>Submitted By</th>
@@ -40,7 +78,9 @@
                         @forelse($submissions as $submission)
                             <tr>
                                 <td>{{ $submission->created_at->format('d M Y H:i') }}</td>
+                                <td><code style="font-size: 0.8125rem;">{{ $submission->batch_id }}</code></td>
                                 <td>{{ $submission->ITP_ARCIM_Code }}</td>
+                                <td><code class="fw-bold">{{ $submission->TypeofItemCode ?? '-' }}</code></td>
                                 <td>{{ Str::limit($submission->ITP_ARCIM_Desc, 30) }}</td>
                                 <td>
                                     <span class="badge-shadcn badge-shadcn-secondary">{{ $submission->total_items }}
