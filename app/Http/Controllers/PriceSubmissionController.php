@@ -14,15 +14,16 @@ class PriceSubmissionController extends Controller
     {
         $role = session('user')['role'] ?? null;
 
-        $query = PriceSubmission::select('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by', 'submission_type')
+        $query = PriceSubmission::select('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by', 'submission_type', 'approved_by')
             ->selectRaw('COUNT(*) as total_items')
             ->selectRaw('MIN(id) as id') // Use one ID for linking
             ->with(['submitter', 'approver'])
-            ->groupBy('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by', 'submission_type')
+            ->groupBy('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by', 'submission_type', 'approved_by')
             ->orderBy('created_at', 'desc');
 
         if ($role == 'PRICE_APPROVER') {
-            $query->where('status', 'PENDING');
+            // Show all statuses (PENDING, APPROVED, REJECTED)
+            // $query->where('status', 'PENDING');
         } elseif ($role == 'PRICE_ENTRY') {
             $query->where('submitted_by', session('user')['id']);
         }

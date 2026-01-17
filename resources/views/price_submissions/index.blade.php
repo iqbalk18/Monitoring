@@ -55,7 +55,7 @@
 
     <div class="card-shadcn">
         <div class="card-shadcn-header">
-            <h3 class="card-shadcn-title">Pending Approvals</h3>
+            <h3 class="card-shadcn-title">Submission History</h3>
         </div>
         <div class="card-shadcn-body p-0">
             <div class="table-container-shadcn shadow-none border-0 radius-0">
@@ -124,7 +124,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-5 text-muted">No pending submissions found.</td>
+                                <td colspan="11" class="text-center py-5 text-muted">No submissions found.</td>
                             </tr>
                         @endforelse
                     </tbody>
