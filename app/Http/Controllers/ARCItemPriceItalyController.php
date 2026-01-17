@@ -65,11 +65,11 @@ class ARCItemPriceItalyController extends Controller
         $price = ARCItemPriceItaly::create($request->all());
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Data berhasil ditambahkan', 'data' => $price], 201);
+            return response()->json(['message' => 'Data successfully added', 'data' => $price], 201);
         }
 
         return redirect()->route('arc-item-price-italy.create')
-            ->with('success', 'Data berhasil ditambahkan');
+            ->with('success', 'Data successfully added');
     }
 
     public function show(string $id)
@@ -114,7 +114,7 @@ class ARCItemPriceItalyController extends Controller
         $price = ARCItemPriceItaly::findOrFail($id);
         $price->update($request->all());
 
-        return response()->json(['message' => 'Data berhasil diupdate', 'data' => $price]);
+        return response()->json(['message' => 'Data successfully updated', 'data' => $price]);
     }
 
 
@@ -170,12 +170,12 @@ class ARCItemPriceItalyController extends Controller
             ];
 
             $validator = Validator::make($request->all(), $rules, [
-                'ITP_DateFrom.required' => 'Date From wajib diisi',
-                'ITP_DateFrom.date' => 'Date From harus berupa tanggal yang valid',
-                'hna.required' => 'HNA wajib diisi',
-                'hna.numeric' => 'HNA harus berupa angka',
-                'hna.min' => 'HNA harus lebih besar atau sama dengan 0',
-                'TypeofItemCode.required' => 'Type of Item Code wajib dipilih',
+                'ITP_DateFrom.required' => 'Date From is required',
+                'ITP_DateFrom.date' => 'Date From must be a valid date',
+                'hna.required' => 'HNA is required',
+                'hna.numeric' => 'HNA must be a number',
+                'hna.min' => 'HNA must be greater than or equal to 0',
+                'TypeofItemCode.required' => 'Type of Item Code is required',
             ]);
 
             if ($validator->fails()) {
@@ -212,7 +212,7 @@ class ARCItemPriceItalyController extends Controller
 
                 if ($existingPending) {
                     return redirect()->back()
-                        ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                        ->withErrors(['submission' => 'This item still has a pending price submission.'])
                         ->withInput();
                 }
             }
@@ -225,7 +225,7 @@ class ARCItemPriceItalyController extends Controller
 
             if (!$margin) {
                 return redirect()->back()
-                    ->withErrors(['TypeofItemCode' => 'Margin tidak ditemukan untuk Type of Item Code yang dipilih'])
+                    ->withErrors(['TypeofItemCode' => 'Margin not found for the selected Type of Item Code'])
                     ->withInput();
             }
 
@@ -328,9 +328,9 @@ class ARCItemPriceItalyController extends Controller
                     PriceSubmission::create($submissionData);
                 }
 
-                $msg = 'Harga berhasil diajukan dan menunggu persetujuan.';
+                $msg = 'Price successfully submitted and awaiting approval.';
                 if (count($pricesToProcess) > 1) {
-                    $msg .= ' (' . count($pricesToProcess) . ' item generated)';
+                    $msg .= ' (' . count($pricesToProcess) . ' items generated)';
                 }
                 return redirect()->back()->with('success', $msg);
             }
@@ -379,7 +379,7 @@ class ARCItemPriceItalyController extends Controller
                         'count' => count($pricesToProcess)
                     ]);
 
-                    $message = 'Data HNA berhasil ditambahkan dengan harga: ' . number_format($calculatedPrice, 2);
+                    $message = 'HNA data successfully added with price: ' . number_format($calculatedPrice, 2);
                     if (count($pricesToProcess) > 1) {
                         $message .= ' (+ Auto Generated Episode O)';
                     }
@@ -392,7 +392,7 @@ class ARCItemPriceItalyController extends Controller
                     ]);
 
                     return redirect()->back()
-                        ->withErrors(['api' => 'Gagal mengirim data ke TrakCare: ' . $response->status()])
+                        ->withErrors(['api' => 'Failed to send data to TrakCare: ' . $response->status()])
                         ->withInput();
                 }
             } catch (\Exception $e) {
@@ -425,12 +425,12 @@ class ARCItemPriceItalyController extends Controller
         }
 
         $validator = Validator::make($request->all(), $rules, [
-            'ITP_DateFrom.required' => 'Date From wajib diisi',
-            'ITP_DateFrom.date' => 'Date From harus berupa tanggal yang valid',
-            'ITP_Price.required' => 'Price wajib diisi',
-            'ITP_Price.numeric' => 'Price harus berupa angka',
-            'ITP_Price.min' => 'Price harus lebih besar atau sama dengan 0',
-            'ITP_EpisodeType.required' => 'Episode Type wajib dipilih untuk input manual',
+            'ITP_DateFrom.required' => 'Date From is required',
+            'ITP_DateFrom.date' => 'Date From must be a valid date',
+            'ITP_Price.required' => 'Price is required',
+            'ITP_Price.numeric' => 'Price must be a number',
+            'ITP_Price.min' => 'Price must be greater than or equal to 0',
+            'ITP_EpisodeType.required' => 'Episode Type is required for manual input',
         ]);
 
 
@@ -469,7 +469,7 @@ class ARCItemPriceItalyController extends Controller
 
             if ($existingPending) {
                 return redirect()->back()
-                    ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                    ->withErrors(['submission' => 'This item still has a pending price submission.'])
                     ->withInput();
             }
 
@@ -666,8 +666,8 @@ class ARCItemPriceItalyController extends Controller
                 }
 
                 $message = $createdCount > 1
-                    ? "Data berhasil ditambahkan ({$createdCount} record) dan dikirim ke TrakCare"
-                    : 'Data berhasil ditambahkan dan dikirim ke TrakCare';
+                    ? "Data successfully added ({$createdCount} records) and sent to TrakCare"
+                    : 'Data successfully added and sent to TrakCare';
 
                 Log::info('Price data sent to TrakCare successfully', [
                     'arcim_code' => $arcimCode,
@@ -681,7 +681,7 @@ class ARCItemPriceItalyController extends Controller
                 ]);
 
                 return redirect()->back()
-                    ->withErrors(['api' => 'Gagal mengirim data ke TrakCare: ' . $response->status()])
+                    ->withErrors(['api' => 'Failed to send data to TrakCare: ' . $response->status()])
                     ->withInput();
             }
         } catch (\Exception $e) {
@@ -718,12 +718,12 @@ class ARCItemPriceItalyController extends Controller
                 'hna' => 'required|numeric|min:0',
                 'TypeofItemCode' => 'required|string',
             ], [
-                'ITP_DateFrom.required' => 'Date From wajib diisi',
-                'ITP_DateFrom.date' => 'Date From harus berupa tanggal yang valid',
-                'hna.required' => 'HNA wajib diisi',
-                'hna.numeric' => 'HNA harus berupa angka',
-                'hna.min' => 'HNA harus lebih besar atau sama dengan 0',
-                'TypeofItemCode.required' => 'Type of Item Code wajib dipilih',
+                'ITP_DateFrom.required' => 'Date From is required',
+                'ITP_DateFrom.date' => 'Date From must be a valid date',
+                'hna.required' => 'HNA is required',
+                'hna.numeric' => 'HNA must be a number',
+                'hna.min' => 'HNA must be greater than or equal to 0',
+                'TypeofItemCode.required' => 'Type of Item Code is required',
             ]);
 
             if ($validator->fails()) {
@@ -740,7 +740,7 @@ class ARCItemPriceItalyController extends Controller
 
             if (!$margin) {
                 return redirect()->back()
-                    ->withErrors(['TypeofItemCode' => 'Margin tidak ditemukan untuk Type of Item Code yang dipilih'])
+                    ->withErrors(['TypeofItemCode' => 'Margin not found for the selected Type of Item Code'])
                     ->withInput();
             }
 
@@ -765,7 +765,7 @@ class ARCItemPriceItalyController extends Controller
 
                 if ($existingPending) {
                     return redirect()->back()
-                        ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                        ->withErrors(['submission' => 'This item still has a pending price submission.'])
                         ->withInput();
                 }
 
@@ -800,7 +800,7 @@ class ARCItemPriceItalyController extends Controller
 
                 PriceSubmission::create($submissionData);
 
-                return redirect()->back()->with('success', 'Perubahan harga berhasil diajukan dan menunggu persetujuan.');
+                return redirect()->back()->with('success', 'Price change successfully submitted and awaiting approval.');
             }
 
             $updateData = [
@@ -818,7 +818,7 @@ class ARCItemPriceItalyController extends Controller
                 $redirectUrl .= '?status=' . $request->status;
             }
 
-            return redirect($redirectUrl)->with('success', 'Data HNA berhasil diupdate dengan harga: ' . number_format($calculatedPrice, 2));
+            return redirect($redirectUrl)->with('success', 'HNA data successfully updated with price: ' . number_format($calculatedPrice, 2));
         }
 
         // Handle Service (S) type
@@ -826,11 +826,11 @@ class ARCItemPriceItalyController extends Controller
             'ITP_DateFrom' => 'required|date',
             'ITP_Price' => 'required|numeric|min:0',
         ], [
-            'ITP_DateFrom.required' => 'Date From wajib diisi',
-            'ITP_DateFrom.date' => 'Date From harus berupa tanggal yang valid',
-            'ITP_Price.required' => 'Price wajib diisi',
-            'ITP_Price.numeric' => 'Price harus berupa angka',
-            'ITP_Price.min' => 'Price harus lebih besar atau sama dengan 0',
+            'ITP_DateFrom.required' => 'Date From is required',
+            'ITP_DateFrom.date' => 'Date From must be a valid date',
+            'ITP_Price.required' => 'Price is required',
+            'ITP_Price.numeric' => 'Price must be a number',
+            'ITP_Price.min' => 'Price must be greater than or equal to 0',
         ]);
 
         if ($validator->fails()) {
@@ -847,7 +847,7 @@ class ARCItemPriceItalyController extends Controller
 
             if ($existingPending) {
                 return redirect()->back()
-                    ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                    ->withErrors(['submission' => 'This item still has a pending price submission.'])
                     ->withInput();
             }
 
@@ -881,7 +881,7 @@ class ARCItemPriceItalyController extends Controller
 
             PriceSubmission::create($submissionData);
 
-            return redirect()->back()->with('success', 'Perubahan harga berhasil diajukan dan menunggu persetujuan.');
+            return redirect()->back()->with('success', 'Price change successfully submitted and awaiting approval.');
         }
 
         $updateData = $request->only(['ITP_DateFrom', 'ITP_DateTo', 'ITP_Price']);
@@ -893,7 +893,7 @@ class ARCItemPriceItalyController extends Controller
             $redirectUrl .= '?status=' . $request->status;
         }
 
-        return redirect($redirectUrl)->with('success', 'Data berhasil diupdate');
+        return redirect($redirectUrl)->with('success', 'Data successfully updated');
     }
 
     private function storeManualPrice(Request $request, string $arcimCode, $item)
@@ -981,7 +981,7 @@ class ARCItemPriceItalyController extends Controller
 
             if ($existingPending) {
                 return redirect()->back()
-                    ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                    ->withErrors(['submission' => 'This item still has a pending price submission.'])
                     ->withInput();
             }
 
@@ -997,7 +997,7 @@ class ARCItemPriceItalyController extends Controller
 
             PriceSubmission::create($priceData);
 
-            return redirect()->back()->with('success', 'Harga berhasil diajukan dan menunggu persetujuan.');
+            return redirect()->back()->with('success', 'Price successfully submitted and awaiting approval.');
         }
 
         $apiPayload = [
@@ -1026,7 +1026,7 @@ class ARCItemPriceItalyController extends Controller
                 }
                 ARCItemPriceItaly::create($priceData);
 
-                $message = 'Data manual berhasil ditambahkan dan dikirim ke TrakCare';
+                $message = 'Manual data successfully added and sent to TrakCare';
 
                 Log::info('Manual price data sent to TrakCare successfully', [
                     'arcim_code' => $arcimCode,
@@ -1041,7 +1041,7 @@ class ARCItemPriceItalyController extends Controller
                 ]);
 
                 return redirect()->back()
-                    ->withErrors(['api' => 'Gagal mengirim data ke TrakCare: ' . $response->status()])
+                    ->withErrors(['api' => 'Failed to send data to TrakCare: ' . $response->status()])
                     ->withInput();
             }
         } catch (\Exception $e) {
