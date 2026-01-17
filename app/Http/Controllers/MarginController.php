@@ -18,11 +18,11 @@ class MarginController extends Controller
         // Search functionality
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('TypeofItemCode', 'like', "%{$search}%")
-                  ->orWhere('TypeofItemDesc', 'like', "%{$search}%")
-                  ->orWhere('Margin', 'like', "%{$search}%")
-                  ->orWhere('ARCIM_ServMateria', 'like', "%{$search}%");
+                    ->orWhere('TypeofItemDesc', 'like', "%{$search}%")
+                    ->orWhere('Margin', 'like', "%{$search}%")
+                    ->orWhere('ARCIM_ServMateria', 'like', "%{$search}%");
             });
         }
 
@@ -47,8 +47,10 @@ class MarginController extends Controller
         $validator = Validator::make($request->all(), [
             'TypeofItemCode' => 'nullable|string|max:255',
             'TypeofItemDesc' => 'nullable|string|max:255',
-            'Margin' => 'nullable|numeric|min:0|max:100',
+            'Margin' => 'nullable|numeric|min:0',
             'ARCIM_ServMateria' => 'nullable|string|max:255',
+            'DateFrom' => 'required|date',
+            'DateTo' => 'nullable|date|after_or_equal:DateFrom',
         ]);
 
         if ($validator->fails()) {
@@ -89,8 +91,10 @@ class MarginController extends Controller
         $validator = Validator::make($request->all(), [
             'TypeofItemCode' => 'nullable|string|max:255',
             'TypeofItemDesc' => 'nullable|string|max:255',
-            'Margin' => 'nullable|numeric|min:0|max:100',
+            'Margin' => 'nullable|numeric|min:0',
             'ARCIM_ServMateria' => 'nullable|string|max:255',
+            'DateFrom' => 'required|date',
+            'DateTo' => 'nullable|date|after_or_equal:DateFrom',
         ]);
 
         if ($validator->fails()) {

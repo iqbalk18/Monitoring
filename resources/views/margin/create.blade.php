@@ -93,7 +93,7 @@
                                 Margin (%)
                             </label>
                             <div class="input-group-shadcn">
-                                <input type="number" id="Margin" step="0.01" min="0" max="1000" name="Margin"
+                                <input type="number" id="Margin" step="0.01" min="0" name="Margin"
                                     class="form-control-shadcn @error('Margin') is-invalid @enderror"
                                     value="{{ old('Margin') }}" placeholder="0.00">
                             </div>
@@ -118,6 +118,39 @@
                                 </option>
                             </select>
                             @error('ARCIM_ServMateria')
+                                <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4" style="row-gap: 1.5rem;">
+                    <!-- Date From -->
+                    <div class="col-md-6">
+                        <div class="form-group-shadcn">
+                            <label class="form-label-shadcn" for="DateFrom">
+                                Date From
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" id="DateFrom" name="DateFrom"
+                                class="form-control-shadcn @error('DateFrom') is-invalid @enderror"
+                                value="{{ old('DateFrom') }}" required>
+                            @error('DateFrom')
+                                <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Date To -->
+                    <div class="col-md-6">
+                        <div class="form-group-shadcn">
+                            <label class="form-label-shadcn" for="DateTo">
+                                Date To
+                            </label>
+                            <input type="date" id="DateTo" name="DateTo"
+                                class="form-control-shadcn @error('DateTo') is-invalid @enderror"
+                                value="{{ old('DateTo') }}">
+                            @error('DateTo')
                                 <div class="invalid-feedback-shadcn">{{ $message }}</div>
                             @enderror
                         </div>

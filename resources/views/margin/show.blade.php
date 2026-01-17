@@ -59,6 +59,29 @@
                                     {{ $margin->ARCIM_ServMateria ?? '-' }}
                                 </div>
                             </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-muted">Date From</label>
+                                <div class="form-control-plaintext bg-light p-2 rounded">
+                                    {{ $margin->DateFrom ? $margin->DateFrom->format('d/m/Y') : '-' }}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-muted">Date To</label>
+                                <div class="form-control-plaintext bg-light p-2 rounded">
+                                    {{ $margin->DateTo ? $margin->DateTo->format('d/m/Y') : '-' }}
+                                </div>
+                            </div>
+                            
+                             <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-muted">Status</label>
+                                <div class="form-control-plaintext bg-light p-2 rounded">
+                                     <span class="badge {{ $margin->Status == 'Active' ? 'bg-success' : 'bg-secondary' }}">
+                                        {{ $margin->Status }}
+                                    </span>
+                                </div>
+                            </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold text-muted">Created At</label>

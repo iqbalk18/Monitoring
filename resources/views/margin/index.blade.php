@@ -150,6 +150,9 @@
                             <th>TypeofItem Code</th>
                             <th>TypeofItem Description</th>
                             <th>Margin (%)</th>
+                            <th>Date From</th>
+                            <th>Date To</th>
+                            <th>Status</th>
                             <th>ARCIM_ServMateria</th>
                             <th>Actions</th>
                         </tr>
@@ -166,6 +169,14 @@
                                     @else
                                         <span style="color: var(--muted-foreground);">-</span>
                                     @endif
+                                </td>
+                                <td>{{ $margin->DateFrom ? $margin->DateFrom->format('d/m/Y') : '-' }}</td>
+                                <td>{{ $margin->DateTo ? $margin->DateTo->format('d/m/Y') : '-' }}</td>
+                                <td>
+                                    <span
+                                        class="badge-shadcn {{ $margin->Status == 'Active' ? 'badge-shadcn-success' : 'badge-shadcn-secondary' }}">
+                                        {{ $margin->Status }}
+                                    </span>
                                 </td>
                                 <td>{{ $margin->ARCIM_ServMateria ?? '-' }}</td>
                                 <td>
@@ -185,7 +196,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center" style="padding: 3rem;">
+                                <td colspan="9" class="text-center" style="padding: 3rem;">
                                     <div style="color: var(--muted-foreground);">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
                                             fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
@@ -242,15 +253,15 @@
                 if (visibleRows === 0 && value !== '') {
                     if ($('#noFilterResults').length === 0) {
                         $('#marginTable tbody').append(`
-                        <tr id="noFilterResults">
-                            <td colspan="6" class="text-center" style="padding: 2rem;">
-                                <div style="color: var(--muted-foreground);">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                                    <p class="mb-0" style="font-size: 0.875rem;">No results found for "${value}"</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `);
+                            <tr id="noFilterResults">
+                                <td colspan="9" class="text-center" style="padding: 2rem;">
+                                    <div style="color: var(--muted-foreground);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                        <p class="mb-0" style="font-size: 0.875rem;">No results found for "${value}"</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        `);
                     }
                 } else {
                     $('#noFilterResults').remove();
