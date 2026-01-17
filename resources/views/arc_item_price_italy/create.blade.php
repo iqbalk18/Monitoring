@@ -14,7 +14,7 @@
                 <span class="fw-semibold text-dark">Tambah Item Price</span><br>
                 <small class="text-muted">ARC Item Price Italy</small>
             </div>
-            <a href="{{ route('arc-itm-mast.index') }}" class="btn btn-outline-primary btn-sm px-3">Kembali</a>
+            <a href="{{ route('arc-itm-mast.index') }}" class="btn btn-outline-primary btn-sm px-3">Back</a>
         </div>
     </div>
 </nav>
