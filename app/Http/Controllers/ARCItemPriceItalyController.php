@@ -289,21 +289,22 @@ class ARCItemPriceItalyController extends Controller
 
             // AUTOMATIC GENERATION FOR 'D' ITEMS
             // Rule: If ItemCode starts with 'D', generate automatically Episode Type = O
-            // Calculation: HNA * (1 + (Margin + 11) / 100)
+            // Calculation: (HNA + Margin) + 11%
             if (str_starts_with($arcimCode, 'D')) {
-                $marginWithExtra = $marginValue + 11;
-                $calculatedPriceO = (($marginWithExtra / 100) + 1) * $hna;
+                // New Calculation: Price with Margin * 1.11
+                $calculatedPriceO = $calculatedPrice * 1.11;
 
                 $baseDataO = $baseData; // Copy base structure
                 $baseDataO['ITP_Price'] = $calculatedPriceO;
                 $baseDataO['ITP_EpisodeType'] = 'O';
+                $baseDataO['ITP_Rank'] = '90'; // Update Rank to 90
                 // For the auto-generated O price, we keep the TypeofItemCode (Margin Type) reference
                 // But we clear Room Type fields
                 unset($baseDataO['ITP_ROOMT_Code']);
                 unset($baseDataO['ITP_ROOMT_Desc']);
 
                 $apiPriceO = [
-                    'ITPRank' => '99',
+                    'ITPRank' => '90',
                     'ITPPrice' => (string) $calculatedPriceO,
                     'ITPEpisodeType' => 'O'
                 ];
