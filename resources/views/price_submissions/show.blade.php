@@ -7,7 +7,15 @@
         <a href="{{ route('price-submissions.index') }}" class="btn-shadcn btn-shadcn-ghost btn-shadcn-sm mb-2">
             ← Back to List
         </a>
-        <h2 class="section-title">Review Submission #{{ $baseSubmission->id }}</h2>
+        <h2 class="section-title">Review Submission #{{ $baseSubmission->id }}
+            @if($baseSubmission->submission_type == 'ADD')
+                <span class="badge-shadcn badge-shadcn-success ms-2" style="font-size: 0.8em; vertical-align: middle;">ADD</span>
+            @elseif($baseSubmission->submission_type == 'EDIT')
+                <span class="badge-shadcn badge-shadcn-warning ms-2" style="font-size: 0.8em; vertical-align: middle;">EDIT</span>
+            @elseif($baseSubmission->submission_type)
+                <span class="badge-shadcn badge-shadcn-secondary ms-2" style="font-size: 0.8em; vertical-align: middle;">{{ $baseSubmission->submission_type }}</span>
+            @endif
+        </h2>
     </div>
 
     @if($errors->any())

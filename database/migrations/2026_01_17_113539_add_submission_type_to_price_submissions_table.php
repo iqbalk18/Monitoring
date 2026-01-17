@@ -11,7 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('price_submissions', function (Blueprint $table) {
-            $table->string('TypeofItemCode')->nullable()->after('ITP_Rank');
+            $table->string('submission_type')->default('ADD')->after('batch_id'); // ADD, EDIT
+            $table->unsignedBigInteger('original_price_id')->nullable()->after('submission_type');
         });
     }
 
@@ -21,7 +22,8 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('price_submissions', function (Blueprint $table) {
-            $table->dropColumn('TypeofItemCode');
+            $table->dropColumn('submission_type');
+            $table->dropColumn('original_price_id');
         });
     }
 };

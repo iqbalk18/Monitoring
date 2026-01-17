@@ -14,11 +14,11 @@ class PriceSubmissionController extends Controller
     {
         $role = session('user')['role'] ?? null;
 
-        $query = PriceSubmission::select('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by')
+        $query = PriceSubmission::select('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by', 'submission_type')
             ->selectRaw('COUNT(*) as total_items')
             ->selectRaw('MIN(id) as id') // Use one ID for linking
             ->with(['submitter', 'approver'])
-            ->groupBy('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by')
+            ->groupBy('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by', 'submission_type')
             ->orderBy('created_at', 'desc');
 
         if ($role == 'PRICE_APPROVER') {
@@ -134,25 +134,61 @@ class PriceSubmissionController extends Controller
                 }
 
                 foreach ($submissions as $sub) {
-                    ARCItemPriceItaly::create([
-                        'ITP_ARCIM_Code' => $sub->ITP_ARCIM_Code,
-                        'ITP_ARCIM_Desc' => $sub->ITP_ARCIM_Desc,
-                        'ITP_DateFrom' => $sub->ITP_DateFrom,
-                        'ITP_DateTo' => $sub->ITP_DateTo,
-                        'ITP_TAR_Code' => $sub->ITP_TAR_Code,
-                        'ITP_TAR_Desc' => $sub->ITP_TAR_Desc,
-                        'ITP_Price' => $sub->ITP_Price,
-                        'ITP_CTCUR_Code' => $sub->ITP_CTCUR_Code,
-                        'ITP_CTCUR_Desc' => $sub->ITP_CTCUR_Desc,
-                        'ITP_ROOMT_Code' => $sub->ITP_ROOMT_Code,
-                        'ITP_ROOMT_Desc' => $sub->ITP_ROOMT_Desc,
-                        'ITP_HOSP_Code' => $sub->ITP_HOSP_Code,
-                        'ITP_HOSP_Desc' => $sub->ITP_HOSP_Desc,
-                        'ITP_Rank' => $sub->ITP_Rank,
-                        'ITP_EpisodeType' => $sub->ITP_EpisodeType,
-                        'batch_id' => $sub->batch_id,
-                        'TypeofItemCode' => $sub->TypeofItemCode,
-                    ]);
+                    if ($sub->submission_type === 'EDIT' && $sub->original_price_id) {
+                        $existing = ARCItemPriceItaly::find($sub->original_price_id);
+                        if ($existing) {
+                            $existing->update([
+                                'ITP_DateFrom' => $sub->ITP_DateFrom,
+                                'ITP_DateTo' => $sub->ITP_DateTo,
+                                'ITP_Price' => $sub->ITP_Price,
+                                'ITP_EpisodeType' => $sub->ITP_EpisodeType,
+                                'hna' => $sub->hna,
+                            ]);
+                        } else {
+                            // Fallback: Create new if original not found
+                            ARCItemPriceItaly::create([
+                                'ITP_ARCIM_Code' => $sub->ITP_ARCIM_Code,
+                                'ITP_ARCIM_Desc' => $sub->ITP_ARCIM_Desc,
+                                'ITP_DateFrom' => $sub->ITP_DateFrom,
+                                'ITP_DateTo' => $sub->ITP_DateTo,
+                                'ITP_TAR_Code' => $sub->ITP_TAR_Code,
+                                'ITP_TAR_Desc' => $sub->ITP_TAR_Desc,
+                                'ITP_Price' => $sub->ITP_Price,
+                                'ITP_CTCUR_Code' => $sub->ITP_CTCUR_Code,
+                                'ITP_CTCUR_Desc' => $sub->ITP_CTCUR_Desc,
+                                'ITP_ROOMT_Code' => $sub->ITP_ROOMT_Code,
+                                'ITP_ROOMT_Desc' => $sub->ITP_ROOMT_Desc,
+                                'ITP_HOSP_Code' => $sub->ITP_HOSP_Code,
+                                'ITP_HOSP_Desc' => $sub->ITP_HOSP_Desc,
+                                'ITP_Rank' => $sub->ITP_Rank,
+                                'ITP_EpisodeType' => $sub->ITP_EpisodeType,
+                                'batch_id' => $sub->batch_id,
+                                'TypeofItemCode' => $sub->TypeofItemCode,
+                                'hna' => $sub->hna,
+                            ]);
+                        }
+                    } else {
+                        ARCItemPriceItaly::create([
+                            'ITP_ARCIM_Code' => $sub->ITP_ARCIM_Code,
+                            'ITP_ARCIM_Desc' => $sub->ITP_ARCIM_Desc,
+                            'ITP_DateFrom' => $sub->ITP_DateFrom,
+                            'ITP_DateTo' => $sub->ITP_DateTo,
+                            'ITP_TAR_Code' => $sub->ITP_TAR_Code,
+                            'ITP_TAR_Desc' => $sub->ITP_TAR_Desc,
+                            'ITP_Price' => $sub->ITP_Price,
+                            'ITP_CTCUR_Code' => $sub->ITP_CTCUR_Code,
+                            'ITP_CTCUR_Desc' => $sub->ITP_CTCUR_Desc,
+                            'ITP_ROOMT_Code' => $sub->ITP_ROOMT_Code,
+                            'ITP_ROOMT_Desc' => $sub->ITP_ROOMT_Desc,
+                            'ITP_HOSP_Code' => $sub->ITP_HOSP_Code,
+                            'ITP_HOSP_Desc' => $sub->ITP_HOSP_Desc,
+                            'ITP_Rank' => $sub->ITP_Rank,
+                            'ITP_EpisodeType' => $sub->ITP_EpisodeType,
+                            'batch_id' => $sub->batch_id,
+                            'TypeofItemCode' => $sub->TypeofItemCode,
+                            'hna' => $sub->hna,
+                        ]);
+                    }
 
                     $sub->update([
                         'status' => 'APPROVED',

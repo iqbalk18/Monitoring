@@ -64,6 +64,7 @@
                         <tr>
                             <th>Date Submitted</th>
                             <th>Batch ID</th>
+                            <th>Type</th>
                             <th>Item Code</th>
                             <th>Type Item</th>
                             <th>Description</th>
@@ -79,6 +80,15 @@
                             <tr>
                                 <td>{{ $submission->created_at->format('d M Y H:i') }}</td>
                                 <td><code style="font-size: 0.8125rem;">{{ $submission->batch_id }}</code></td>
+                                <td>
+                                    @if($submission->submission_type == 'ADD')
+                                        <span class="badge-shadcn badge-shadcn-success">ADD</span>
+                                    @elseif($submission->submission_type == 'EDIT')
+                                        <span class="badge-shadcn badge-shadcn-warning">EDIT</span>
+                                    @else
+                                        <span class="badge-shadcn badge-shadcn-secondary">{{ $submission->submission_type ?? 'ADD' }}</span>
+                                    @endif
+                                </td>
                                 <td>{{ $submission->ITP_ARCIM_Code }}</td>
                                 <td><code class="fw-bold">{{ $submission->TypeofItemCode ?? '-' }}</code></td>
                                 <td>{{ Str::limit($submission->ITP_ARCIM_Desc, 30) }}</td>

@@ -252,6 +252,7 @@ class ARCItemPriceItalyController extends Controller
                 'hna' => $hna,
                 'ITP_Price' => $calculatedPrice,
                 'TypeofItemCode' => $typeOfItemCode, // Save the Margin Type
+                'submission_type' => 'ADD',
             ];
 
             $apiPrice = [
@@ -490,6 +491,7 @@ class ARCItemPriceItalyController extends Controller
                 'status' => 'PENDING',
                 'submitted_by' => session('user')['id'],
                 'batch_id' => $batchId,
+                'submission_type' => 'ADD',
             ];
 
             if ($request->ITP_Price !== null) {
@@ -754,6 +756,53 @@ class ARCItemPriceItalyController extends Controller
                 $episodeType = null;
             }
 
+            // Check if user is PRICE_ENTRY -> Create Submission
+            if (session('user') && session('user')['role'] == 'PRICE_ENTRY') {
+                // Check for existing pending submission for this price/item
+                $existingPending = PriceSubmission::where('ITP_ARCIM_Code', $arcimCode)
+                    ->where('status', 'PENDING')
+                    ->exists();
+
+                if ($existingPending) {
+                    return redirect()->back()
+                        ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                        ->withInput();
+                }
+
+                $batchId = 'BATCH-UPD-' . now()->format('YmdHis') . '-' . strtoupper(uniqid());
+
+                $submissionData = [
+                    'ITP_ARCIM_Code' => $arcimCode,
+                    'ITP_ARCIM_Desc' => $item->ARCIM_Desc,
+                    'ITP_DateFrom' => $request->ITP_DateFrom,
+                    'ITP_DateTo' => $request->ITP_DateTo,
+                    'hna' => $hna,
+                    'ITP_Price' => $calculatedPrice,
+                    'ITP_EpisodeType' => $episodeType,
+                    // Preserve other fields from original price if needed
+                    'ITP_TAR_Code' => $price->ITP_TAR_Code,
+                    'ITP_TAR_Desc' => $price->ITP_TAR_Desc,
+                    'ITP_CTCUR_Code' => $price->ITP_CTCUR_Code,
+                    'ITP_CTCUR_Desc' => $price->ITP_CTCUR_Desc,
+                    'ITP_ROOMT_Code' => $price->ITP_ROOMT_Code, // or update if needed?
+                    'ITP_ROOMT_Desc' => $price->ITP_ROOMT_Desc, // or update?
+                    'ITP_HOSP_Code' => $price->ITP_HOSP_Code,
+                    'ITP_HOSP_Desc' => $price->ITP_HOSP_Desc,
+                    'ITP_Rank' => $price->ITP_Rank,
+                    'TypeofItemCode' => $typeOfItemCode,
+
+                    'status' => 'PENDING',
+                    'submitted_by' => session('user')['id'],
+                    'batch_id' => $batchId,
+                    'submission_type' => 'EDIT',
+                    'original_price_id' => $id,
+                ];
+
+                PriceSubmission::create($submissionData);
+
+                return redirect()->back()->with('success', 'Perubahan harga berhasil diajukan dan menunggu persetujuan.');
+            }
+
             $updateData = [
                 'ITP_DateFrom' => $request->ITP_DateFrom,
                 'ITP_DateTo' => $request->ITP_DateTo,
@@ -788,6 +837,51 @@ class ARCItemPriceItalyController extends Controller
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
+        }
+
+        if (session('user') && session('user')['role'] == 'PRICE_ENTRY') {
+            // Check for existing pending submission
+            $existingPending = PriceSubmission::where('ITP_ARCIM_Code', $arcimCode)
+                ->where('status', 'PENDING')
+                ->exists();
+
+            if ($existingPending) {
+                return redirect()->back()
+                    ->withErrors(['submission' => 'Item ini masih memiliki pengajuan harga yang menunggu persetujuan (Pending).'])
+                    ->withInput();
+            }
+
+            $batchId = 'BATCH-UPD-' . now()->format('YmdHis') . '-' . strtoupper(uniqid());
+
+            $submissionData = [
+                'ITP_ARCIM_Code' => $arcimCode,
+                'ITP_ARCIM_Desc' => $item->ARCIM_Desc,
+                'ITP_DateFrom' => $request->ITP_DateFrom,
+                'ITP_DateTo' => $request->ITP_DateTo,
+                'ITP_Price' => (float) $request->ITP_Price,
+
+                // Preserve fields
+                'ITP_TAR_Code' => $price->ITP_TAR_Code,
+                'ITP_TAR_Desc' => $price->ITP_TAR_Desc,
+                'ITP_CTCUR_Code' => $price->ITP_CTCUR_Code,
+                'ITP_CTCUR_Desc' => $price->ITP_CTCUR_Desc,
+                'ITP_ROOMT_Code' => $price->ITP_ROOMT_Code,
+                'ITP_ROOMT_Desc' => $price->ITP_ROOMT_Desc,
+                'ITP_HOSP_Code' => $price->ITP_HOSP_Code,
+                'ITP_HOSP_Desc' => $price->ITP_HOSP_Desc,
+                'ITP_Rank' => $price->ITP_Rank,
+                'ITP_EpisodeType' => $price->ITP_EpisodeType,
+
+                'status' => 'PENDING',
+                'submitted_by' => session('user')['id'],
+                'batch_id' => $batchId,
+                'submission_type' => 'EDIT',
+                'original_price_id' => $id,
+            ];
+
+            PriceSubmission::create($submissionData);
+
+            return redirect()->back()->with('success', 'Perubahan harga berhasil diajukan dan menunggu persetujuan.');
         }
 
         $updateData = $request->only(['ITP_DateFrom', 'ITP_DateTo', 'ITP_Price']);
@@ -897,6 +991,9 @@ class ARCItemPriceItalyController extends Controller
             // Generate Batch ID
             $batchId = 'BATCH-' . now()->format('YmdHis') . '-' . strtoupper(uniqid());
             $priceData['batch_id'] = $batchId;
+
+            $priceData['batch_id'] = $batchId;
+            $priceData['submission_type'] = 'ADD';
 
             PriceSubmission::create($priceData);
 
