@@ -122,6 +122,17 @@ class PriceSubmissionController extends Controller
 
             if ($response->successful()) {
                 // Create Real Records and Update Status
+                // Logic to close previous active price
+                $newDateFrom = $first->ITP_DateFrom;
+                if ($newDateFrom) {
+                    ARCItemPriceItaly::where('ITP_ARCIM_Code', $first->ITP_ARCIM_Code)
+                        ->whereNull('ITP_DateTo')
+                        ->where('ITP_DateFrom', '<', $newDateFrom)
+                        ->update([
+                                'ITP_DateTo' => \Carbon\Carbon::parse($newDateFrom)->subDay()->format('Y-m-d')
+                            ]);
+                }
+
                 foreach ($submissions as $sub) {
                     ARCItemPriceItaly::create([
                         'ITP_ARCIM_Code' => $sub->ITP_ARCIM_Code,
@@ -140,6 +151,7 @@ class PriceSubmissionController extends Controller
                         'ITP_Rank' => $sub->ITP_Rank,
                         'ITP_EpisodeType' => $sub->ITP_EpisodeType,
                         'batch_id' => $sub->batch_id,
+                        'TypeofItemCode' => $sub->TypeofItemCode,
                     ]);
 
                     $sub->update([

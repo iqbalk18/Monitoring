@@ -351,6 +351,16 @@ class ARCItemPriceItalyController extends Controller
                 $response = Http::timeout(30)->post('https://trakcare.com/api/prices', $apiPayload);
 
                 if ($response->successful()) {
+                    // Validation and auto-close previous active price
+                    $newDateFrom = $request->ITP_DateFrom;
+                    if ($newDateFrom) {
+                        ARCItemPriceItaly::where('ITP_ARCIM_Code', $arcimCode)
+                            ->whereNull('ITP_DateTo')
+                            ->where('ITP_DateFrom', '<', $newDateFrom)
+                            ->update([
+                                    'ITP_DateTo' => \Carbon\Carbon::parse($newDateFrom)->subDay()->format('Y-m-d')
+                                ]);
+                    }
                     // Generate Batch ID for direct submission
                     $batchId = 'BATCH-' . now()->format('YmdHis') . '-' . strtoupper(uniqid());
 
@@ -907,6 +917,16 @@ class ARCItemPriceItalyController extends Controller
             $response = Http::timeout(30)->post('https://trakcare.com/api/prices', $apiPayload);
 
             if ($response->successful()) {
+                // Validation and auto-close previous active price
+                $newDateFrom = $request->ITP_DateFrom;
+                if ($newDateFrom) {
+                    ARCItemPriceItaly::where('ITP_ARCIM_Code', $arcimCode)
+                        ->whereNull('ITP_DateTo')
+                        ->where('ITP_DateFrom', '<', $newDateFrom)
+                        ->update([
+                                'ITP_DateTo' => \Carbon\Carbon::parse($newDateFrom)->subDay()->format('Y-m-d')
+                            ]);
+                }
                 ARCItemPriceItaly::create($priceData);
 
                 $message = 'Data manual berhasil ditambahkan dan dikirim ke TrakCare';
