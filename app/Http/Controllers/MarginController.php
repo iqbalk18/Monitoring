@@ -26,6 +26,28 @@ class MarginController extends Controller
             });
         }
 
+        $status = $request->input('status', 'active');
+
+        if ($status != '' && $status != 'all') {
+            $today = now()->startOfDay();
+
+            if ($status == 'active') {
+                $query->where('DateFrom', '<=', $today)
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('DateTo')
+                            ->orWhere('DateTo', '>=', $today);
+                    });
+            } elseif ($status == 'non_active') {
+                $query->where(function ($q) use ($today) {
+                    $q->where('DateFrom', '>', $today)
+                        ->orWhere(function ($q2) use ($today) {
+                            $q2->whereNotNull('DateTo')
+                                ->where('DateTo', '<', $today);
+                        });
+                });
+            }
+        }
+
         $margins = $query->orderBy('created_at', 'desc')->paginate(15);
 
         return view('margin.index', compact('margins'));

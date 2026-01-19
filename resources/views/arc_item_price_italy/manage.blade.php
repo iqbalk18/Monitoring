@@ -415,12 +415,12 @@
     <div class="card-shadcn mb-4">
         <div class="card-shadcn-body">
             <form method="GET" action="{{ route('arc-item-price-italy.manage', $item->ARCIM_Code) }}">
-                <div class="d-flex align-items-end" style="gap: 0.75rem;">
-                    <div class="flex-grow-1">
+                <div class="d-flex align-items-end justify-content-end" style="gap: 0.75rem;">
+                    <div>
                         <label class="form-label-shadcn" for="statusFilter">Filter by Status</label>
-                        <select name="status" id="statusFilter" class="form-select-shadcn">
+                        <select name="status" id="statusFilter" class="form-select-shadcn" style="width: 200px;">
                             <option value="">All Status</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="active" {{ request('status', 'active') == 'active' ? 'selected' : '' }}>Active</option>
                             <option value="non_active" {{ request('status') == 'non_active' ? 'selected' : '' }}>Non Active
                             </option>
                         </select>

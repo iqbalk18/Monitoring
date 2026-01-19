@@ -26,15 +26,17 @@ class ArcItmMastController extends Controller
             });
         }
 
-        if ($request->has('status') && $request->status != '') {
+        $status = $request->input('status', 'active');
+
+        if ($status != '' && $status != 'all') {
             $today = now()->startOfDay();
 
-            if ($request->status == 'active') {
+            if ($status == 'active') {
                 $query->where(function ($q) use ($today) {
                     $q->whereNull('ARCIM_EffDateTo')
                         ->orWhere('ARCIM_EffDateTo', '>=', $today);
                 });
-            } elseif ($request->status == 'non_active') {
+            } elseif ($status == 'non_active') {
                 $query->where('ARCIM_EffDateTo', '<', $today)
                     ->whereNotNull('ARCIM_EffDateTo');
             }
@@ -53,12 +55,12 @@ class ArcItmMastController extends Controller
     public function edit(string $id)
     {
         $item = ArcItmMast::findOrFail($id);
-        
+
         // Get margins for Material type (M) for Type of Item Code dropdown
         $materialMargins = Margin::where('ARCIM_ServMateria', 'M')
             ->orderBy('TypeofItemCode', 'asc')
             ->get();
-        
+
         return view('arc_itm_mast.edit', compact('item', 'materialMargins'));
     }
 

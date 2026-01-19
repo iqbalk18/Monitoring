@@ -127,15 +127,17 @@ class ARCItemPriceItalyController extends Controller
 
         $query = ARCItemPriceItaly::where('ITP_ARCIM_Code', $arcimCode);
 
-        if ($request->has('status') && $request->status != '') {
+        $status = $request->input('status', 'active');
+
+        if ($status != '' && $status != 'all') {
             $today = now()->startOfDay();
 
-            if ($request->status == 'active') {
+            if ($status == 'active') {
                 $query->where(function ($q) use ($today) {
                     $q->whereNull('ITP_DateTo')
                         ->orWhere('ITP_DateTo', '>=', $today);
                 });
-            } elseif ($request->status == 'non_active') {
+            } elseif ($status == 'non_active') {
                 $query->where('ITP_DateTo', '<', $today)
                     ->whereNotNull('ITP_DateTo');
             }

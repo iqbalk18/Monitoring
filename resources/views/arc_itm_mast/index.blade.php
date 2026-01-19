@@ -109,7 +109,8 @@
                     <div>
                         <select name="status" class="form-select-shadcn" style="width: 150px;">
                             <option value="">All Status</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="active" {{ request('status', 'active') == 'active' ? 'selected' : '' }}>Active
+                            </option>
                             <option value="non_active" {{ request('status') == 'non_active' ? 'selected' : '' }}>Non Active
                             </option>
                         </select>
@@ -122,7 +123,7 @@
                         </svg>
                         Search
                     </button>
-                    @if(request('search') || request('status'))
+                    @if(request('search') || request()->has('status'))
                         <a href="{{ route('arc-itm-mast.index') }}" class="btn-shadcn btn-shadcn-outline">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -289,15 +290,15 @@
                 if (visibleRows === 0 && value !== '') {
                     if ($('#noFilterResults').length === 0) {
                         $('#arcTable tbody').append(`
-                                    <tr id="noFilterResults">
-                                        <td colspan="14" class="text-center" style="padding: 2rem;">
-                                            <div style="color: var(--muted-foreground);">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                                                <p class="mb-0" style="font-size: 0.875rem;">No results found for "${value}"</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `);
+                                        <tr id="noFilterResults">
+                                            <td colspan="14" class="text-center" style="padding: 2rem;">
+                                                <div style="color: var(--muted-foreground);">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                                    <p class="mb-0" style="font-size: 0.875rem;">No results found for "${value}"</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `);
                     }
                 } else {
                     $('#noFilterResults').remove();
