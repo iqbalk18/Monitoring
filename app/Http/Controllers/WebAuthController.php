@@ -82,7 +82,7 @@ class WebAuthController extends Controller
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|in:USER,ADMIN',
+            'role' => 'required|in:ADMIN,PRICE_STRATEGY,PRICE_ENTRY,PRICE_APPROVER',
         ]);
 
         if ($validator->fails()) {
