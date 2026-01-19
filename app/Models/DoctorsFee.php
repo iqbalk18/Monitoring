@@ -2,18 +2,14 @@
 
 namespace App\Models;
 
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
-class Ijd extends Model
+class DoctorsFee extends Model
 {
     use HasFactory;
 
-
-    protected $table = 'ijd';
-
+    protected $table = 'doctors_fee';
 
     protected $fillable = [
         'AdmDate',
@@ -47,6 +43,9 @@ class Ijd extends Model
         'DoctorSurgeryDesc',
         'SpecialistType',
         'DoctorSurgerySpecialist',
+        'PriorityDoctorCode',
+        'PriorityDoctorDesc',
+        'PriorityDoctorSpecialist',
         'DoctorAnaesCode',
         'DoctorAnaesDesc',
         'DoctorAnaesSpecialist',
@@ -61,6 +60,7 @@ class Ijd extends Model
         'QTY',
         'TotalPrice',
         'DiscountItem',
+        'AfterDiscount',
         'TypeofItem',
         'OrderSubCategoryCode',
         'OrderSubCategoryDesc',
@@ -97,31 +97,24 @@ class Ijd extends Model
         'OperationStartDate',
         'OperationStartTime',
         'OperationEndDate',
-        'OperationEndTime'
+        'OperationEndTime',
+        'PercentDoctor',
+        'PercentDoctorAnesthesia',
+        'ResultDoctor',
+        'ResultDoctorAnesthesia'
     ];
-
 
     protected $casts = [
-        'AdmDate' => 'date',
-        'OperationDate' => 'date',
-        'OrderDate' => 'date',
-        'DischargeDate' => 'date',
-        'PrintedInvoiceDate' => 'date',
-        'InvoiceCancelledDate' => 'date',
-        'OperationStartDate' => 'date',
-        'OperationEndDate' => 'date',
-        'OperationStartTime' => 'datetime:H:i:s',
-        'OperationEndTime' => 'datetime:H:i:s',
-        'PrintedInvoiceTime' => 'datetime:H:i:s',
-        'InvoiceCancelledTime' => 'datetime:H:i:s',
         'ItemPrice' => 'decimal:2',
+        'QTY' => 'decimal:2',
         'TotalPrice' => 'decimal:2',
         'DiscountItem' => 'decimal:2',
+        'AfterDiscount' => 'decimal:2',
+        'TotalPatient' => 'decimal:2',
         'TotalInsurance' => 'decimal:2',
+        'PercentDoctor' => 'decimal:2',
+        'PercentDoctorAnesthesia' => 'decimal:2',
+        'ResultDoctor' => 'decimal:2',
+        'ResultDoctorAnesthesia' => 'decimal:2',
     ];
-
-
-    // Example: scopes or helper accessors can be added here
-
-
 }

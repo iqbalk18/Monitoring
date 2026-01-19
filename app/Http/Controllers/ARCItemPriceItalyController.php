@@ -546,7 +546,7 @@ class ARCItemPriceItalyController extends Controller
                 PriceSubmission::create($baseData);
             }
 
-            return redirect()->back()->with('success', 'Harga berhasil diajukan dan menunggu persetujuan.');
+            return redirect()->back()->with('success', 'Price submitted successfully and is awaiting approval.');
         }
 
         $baseData = [

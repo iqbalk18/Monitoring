@@ -26,17 +26,17 @@ class StockManagementController extends Controller
             ]);
 
             $periodDate = $request->input('period_date');
-            
+
             $stockSAPs = StockSAP::whereNotNull('Combine_Code')
                 ->whereDate('Period_DateTime', $periodDate)
                 ->get();
-                
+
             $stockTCs = StockTCINCItmLcBt::whereNotNull('Combine_Code')
                 ->whereDate('Period_DateTime', $periodDate)
                 ->get();
 
             $tcGrouped = $stockTCs->groupBy('Combine_Code');
-            
+
             $processedCount = 0;
             $plusCount = 0;
             $minusCount = 0;
@@ -44,21 +44,21 @@ class StockManagementController extends Controller
 
             foreach ($stockSAPs as $sap) {
                 $combineCode = $sap->Combine_Code;
-                
+
                 if ($tcGrouped->has($combineCode)) {
                     $tcData = $tcGrouped->get($combineCode)->first();
-                    
+
                     $sapQty = $sap->Qty ?? 0;
                     $tcQty = $tcData->INCLB_PhyQty ?? 0;
                     $selisih = $sapQty - $tcQty;
-                    
+
                     if ($selisih == 0) {
                         $skippedCount++;
                         continue;
                     }
-                    
+
                     if ($selisih > 0) {
-                        $indicator = 'P'; 
+                        $indicator = 'P';
                         $qtyToSave = $selisih;
                         $plusCount++;
                     } else {
@@ -66,7 +66,7 @@ class StockManagementController extends Controller
                         $qtyToSave = abs($selisih);
                         $minusCount++;
                     }
-                    
+
                     $expiredDate = null;
                     if (!empty($tcData->INCLB_INCIB_ExpDate)) {
                         try {
@@ -78,12 +78,12 @@ class StockManagementController extends Controller
                             $expiredDate = null;
                         }
                     }
-                    
+
                     Stock::create([
                         'stocksap_id' => $sap->id,
                         'stocktcinc_itmlcbt_id' => $tcData->id,
                         'Combine_Code' => $combineCode,
-                        'materialDocument' => 'ADJSO'.str_replace('-', '', $periodDate),
+                        'materialDocument' => 'ADJSO' . str_replace('-', '', $periodDate),
                         'movementType' => '201',
                         // 'specialStockIndicator' => $sap->Stock_Segment ?? '',
                         'indicator' => $indicator,
@@ -91,12 +91,12 @@ class StockManagementController extends Controller
                         'sloc' => $tcData->INCLB_CTLOC_Code ?? '',
                         'batch' => $tcData->INCLB_INCIB_No ?? '',
                         'expiredDate' => $expiredDate,
-                        'expiredDateFreeText' => 'stock adjusment Bulan '.date('F Y', strtotime($periodDate)),
+                        'expiredDateFreeText' => 'stock adjusment Bulan ' . date('F Y', strtotime($periodDate)),
                         'qty' => $qtyToSave,
                         'uom' => $tcData->CTUOM_Code ?? null,
                         'qtySku' => $qtyToSave,
                         'uomSku' => $tcData->CTUOM_Code ?? NULL,
-                        'currency' =>   'IDR',
+                        'currency' => 'IDR',
                         'poBasePricePerUnit' => 0,
                         'poDiscountPerUnit' => 0,
                         'amountInLocalCurrency' => 0,
@@ -104,7 +104,7 @@ class StockManagementController extends Controller
                         // 'taxCode' => '',
                         // 'taxRate' => '',
                     ]);
-                    
+
                     $processedCount++;
                 }
             }
@@ -120,7 +120,7 @@ class StockManagementController extends Controller
                     'total_sap_records' => $stockSAPs->count(),
                     'total_tc_records' => $stockTCs->count(),
                 ],
-                'message' => 'Kalkulasi berhasil! Data telah disimpan ke tabel Stock.'
+                'message' => 'Calculation successful! Data has been saved to the Stock table.'
             ]);
 
         } catch (\Exception $e) {
@@ -135,7 +135,7 @@ class StockManagementController extends Controller
     {
         try {
             $materialDocument = $request->input('materialDocument');
-            
+
             if ($materialDocument) {
                 $formStocks = FormStock::where('materialDocument', $materialDocument)
                     ->orderBy('created_at', 'desc')
@@ -143,7 +143,7 @@ class StockManagementController extends Controller
             } else {
                 $formStocks = FormStock::orderBy('created_at', 'desc')->get();
             }
-            
+
             $result = [];
 
             foreach ($formStocks as $formStock) {
@@ -153,7 +153,7 @@ class StockManagementController extends Controller
                 $itemNumber = 1;
                 foreach ($stocks as $stock) {
                     $items[] = [
-                        'item' => (string)$itemNumber,
+                        'item' => (string) $itemNumber,
                         'movementType' => $stock->movementType ?? '',
                         'specialStockIndicator' => $stock->specialStockIndicator ?? '',
                         'indicator' => $stock->indicator ?? '',
@@ -198,7 +198,7 @@ class StockManagementController extends Controller
             }
 
             $filename = 'formstock_with_items_' . date('YmdHis') . '.json';
-            
+
             return response()->json($result)
                 ->header('Content-Type', 'application/json')
                 ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
@@ -220,7 +220,7 @@ class StockManagementController extends Controller
 
             $materialDocument = $request->input('materialDocument');
             $stocks = Stock::where('materialDocument', $materialDocument)->get();
-            
+
             if ($stocks->isEmpty()) {
                 return response()->json([
                     'success' => false,
@@ -229,7 +229,7 @@ class StockManagementController extends Controller
             }
 
             $filename = 'stock_' . str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $materialDocument) . '_' . date('YmdHis') . '.json';
-            
+
             return response()->json($stocks)
                 ->header('Content-Type', 'application/json')
                 ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');

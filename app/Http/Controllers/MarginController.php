@@ -84,7 +84,7 @@ class MarginController extends Controller
         Margin::create($request->all());
 
         return redirect()->route('margin.index')
-            ->with('success', 'Data berhasil ditambahkan');
+            ->with('success', 'Data added successfully');
     }
 
     /**
@@ -129,7 +129,7 @@ class MarginController extends Controller
         $margin->update($request->all());
 
         return redirect()->route('margin.index')
-            ->with('success', 'Data berhasil diupdate');
+            ->with('success', 'Data updated successfully');
     }
 
     /**
@@ -141,6 +141,6 @@ class MarginController extends Controller
         $margin->delete();
 
         return redirect()->route('margin.index')
-            ->with('success', 'Data berhasil dihapus');
+            ->with('success', 'Data deleted successfully');
     }
 }

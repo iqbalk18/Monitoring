@@ -15,6 +15,7 @@ use App\Http\Controllers\MarginController;
 use App\Http\Controllers\ARCItemPriceItalyController;
 use App\Http\Controllers\StockManagementController;
 
+
 Route::get('/', fn() => redirect('/login'));
 
 Route::get('/login', [WebAuthController::class, 'loginPage'])->name('login');
@@ -66,6 +67,8 @@ Route::get('download-json', [ImportController::class, 'downloadJson']);
 
 Route::resource('arc-itm-mast', ArcItmMastController::class);
 Route::resource('margin', MarginController::class);
+Route::resource('details-invoice-tc', \App\Http\Controllers\DetailsInvoiceTcController::class);
+Route::resource('doctors-fee', \App\Http\Controllers\DoctorsFeeController::class);
 
 Route::get('arc-item-price-italy/create', [ARCItemPriceItalyController::class, 'createPage'])->name('arc-item-price-italy.create');
 Route::post('arc-item-price-italy', [ARCItemPriceItalyController::class, 'store'])->name('arc-item-price-italy.store');

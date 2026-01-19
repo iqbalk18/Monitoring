@@ -26,23 +26,23 @@ class WebAuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors(['login' => 'Username dan password wajib diisi.'])->withInput();
+            return back()->withErrors(['login' => 'Username and password are required.'])->withInput();
         }
 
         if (!$token = auth('api')->attempt($request->only('username', 'password'))) {
-            return back()->withErrors(['login' => 'Username atau password salah.'])->withInput();
+            return back()->withErrors(['login' => 'Invalid username or password.'])->withInput();
         }
 
         $user = auth('api')->user();
         session(['token' => $token, 'user' => $user]);
 
-        return redirect('/dashboard')->with('success', 'Login berhasil!');
+        return redirect('/dashboard')->with('success', 'Login successful!');
     }
 
     public function dashboard(Request $request)
     {
         if (!$request->session()->has('token')) {
-            return redirect('/login')->withErrors(['login' => 'Silakan login terlebih dahulu.']);
+            return redirect('/login')->withErrors(['login' => 'Please log in first.']);
         }
 
         $user = $request->session()->get('user');
@@ -95,7 +95,7 @@ class WebAuthController extends Controller
         $user->role = $request->role;
         $user->save();
 
-        return redirect()->route('settings')->with('success', 'User berhasil ditambahkan!');
+        return redirect()->route('settings')->with('success', 'User added successfully!');
     }
 
     public function changePasswordWeb(Request $request, $id)
@@ -114,7 +114,7 @@ class WebAuthController extends Controller
         $targetUser->password = Hash::make($request->password);
         $targetUser->save();
 
-        return redirect()->back()->with('success', 'Password berhasil diubah untuk ' . $targetUser->username);
+        return redirect()->back()->with('success', 'Password changed successfully for ' . $targetUser->username);
     }
 
     public function deleteUserWeb($id)
@@ -132,7 +132,7 @@ class WebAuthController extends Controller
         }
 
         $user->delete();
-        return redirect()->back()->with('success', 'User ' . $user->username . ' berhasil dihapus!');
+        return redirect()->back()->with('success', 'User ' . $user->username . ' deleted successfully!');
     }
 
     public function logoutWeb(Request $request)
@@ -147,6 +147,6 @@ class WebAuthController extends Controller
         }
 
         $request->session()->flush();
-        return redirect('/login')->with('success', 'Berhasil logout!');
+        return redirect('/login')->with('success', 'Logged out successfully!');
     }
 }

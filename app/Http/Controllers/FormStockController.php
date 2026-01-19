@@ -32,6 +32,6 @@ class FormStockController extends Controller
 
         FormStock::create($request->all());
 
-        return redirect()->back()->with('success', 'Data berhasil disimpan!');
+        return redirect()->back()->with('success', 'Data saved successfully!');
     }
 }

@@ -99,6 +99,6 @@ class ArcItmMastController extends Controller
         $item->update($request->all());
 
         return redirect()->route('arc-itm-mast.index')
-            ->with('success', 'Data berhasil diupdate');
+            ->with('success', 'Data updated successfully');
     }
 }

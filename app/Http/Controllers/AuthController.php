@@ -33,7 +33,7 @@ class AuthController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 'failed',
-                    'message' => 'Validasi gagal',
+                    'message' => 'Validation failed',
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -46,14 +46,14 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'User baru berhasil ditambahkan.',
+                'message' => 'New user added successfully.',
                 'user' => $user
             ], 201);
 
         } catch (JWTException $e) {
             return response()->json([
                 'status' => 'failed',
-                'message' => 'Token tidak valid atau tidak ditemukan.'
+                'message' => 'Token invalid or not found.'
             ], 401);
         }
     }
@@ -75,7 +75,7 @@ class AuthController extends Controller
             if (!$user) {
                 return response()->json([
                     'status' => 'failed',
-                    'message' => 'User tidak ditemukan.'
+                    'message' => 'User not found.'
                 ], 404);
             }
 
@@ -90,13 +90,13 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'User berhasil dihapus.'
+                'message' => 'User deleted successfully.'
             ]);
 
         } catch (JWTException $e) {
             return response()->json([
                 'status' => 'failed',
-                'message' => 'Token tidak valid atau tidak ditemukan.'
+                'message' => 'Token invalid or not found.'
             ], 401);
         }
     }
@@ -114,7 +114,7 @@ class AuthController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 'failed',
-                    'message' => 'Validasi gagal',
+                    'message' => 'Validation failed',
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -131,7 +131,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Password berhasil diubah.'
+                'message' => 'Password changed successfully.'
             ]);
 
         } catch (JWTException $e) {
@@ -152,7 +152,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'failed',
-                'message' => 'Validasi gagal',
+                'message' => 'Validation failed',
                 'errors' => $validator->errors(),
             ], 422);
         }
@@ -162,7 +162,7 @@ class AuthController extends Controller
         if (!$token = auth('api')->attempt($credentials)) {
             return response()->json([
                 'status' => 'failed',
-                'message' => 'Username atau password salah.',
+                'message' => 'Invalid username or password.',
             ], 401);
         }
 
@@ -191,7 +191,7 @@ class AuthController extends Controller
             JWTAuth::parseToken()->invalidate();
             return response()->json([
                 'status' => 'success',
-                'message' => 'Berhasil logout!',
+                'message' => 'Logged out successfully!',
             ]);
         } catch (JWTException $e) {
             return response()->json([
@@ -209,7 +209,7 @@ class AuthController extends Controller
         } catch (JWTException $e) {
             return response()->json([
                 'status' => 'failed',
-                'message' => 'Token gagal diperbarui. Mungkin sudah expired.',
+                'message' => 'Token refresh failed. It may have expired.',
             ], 401);
         }
     }
