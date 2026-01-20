@@ -178,7 +178,7 @@ class ImportService
             'INCLB_INCIB_ExpDate' => $this->parseDate($row['inclb_incib_expdate'] ?? null),
             'INCLB_CTLOC_Code' => $row['inclb_ctloc_code'] ?? null,
             'INCLB_CTLOC_Desc' => $row['inclb_ctloc_desc'] ?? null,
-            'INCLB_PhyQty' => $this->parseDecimal($row['inclb_phyqty'] ?? null),
+            'INCLB_PhyQty' => $this->parseDecimal($row['inclb_phy_qty'] ?? null),
             'CTUOM_Code' => $row['ctuom_code'] ?? null,
             'CTUOM_Desc' => $row['ctuom_desc'] ?? null,
             'created_at' => $now,
