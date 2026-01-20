@@ -7,15 +7,33 @@ use App\Models\Stock;
 use App\Models\StockSAP;
 use App\Models\StockTCINCItmLcBt;
 use App\Models\FormStock;
+use App\Models\StockSAPTc;
 use Carbon\Carbon;
 
 class StockManagementController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $stocks = Stock::orderBy('created_at', 'desc')->get();
         $formStocks = FormStock::orderBy('created_at', 'desc')->get();
-        return view('stock-management', compact('stocks', 'formStocks'));
+
+        $filterDate = $request->query('filter_date', Carbon::today()->format('Y-m-d'));
+
+        // Fetch raw SAP and TrakCare data based on filter date
+        $stockSAPs = StockSAP::whereDate('Period_DateTime', $filterDate)->paginate(10, ['*'], 'sap_page');
+        $stockTCs = StockTCINCItmLcBt::whereDate('Period_DateTime', $filterDate)->orderBy('id', 'desc')->paginate(10, ['*'], 'tc_page');
+
+        // Fetch Calculated Stock Data (tcmon_stock) based on filter date
+        $stockCalculations = Stock::whereDate('created_at', $filterDate)
+            ->orderBy('id', 'desc')
+            ->paginate(10, ['*'], 'calc_page');
+
+        // Fetch Comparison Data (tcmon_stocksaptc)
+        $stockComparisons = StockSAPTc::whereDate('Period_DateTime', $filterDate)
+            ->orderBy('id', 'desc')
+            ->paginate(10, ['*'], 'comp_page');
+
+        return view('stock-management', compact('stocks', 'formStocks', 'stockSAPs', 'stockTCs', 'stockCalculations', 'stockComparisons', 'filterDate'));
     }
 
     public function kalkulasi(Request $request)
@@ -33,6 +51,7 @@ class StockManagementController extends Controller
 
             $stockTCs = StockTCINCItmLcBt::whereNotNull('Combine_Code')
                 ->whereDate('Period_DateTime', $periodDate)
+                ->orderBy('id', 'desc')
                 ->get();
 
             $tcGrouped = $stockTCs->groupBy('Combine_Code');
@@ -42,6 +61,10 @@ class StockManagementController extends Controller
             $minusCount = 0;
             $skippedCount = 0;
 
+            // Clear existing calculations for this period to prevent duplicates
+            $materialDocPrefix = 'ADJSO' . str_replace('-', '', $periodDate);
+            Stock::where('materialDocument', $materialDocPrefix)->delete();
+
             foreach ($stockSAPs as $sap) {
                 $combineCode = $sap->Combine_Code;
 
@@ -50,20 +73,21 @@ class StockManagementController extends Controller
 
                     $sapQty = $sap->Qty ?? 0;
                     $tcQty = $tcData->INCLB_PhyQty ?? 0;
-                    $selisih = $sapQty - $tcQty;
 
-                    if ($selisih == 0) {
+                    $selisih = bcsub((string) $sapQty, (string) $tcQty, 5);
+
+                    if (bccomp($selisih, '0', 5) === 0) {
                         $skippedCount++;
                         continue;
                     }
 
-                    if ($selisih > 0) {
+                    if (bccomp($selisih, '0', 5) === 1) { // Difference > 0 (Plus)
                         $indicator = 'P';
                         $qtyToSave = $selisih;
                         $plusCount++;
-                    } else {
+                    } else { // Difference < 0 (Minus)
                         $indicator = 'M';
-                        $qtyToSave = abs($selisih);
+                        $qtyToSave = bcsub('0', $selisih, 5); // Absolute value logic
                         $minusCount++;
                     }
 
@@ -83,9 +107,8 @@ class StockManagementController extends Controller
                         'stocksap_id' => $sap->id,
                         'stocktcinc_itmlcbt_id' => $tcData->id,
                         'Combine_Code' => $combineCode,
-                        'materialDocument' => 'ADJSO' . str_replace('-', '', $periodDate),
+                        'materialDocument' => $materialDocPrefix,
                         'movementType' => '201',
-                        // 'specialStockIndicator' => $sap->Stock_Segment ?? '',
                         'indicator' => $indicator,
                         'material' => $tcData->INCLB_INCI_Code ?? '',
                         'sloc' => $tcData->INCLB_CTLOC_Code ?? '',
@@ -101,8 +124,6 @@ class StockManagementController extends Controller
                         'poDiscountPerUnit' => 0,
                         'amountInLocalCurrency' => 0,
                         'map' => 0,
-                        // 'taxCode' => '',
-                        // 'taxRate' => '',
                     ]);
 
                     $processedCount++;
@@ -121,6 +142,75 @@ class StockManagementController extends Controller
                     'total_tc_records' => $stockTCs->count(),
                 ],
                 'message' => 'Calculation successful! Data has been saved to the Stock table.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function compare(Request $request)
+    {
+        try {
+            $request->validate([
+                'period_date' => 'required|date'
+            ]);
+
+            $periodDate = $request->input('period_date');
+
+            $stockSAPs = StockSAP::whereNotNull('Combine_Code')
+                ->whereDate('Period_DateTime', $periodDate)
+                ->get();
+
+            $stockTCs = StockTCINCItmLcBt::whereNotNull('Combine_Code')
+                ->whereDate('Period_DateTime', $periodDate)
+                ->orderBy('id', 'desc')
+                ->get();
+
+            $tcGrouped = $stockTCs->groupBy('Combine_Code');
+
+            $processedCount = 0;
+
+            // Clear existing compare records for this period
+            StockSAPTc::whereDate('Period_DateTime', $periodDate)->delete();
+
+            foreach ($stockSAPs as $sap) {
+                $combineCode = $sap->Combine_Code;
+
+                if ($tcGrouped->has($combineCode)) {
+                    $tcData = $tcGrouped->get($combineCode)->first();
+
+                    $sapQty = $sap->Qty ?? 0;
+                    $tcQty = $tcData->INCLB_PhyQty ?? 0;
+
+                    // Simpan data compare ke tbmon_stocksaptc (Semua yang match CombineCode)
+                    StockSAPTc::create([
+                        'Period_DateTime' => $periodDate,
+                        'Combine_Code' => $sap->Combine_Code,
+                        'Material_Desc' => $sap->Material_Desc,
+                        'Material_Code' => $sap->Material_Code,
+                        'Plant' => $sap->Plant,
+                        'Storage_Loc' => $sap->Storage_Loc,
+                        'Batch_No' => $sap->Batch_No,
+                        'BU_Code' => $sap->BU_Code,
+                        'QTY_SAP' => $sapQty,
+                        'QTY_TC' => $tcQty,
+                    ]);
+
+                    $processedCount++;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'period_date' => date('d/m/Y', strtotime($periodDate)),
+                    'total_processed' => $processedCount,
+                ],
+                'message' => 'Comparion successful! Data has been saved to the Stock Compare table.'
             ]);
 
         } catch (\Exception $e) {

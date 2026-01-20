@@ -9,6 +9,15 @@ class DoctorsFee extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::saving(function (DoctorsFee $doctorsFee) {
+            $totalPrice = $doctorsFee->TotalPrice ?? 0;
+            $discountItem = $doctorsFee->DiscountItem ?? 0;
+            $doctorsFee->AfterDiscount = $totalPrice - $discountItem;
+        });
+    }
+
     protected $table = 'doctors_fee';
 
     protected $fillable = [

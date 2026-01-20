@@ -54,6 +54,7 @@ Route::get('/stock/export', [StockController::class, 'exportExcel'])->name('stoc
 // Stock Management Routes
 Route::get('/stock-management', [StockManagementController::class, 'index'])->name('stock-management.index');
 Route::post('/stock-management/kalkulasi', [StockManagementController::class, 'kalkulasi'])->name('stock-management.kalkulasi');
+Route::post('/stock-management/compare', [StockManagementController::class, 'compare'])->name('stock-management.compare');
 Route::match(['get', 'post'], '/stock-management/download-json', [StockManagementController::class, 'downloadJson'])->name('stock-management.download-json');
 Route::post('/stock-management/download-json-by-material-doc', [StockManagementController::class, 'downloadJsonByMaterialDocument'])->name('stock-management.download-json-by-material-doc');
 

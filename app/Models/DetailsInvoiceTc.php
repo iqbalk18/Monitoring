@@ -22,6 +22,11 @@ class DetailsInvoiceTc extends Model
             $data = $details->attributesToArray();
             unset($data['id'], $data['created_at'], $data['updated_at']);
 
+            // Calculate AfterDiscount
+            $totalPrice = isset($data['TotalPrice']) ? (float) $data['TotalPrice'] : 0;
+            $discountItem = isset($data['DiscountItem']) ? (float) $data['DiscountItem'] : 0;
+            $data['AfterDiscount'] = $totalPrice - $discountItem;
+
             \App\Models\DoctorsFee::create($data);
         });
     }
