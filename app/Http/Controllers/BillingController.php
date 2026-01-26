@@ -16,62 +16,63 @@ class BillingController extends Controller
     public function index(Request $request)
     {
         $token = session('token');
-        $user  = session('user_name');
-        $org   = session('sales_org');
+        $user = session('user_name');
+        $org = session('sales_org');
 
         if (!$token) {
             return redirect('/loginmdw')->withErrors(['loginmdw' => 'Please Login.']);
         }
 
         $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));
-        $toDateRaw   = $request->query('toDate', now()->format('Y-m-d'));
+        $toDateRaw = $request->query('toDate', now()->format('Y-m-d'));
 
         try {
             $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRaw)->format('Ymd');
-            $toDate   = Carbon::createFromFormat('Y-m-d', $toDateRaw)->format('Ymd');
+            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRaw)->format('Ymd');
         } catch (\Exception $e) {
             return back()->withErrors(['date' => 'Invalid Format Date']);
         }
 
-        $statusOptions = ['success','failed','ready to rerun','reversed'];
-        $status = $request->query('status', 'success','failed','ready to rerun');
-        if (!is_array($status)) $status = [$status];
+        $statusOptions = ['success', 'failed', 'ready to rerun', 'reversed'];
+        $status = $request->query('status', 'success', 'failed', 'ready to rerun');
+        if (!is_array($status))
+            $status = [$status];
 
-        $typeFilter   = $request->query('type', 'FinalBilling');
-        $page         = (int) $request->query('page', 1);
+        $typeFilter = $request->query('type', 'FinalBilling');
+        $page = (int) $request->query('page', 1);
 
         try {
             $response = Http::withToken($token)
                 ->timeout(30)
                 ->get('https://cerebro.ihc.id/api/sap/monitoring/recap', [
-                    'limit'             => 500, 
-                    'salesOrganization' => $org,
-                    'page'              => $page,
-                    'fromDate'          => $fromDate,
-                    'toDate'            => $toDate,
-                    'status'            => count($status) === count($statusOptions) ? null : implode(',', $status),
-                    'includeDetails'    => 1,
-                    'type'              => $typeFilter,
-                ]);
+                        'limit' => 500,
+                        'salesOrganization' => $org,
+                        'page' => $page,
+                        'fromDate' => $fromDate,
+                        'toDate' => $toDate,
+                        'status' => count($status) === count($statusOptions) ? null : implode(',', $status),
+                        'includeDetails' => 1,
+                        'type' => $typeFilter,
+                    ]);
         } catch (ConnectionException $e) {
             return view('billing', [
-                'token'               => $token,
-                'user'                => $user,
-                'org'                 => $org,
-                'recaps'              => collect([]),
-                'error'               => 'Request timeout, Unstable Connection',
-                'currentPage'         => $page,
-                'lastPage'            => 1,
-                'status'              => $status,
-                'fromDate'            => $fromDateRaw,
-                'toDate'              => $toDateRaw,
-                'totalFinalAmount'    => 0,
-                'totalAmount'         => 0,
-                'totalAmountFree'     => 0,
-                'totalDepositAmount'  => 0,
-                'recapCount'          => 0,
-                'totalData'           => 0,
-                'typeFilter'          => $typeFilter,
+                'token' => $token,
+                'user' => $user,
+                'org' => $org,
+                'recaps' => collect([]),
+                'error' => 'Request timeout, Unstable Connection',
+                'currentPage' => $page,
+                'lastPage' => 1,
+                'status' => $status,
+                'fromDate' => $fromDateRaw,
+                'toDate' => $toDateRaw,
+                'totalFinalAmount' => 0,
+                'totalAmount' => 0,
+                'totalAmountFree' => 0,
+                'totalDepositAmount' => 0,
+                'recapCount' => 0,
+                'totalData' => 0,
+                'typeFilter' => $typeFilter,
             ]);
         }
 
@@ -112,171 +113,180 @@ class BillingController extends Controller
             $lastPage = $data['last_page'] ?? (int) ceil(($totalData ?: $recapsRaw->count()) / 5);
 
             return view('billing', [
-                'token'               => $token,
-                'user'                => $user,
-                'org'                 => $org,
-                'recaps'              => $recaps,
-                'currentPage'         => $currentPage,
-                'lastPage'            => $lastPage,
-                'status'              => $status,
-                'fromDate'            => $fromDateRaw,
-                'toDate'              => $toDateRaw,
-                'totalFinalAmount'    => $totalFinalAmount,
-                'totalAmount'         => $totalAmount,
-                'totalAmountFree'     => $totalAmountFree,
-                'totalDepositAmount'  => $totalDepositAmount,
-                'recapCount'          => $recapCount,
-                'totalData'           => $totalData,
-                'typeFilter'          => $typeFilter,
+                'token' => $token,
+                'user' => $user,
+                'org' => $org,
+                'recaps' => $recaps,
+                'currentPage' => $currentPage,
+                'lastPage' => $lastPage,
+                'status' => $status,
+                'fromDate' => $fromDateRaw,
+                'toDate' => $toDateRaw,
+                'totalFinalAmount' => $totalFinalAmount,
+                'totalAmount' => $totalAmount,
+                'totalAmountFree' => $totalAmountFree,
+                'totalDepositAmount' => $totalDepositAmount,
+                'recapCount' => $recapCount,
+                'totalData' => $totalData,
+                'typeFilter' => $typeFilter,
             ]);
         }
 
         return view('billing', [
-            'token'               => $token,
-            'user'                => $user,
-            'org'                 => $org,
-            'recaps'              => collect([]),
-            'error'               => 'Failed get data: ' . $response->body(),
-            'currentPage'         => $page,
-            'lastPage'            => 1,
-            'status'              => $status,
-            'fromDate'            => $fromDateRaw,
-            'toDate'              => $toDateRaw,
-            'totalFinalAmount'    => 0,
-            'totalAmount'         => 0,
-            'totalAmountFree'     => 0,
-            'totalDepositAmount'  => 0,
-            'recapCount'          => 0,
-            'totalData'           => 0,
-            'typeFilter'          => $typeFilter,
+            'token' => $token,
+            'user' => $user,
+            'org' => $org,
+            'recaps' => collect([]),
+            'error' => 'Failed get data: ' . $response->body(),
+            'currentPage' => $page,
+            'lastPage' => 1,
+            'status' => $status,
+            'fromDate' => $fromDateRaw,
+            'toDate' => $toDateRaw,
+            'totalFinalAmount' => 0,
+            'totalAmount' => 0,
+            'totalAmountFree' => 0,
+            'totalDepositAmount' => 0,
+            'recapCount' => 0,
+            'totalData' => 0,
+            'typeFilter' => $typeFilter,
         ]);
     }
 
 
     public function exportExcel(Request $request)
-{
-    $token = session('token');
-    $org   = session('sales_org');
+    {
+        $token = session('token');
+        $org = session('sales_org');
 
-    if (!$token) {
-        return redirect('/loginmdw')->withErrors(['loginmdw' => 'Please Login.']);
-    }
-
-    $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));
-    $toDateRaw   = $request->query('toDate', now()->format('Y-m-d'));
-
-    try {
-        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRaw)->format('Ymd');
-        $toDate   = Carbon::createFromFormat('Y-m-d', $toDateRaw)->format('Ymd');
-    } catch (\Exception $e) {
-        return back()->withErrors(['date' => 'Invalid date format']);
-    }
-
-    $status = $request->query('status', []);
-    $typeFilter = $request->query('type', 'FinalBilling');
-
-    if (!is_array($status)) $status = [$status];
-
-    $allRecaps = collect();
-    $page = 1;
-    $hasMore = true;
-
-    try {
-        while ($hasMore) {
-            $response = Http::withToken($token)
-                ->timeout(60)
-                ->get('https://cerebro.ihc.id/api/sap/monitoring/recap', [
-                    'limit'             => 500,
-                    'salesOrganization' => $org,
-                    'fromDate'          => $fromDate,
-                    'toDate'            => $toDate,
-                    'status'            => count($status) ? implode(',', $status) : null,
-                    'includeDetails'    => 1,
-                    'type'              => $typeFilter,
-                    'page'              => $page,
-                ]);
-
-            if (!$response->successful()) break;
-
-            $data = $response->json();
-            $recaps = collect($data['data'] ?? []);
-            $allRecaps = $allRecaps->merge($recaps);
-
-            $currentPage = $data['current_page'] ?? $page;
-            $lastPage = $data['last_page'] ?? $page;
-            $hasMore = $currentPage < $lastPage;
-            $page++;
+        if (!$token) {
+            return redirect('/loginmdw')->withErrors(['loginmdw' => 'Please Login.']);
         }
-    } catch (ConnectionException $e) {
-        return back()->withErrors(['export' => 'Request timeout or unstable connection']);
-    }
 
-    if ($allRecaps->isEmpty()) {
-        return back()->withErrors(['export' => 'No data available for export']);
-    }
+        $fromDateRaw = $request->query('fromDate', now()->subDays(7)->format('Y-m-d'));
+        $toDateRaw = $request->query('toDate', now()->format('Y-m-d'));
 
-    // === CREATE EXCEL ===
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setTitle('Billing Recap');
+        try {
+            $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRaw)->format('Ymd');
+            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRaw)->format('Ymd');
+        } catch (\Exception $e) {
+            return back()->withErrors(['date' => 'Invalid date format']);
+        }
 
-    $headers = ['No', 'Recap Code', 'Ref ID', 'Status', 'Final Amount', 'SAP Error Message'];
-    $col = 'A';
-    foreach ($headers as $header) {
-        $sheet->setCellValue($col . '1', $header);
-        $col++;
-    }
-    $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+        $status = $request->query('status', []);
+        $typeFilter = $request->query('type', 'FinalBilling');
 
-    $row = 2;
-    $no = 1;
+        if (!is_array($status))
+            $status = [$status];
 
-    foreach ($allRecaps as $recap) {
-        $recapCode = $recap['recapCode'] ?? '-';
-        $status = $recap['status'] ?? '-';
-        $finalAmount = $recap['totalFinalAmount'] ?? 0;
-        $sapError = $recap['sapErrorMessage'] ?? '';
+        $allRecaps = [];
+        $page = 1;
+        $hasMore = true;
 
-        $refIds = collect($recap['items'] ?? [])
-            ->flatMap(fn($item) => collect($item['belongsToRefs'] ?? [])->pluck('refId'))
-            ->filter()
-            ->unique()
-            ->values();
+        // Increase execution time for large exports
+        set_time_limit(600);
 
-        if ($refIds->isNotEmpty()) {
-            foreach ($refIds as $refId) {
+        try {
+            while ($hasMore) {
+                $response = Http::withToken($token)
+                    ->timeout(120)
+                    ->get('https://cerebro.ihc.id/api/sap/monitoring/recap', [
+                            'limit' => 500,
+                            'salesOrganization' => $org,
+                            'fromDate' => $fromDate,
+                            'toDate' => $toDate,
+                            'status' => count($status) ? implode(',', $status) : null,
+                            'includeDetails' => 1,
+                            'type' => $typeFilter,
+                            'page' => $page,
+                        ]);
+
+                if (!$response->successful())
+                    break;
+
+                $data = $response->json();
+                $pageData = $data['data'] ?? [];
+
+                // Append data to array instead of merging collections for performance
+                foreach ($pageData as $item) {
+                    $allRecaps[] = $item;
+                }
+
+                $currentPage = $data['current_page'] ?? $page;
+                $lastPage = $data['last_page'] ?? $page;
+                $hasMore = $currentPage < $lastPage;
+                $page++;
+            }
+        } catch (ConnectionException $e) {
+            return back()->withErrors(['export' => 'Request timeout or unstable connection']);
+        }
+
+        if (empty($allRecaps)) {
+            return back()->withErrors(['export' => 'No data available for export']);
+        }
+
+        // === CREATE EXCEL ===
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Billing Recap');
+
+        $headers = ['No', 'Recap Code', 'Ref ID', 'Status', 'Final Amount', 'SAP Error Message'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '1', $header);
+            $col++;
+        }
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+
+        $row = 2;
+        $no = 1;
+
+        foreach ($allRecaps as $recap) {
+            $recapCode = $recap['recapCode'] ?? '-';
+            $status = $recap['status'] ?? '-';
+            $finalAmount = $recap['totalFinalAmount'] ?? 0;
+            $sapError = $recap['sapErrorMessage'] ?? '';
+
+            $refIds = collect($recap['items'] ?? [])
+                ->flatMap(fn($item) => collect($item['belongsToRefs'] ?? [])->pluck('refId'))
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($refIds->isNotEmpty()) {
+                foreach ($refIds as $refId) {
+                    $sheet->setCellValue("A{$row}", $no++);
+                    $sheet->setCellValue("B{$row}", $recapCode);
+                    $sheet->setCellValue("C{$row}", $refId);
+                    $sheet->setCellValue("D{$row}", $status);
+                    $sheet->setCellValue("E{$row}", $finalAmount);
+                    $sheet->setCellValue("F{$row}", $sapError);
+                    $row++;
+                }
+            } else {
                 $sheet->setCellValue("A{$row}", $no++);
                 $sheet->setCellValue("B{$row}", $recapCode);
-                $sheet->setCellValue("C{$row}", $refId);
+                $sheet->setCellValue("C{$row}", '-');
                 $sheet->setCellValue("D{$row}", $status);
                 $sheet->setCellValue("E{$row}", $finalAmount);
                 $sheet->setCellValue("F{$row}", $sapError);
                 $row++;
             }
-        } else {
-            $sheet->setCellValue("A{$row}", $no++);
-            $sheet->setCellValue("B{$row}", $recapCode);
-            $sheet->setCellValue("C{$row}", '-');
-            $sheet->setCellValue("D{$row}", $status);
-            $sheet->setCellValue("E{$row}", $finalAmount);
-            $sheet->setCellValue("F{$row}", $sapError);
-            $row++;
         }
+
+        foreach (range('A', 'F') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $fileName = 'Billing_Recap_' . now()->format('Ymd_His') . '.xlsx';
+
+        // === STREAM RESPONSE ===
+        $writer = new Xlsx($spreadsheet);
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
-
-    foreach (range('A', 'F') as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
-
-    $fileName = 'Billing_Recap_' . now()->format('Ymd_His') . '.xlsx';
-
-    // === STREAM RESPONSE ===
-    $writer = new Xlsx($spreadsheet);
-    return response()->streamDownload(function () use ($writer) {
-        $writer->save('php://output');
-    }, $fileName, [
-        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Cache-Control' => 'max-age=0',
-    ]);
-}
 }

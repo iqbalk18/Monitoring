@@ -252,9 +252,9 @@ class StockManagementController extends Controller
                         'batch' => $stock->batch ?? '',
                         'expiredDate' => $stock->expiredDate ? $stock->expiredDate->format('Ymd') : '',
                         'expiredDateFreeText' => $stock->expiredDateFreeText ?? '',
-                        'qty' => $stock->qty ?? '0',
+                        'qty' => isset($stock->qty) ? (string) ((float) $stock->qty) : '0',
                         'uom' => $stock->uom ?? '',
-                        'qtySku' => $stock->qtySku ?? '0',
+                        'qtySku' => isset($stock->qtySku) ? (string) ((float) $stock->qtySku) : '0',
                         'uomSku' => $stock->uomSku ?? '',
                         'currency' => $stock->currency ?? '',
                         'poBasePricePerUnit' => $stock->poBasePricePerUnit ?? '0',
@@ -310,6 +310,12 @@ class StockManagementController extends Controller
 
             $materialDocument = $request->input('materialDocument');
             $stocks = Stock::where('materialDocument', $materialDocument)->get();
+
+            $stocks->transform(function ($stock) {
+                $stock->qty = isset($stock->qty) ? (string) ((float) $stock->qty) : '0';
+                $stock->qtySku = isset($stock->qtySku) ? (string) ((float) $stock->qtySku) : '0';
+                return $stock;
+            });
 
             if ($stocks->isEmpty()) {
                 return response()->json([
