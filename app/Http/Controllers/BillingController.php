@@ -156,6 +156,10 @@ class BillingController extends Controller
 
     public function exportExcel(Request $request)
     {
+        // Increase memory limit and execution time for large exports
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+
         $token = session('token');
         $org = session('sales_org');
 
@@ -179,15 +183,32 @@ class BillingController extends Controller
         if (!is_array($status))
             $status = [$status];
 
-        $allRecaps = [];
+        // === INITIALIZE EXCEL ===
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Billing Recap');
+
+        $headers = ['No', 'Recap Code', 'Ref ID', 'Status', 'Final Amount', 'SAP Error Message'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '1', $header);
+            $col++;
+        }
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+
+        $row = 2;
+        $no = 1;
         $page = 1;
         $hasMore = true;
-
-        // Increase execution time for large exports
-        set_time_limit(600);
+        $hasData = false;
 
         try {
             while ($hasMore) {
+                // Garbage collection to free memory from previous iterations
+                if ($page > 1) {
+                    gc_collect_cycles();
+                }
+
                 $response = Http::withToken($token)
                     ->timeout(120)
                     ->get('https://cerebro.ihc.id/api/sap/monitoring/recap', [
@@ -205,11 +226,44 @@ class BillingController extends Controller
                     break;
 
                 $data = $response->json();
-                $pageData = $data['data'] ?? [];
+                $recaps = $data['data'] ?? [];
 
-                // Append data to array instead of merging collections for performance
-                foreach ($pageData as $item) {
-                    $allRecaps[] = $item;
+                if (!empty($recaps)) {
+                    $hasData = true;
+                }
+
+                // Process current page data directly to Excel
+                foreach ($recaps as $recap) {
+                    $recapCode = $recap['recapCode'] ?? '-';
+                    $statusVal = $recap['status'] ?? '-';
+                    $finalAmount = $recap['totalFinalAmount'] ?? 0;
+                    $sapError = $recap['sapErrorMessage'] ?? '';
+
+                    $refIds = collect($recap['items'] ?? [])
+                        ->flatMap(fn($item) => collect($item['belongsToRefs'] ?? [])->pluck('refId'))
+                        ->filter()
+                        ->unique()
+                        ->values();
+
+                    if ($refIds->isNotEmpty()) {
+                        foreach ($refIds as $refId) {
+                            $sheet->setCellValue("A{$row}", $no++);
+                            $sheet->setCellValue("B{$row}", $recapCode);
+                            $sheet->setCellValue("C{$row}", $refId);
+                            $sheet->setCellValue("D{$row}", $statusVal);
+                            $sheet->setCellValue("E{$row}", $finalAmount);
+                            $sheet->setCellValue("F{$row}", $sapError);
+                            $row++;
+                        }
+                    } else {
+                        $sheet->setCellValue("A{$row}", $no++);
+                        $sheet->setCellValue("B{$row}", $recapCode);
+                        $sheet->setCellValue("C{$row}", '-');
+                        $sheet->setCellValue("D{$row}", $statusVal);
+                        $sheet->setCellValue("E{$row}", $finalAmount);
+                        $sheet->setCellValue("F{$row}", $sapError);
+                        $row++;
+                    }
                 }
 
                 $currentPage = $data['current_page'] ?? $page;
@@ -221,57 +275,8 @@ class BillingController extends Controller
             return back()->withErrors(['export' => 'Request timeout or unstable connection']);
         }
 
-        if (empty($allRecaps)) {
+        if (!$hasData) {
             return back()->withErrors(['export' => 'No data available for export']);
-        }
-
-        // === CREATE EXCEL ===
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Billing Recap');
-
-        $headers = ['No', 'Recap Code', 'Ref ID', 'Status', 'Final Amount', 'SAP Error Message'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($col . '1', $header);
-            $col++;
-        }
-        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
-
-        $row = 2;
-        $no = 1;
-
-        foreach ($allRecaps as $recap) {
-            $recapCode = $recap['recapCode'] ?? '-';
-            $status = $recap['status'] ?? '-';
-            $finalAmount = $recap['totalFinalAmount'] ?? 0;
-            $sapError = $recap['sapErrorMessage'] ?? '';
-
-            $refIds = collect($recap['items'] ?? [])
-                ->flatMap(fn($item) => collect($item['belongsToRefs'] ?? [])->pluck('refId'))
-                ->filter()
-                ->unique()
-                ->values();
-
-            if ($refIds->isNotEmpty()) {
-                foreach ($refIds as $refId) {
-                    $sheet->setCellValue("A{$row}", $no++);
-                    $sheet->setCellValue("B{$row}", $recapCode);
-                    $sheet->setCellValue("C{$row}", $refId);
-                    $sheet->setCellValue("D{$row}", $status);
-                    $sheet->setCellValue("E{$row}", $finalAmount);
-                    $sheet->setCellValue("F{$row}", $sapError);
-                    $row++;
-                }
-            } else {
-                $sheet->setCellValue("A{$row}", $no++);
-                $sheet->setCellValue("B{$row}", $recapCode);
-                $sheet->setCellValue("C{$row}", '-');
-                $sheet->setCellValue("D{$row}", $status);
-                $sheet->setCellValue("E{$row}", $finalAmount);
-                $sheet->setCellValue("F{$row}", $sapError);
-                $row++;
-            }
         }
 
         foreach (range('A', 'F') as $col) {

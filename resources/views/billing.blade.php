@@ -145,70 +145,59 @@
             <table class="table-shadcn" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th style="cursor: pointer;" onclick="sortByRecapCode()">Recap Code <span id="recapSortArrow">⬍</span></th>
-                        <th>List Recap Code</th>
                         <th>Ref ID</th>
-                        <th>Status</th>
+                        <th>Document Date</th>
+                        <th>Order Type</th>
+                        <th style="cursor: pointer; min-width: 200px;" onclick="sortByRecapCode()">Recap Code <span id="recapSortArrow">⬍</span></th>
+                        <th>FB Status</th>
+                        <th>Recap Status</th>
+                        <th>Payer</th>
+                        <th>Assignment</th>
+                        <th style="text-align: right;">Deposit Amount</th>
                         <th style="text-align: right;">Final Amount</th>
-                        <th>SAP Error</th>
+                        <th style="text-align: right;">Amount Free</th>
+                        <th style="text-align: right;">Total Amount</th>
                     </tr>
                 </thead>
                 <tbody id="recapTableBody">
                     @forelse($recaps as $recap)
                         @php
-                            $refIds = collect($recap['items'] ?? [])
-                                ->flatMap(fn($item) => collect($item['belongsToRefs'] ?? [])->pluck('refId'))
-                                ->filter()
-                                ->unique()
-                                ->values();
-                            if ($refIds->isEmpty()) $refIds = collect([null]);
-                            $itemsWithError = collect($recap['items'] ?? [])
-                                ->filter(fn($item) => !is_null($item['sapErrorMessage']));
+                            $refs = collect($recap['refs'] ?? []);
+                            if ($refs->isEmpty()) {
+                                $refs = collect([[
+                                    'refId' => '-',
+                                    'documentDate' => $recap['documentDate'] ?? '-',
+                                    'depositAmount' => 0,
+                                    'totalFinalAmount' => $recap['totalFinalAmount'] ?? 0,
+                                    'totalAmountFree' => $recap['totalAmountFree'] ?? 0,
+                                    'totalAmount' => $recap['totalAmount'] ?? 0,
+                                ]]);
+                            }
                         @endphp
 
-                        @foreach($refIds as $idx => $ref)
+                        @foreach($refs as $ref)
                         <tr>
-                            @if($idx === 0)
-                            <td class="recap-code-first" rowspan="{{ $refIds->count() }}" style="vertical-align: top; font-weight: 600; color: var(--brand);">
-                                <code>{{ $recap['recapCode'] }}</code>
-                            </td>
-                            @endif
-                            <td class="list-recap">{{ $recap['recapCode'] }}</td>
-                            <td style="font-family: monospace; font-size: 0.8125rem;">{{ $ref ?? '-' }}</td>
+                            <td style="font-family: monospace; font-size: 0.8125rem;">{{ $ref['refId'] ?? '-' }}</td>
+                            <td>{{ $ref['documentDate'] ?? '-' }}</td>
+                            <td>{{ $recap['orderType'] ?? '-' }}</td>
+                            <td class="list-recap" style="font-weight: 600; color: var(--brand);">{{ $recap['recapCode'] }}</td>
+                            <td>{{ $recap['fbStatus'] ?? '-' }}</td>
                             <td>
                                 <span class="badge-shadcn {{ strtolower($recap['status']) === 'success' ? 'badge-shadcn-success' : 'badge-shadcn-secondary' }}">
                                     {{ $recap['status'] }}
                                 </span>
                             </td>
-                            <td style="text-align: right; white-space: nowrap;">Rp{{ number_format($recap['totalFinalAmount'] ?? 0, 0, ',', '.') }}</td>
-                            <td>
-                                @if(!is_null($recap['sapErrorMessage']))
-                                    <div><strong>Recap Error:</strong><br>{!! nl2br(e($recap['sapErrorMessage'])) !!}</div>
-                                @elseif($itemsWithError->count() > 0)
-                                    <ul class="mb-0 ps-3" style="font-size: 0.8125rem;">
-                                        @foreach ($itemsWithError as $item)
-                                        <li>
-                                            <strong>Material:</strong> {{ $item['material'] ?? '-' }} — 
-                                            <strong>Qty:</strong> {{ $item['quantity'] ?? 0 }} — 
-                                            <strong>Amount:</strong> Rp{{ number_format($item['finalAmount'] ?? 0, 0, ',', '.') }}<br>
-                                            @if(!empty($item['belongsToRefs']))
-                                                @foreach($item['belongsToRefs'] as $refItem)
-                                                    <strong>Ref ID:</strong> {{ $refItem['refId'] ?? '-' }}<br>
-                                                @endforeach
-                                            @endif
-                                            <strong>Error:</strong> {{ $item['sapErrorMessage'] ?? '-' }}
-                                        </li>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    <span class="text-muted">No errors</span>
-                                @endif
-                            </td>
+                            <td>{{ $recap['payer'] ?? '-' }}</td>
+                            <td>{{ $recap['assignment'] ?? '-' }}</td>
+                            <td style="text-align: right;">Rp{{ number_format($ref['depositAmount'] ?? 0, 0, ',', '.') }}</td>
+                            <td style="text-align: right;">Rp{{ number_format($ref['totalFinalAmount'] ?? 0, 0, ',', '.') }}</td>
+                            <td style="text-align: right;">Rp{{ number_format($ref['totalAmountFree'] ?? 0, 0, ',', '.') }}</td>
+                            <td style="text-align: right;">Rp{{ number_format($ref['totalAmount'] ?? 0, 0, ',', '.') }}</td>
                         </tr>
                         @endforeach
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted" style="padding: 2rem;">No data found.</td>
+                        <td colspan="12" class="text-center text-muted" style="padding: 2rem;">No data found.</td>
                     </tr>
                     @endforelse
                 </tbody>
