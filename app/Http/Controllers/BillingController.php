@@ -45,15 +45,15 @@ class BillingController extends Controller
             $response = Http::withToken($token)
                 ->timeout(30)
                 ->get('https://cerebro.ihc.id/api/sap/monitoring/recap', [
-                        'limit' => 500,
-                        'salesOrganization' => $org,
-                        'page' => $page,
-                        'fromDate' => $fromDate,
-                        'toDate' => $toDate,
-                        'status' => count($status) === count($statusOptions) ? null : implode(',', $status),
-                        'includeDetails' => 1,
-                        'type' => $typeFilter,
-                    ]);
+                    'limit' => 500,
+                    'salesOrganization' => $org,
+                    'page' => $page,
+                    'fromDate' => $fromDate,
+                    'toDate' => $toDate,
+                    'status' => count($status) === count($statusOptions) ? null : implode(',', $status),
+                    'includeDetails' => 1,
+                    'type' => $typeFilter,
+                ]);
         } catch (ConnectionException $e) {
             return view('billing', [
                 'token' => $token,
@@ -188,16 +188,28 @@ class BillingController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Billing Recap');
 
-        $headers = ['No', 'Recap Code', 'Ref ID', 'Status', 'Final Amount', 'SAP Error Message'];
+        $headers = [
+            'Ref ID',
+            'Document Date',
+            'Order Type',
+            'Recap Code',
+            'FB Status',
+            'Recap Status',
+            'Payer',
+            'Assignment',
+            'Deposit Amount',
+            'Final Amount',
+            'Amount Free',
+            'Total Amount'
+        ];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '1', $header);
             $col++;
         }
-        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:L1')->getFont()->setBold(true);
 
         $row = 2;
-        $no = 1;
         $page = 1;
         $hasMore = true;
         $hasData = false;
@@ -212,15 +224,15 @@ class BillingController extends Controller
                 $response = Http::withToken($token)
                     ->timeout(120)
                     ->get('https://cerebro.ihc.id/api/sap/monitoring/recap', [
-                            'limit' => 500,
-                            'salesOrganization' => $org,
-                            'fromDate' => $fromDate,
-                            'toDate' => $toDate,
-                            'status' => count($status) ? implode(',', $status) : null,
-                            'includeDetails' => 1,
-                            'type' => $typeFilter,
-                            'page' => $page,
-                        ]);
+                        'limit' => 500,
+                        'salesOrganization' => $org,
+                        'fromDate' => $fromDate,
+                        'toDate' => $toDate,
+                        'status' => count($status) ? implode(',', $status) : null,
+                        'includeDetails' => 1,
+                        'type' => $typeFilter,
+                        'page' => $page,
+                    ]);
 
                 if (!$response->successful())
                     break;
@@ -234,34 +246,35 @@ class BillingController extends Controller
 
                 // Process current page data directly to Excel
                 foreach ($recaps as $recap) {
-                    $recapCode = $recap['recapCode'] ?? '-';
-                    $statusVal = $recap['status'] ?? '-';
-                    $finalAmount = $recap['totalFinalAmount'] ?? 0;
-                    $sapError = $recap['sapErrorMessage'] ?? '';
+                    $refs = collect($recap['refs'] ?? []);
 
-                    $refIds = collect($recap['items'] ?? [])
-                        ->flatMap(fn($item) => collect($item['belongsToRefs'] ?? [])->pluck('refId'))
-                        ->filter()
-                        ->unique()
-                        ->values();
+                    if ($refs->isEmpty()) {
+                        $refs = collect([
+                            [
+                                'refId' => '-',
+                                'documentDate' => $recap['documentDate'] ?? '-',
+                                'depositAmount' => 0,
+                                'totalFinalAmount' => $recap['totalFinalAmount'] ?? 0,
+                                'totalAmountFree' => $recap['totalAmountFree'] ?? 0,
+                                'totalAmount' => $recap['totalAmount'] ?? 0,
+                            ]
+                        ]);
+                    }
 
-                    if ($refIds->isNotEmpty()) {
-                        foreach ($refIds as $refId) {
-                            $sheet->setCellValue("A{$row}", $no++);
-                            $sheet->setCellValue("B{$row}", $recapCode);
-                            $sheet->setCellValue("C{$row}", $refId);
-                            $sheet->setCellValue("D{$row}", $statusVal);
-                            $sheet->setCellValue("E{$row}", $finalAmount);
-                            $sheet->setCellValue("F{$row}", $sapError);
-                            $row++;
-                        }
-                    } else {
-                        $sheet->setCellValue("A{$row}", $no++);
-                        $sheet->setCellValue("B{$row}", $recapCode);
-                        $sheet->setCellValue("C{$row}", '-');
-                        $sheet->setCellValue("D{$row}", $statusVal);
-                        $sheet->setCellValue("E{$row}", $finalAmount);
-                        $sheet->setCellValue("F{$row}", $sapError);
+                    foreach ($refs as $ref) {
+                        // Columns: Ref ID, Document Date, Order Type, Recap Code, FB Status, Recap Status, Payer, Assignment, Deposit Amount, Final Amount, Amount Free, Total Amount
+                        $sheet->setCellValue("A{$row}", $ref['refId'] ?? '-');
+                        $sheet->setCellValue("B{$row}", $ref['documentDate'] ?? '-');
+                        $sheet->setCellValue("C{$row}", $recap['orderType'] ?? '-');
+                        $sheet->setCellValue("D{$row}", $recap['recapCode'] ?? '-');
+                        $sheet->setCellValue("E{$row}", $recap['fbStatus'] ?? '-');
+                        $sheet->setCellValue("F{$row}", $recap['status'] ?? '-');
+                        $sheet->setCellValue("G{$row}", $recap['payer'] ?? '-');
+                        $sheet->setCellValue("H{$row}", $recap['assignment'] ?? '-');
+                        $sheet->setCellValue("I{$row}", $ref['depositAmount'] ?? 0);
+                        $sheet->setCellValue("J{$row}", $ref['totalFinalAmount'] ?? 0);
+                        $sheet->setCellValue("K{$row}", $ref['totalAmountFree'] ?? 0);
+                        $sheet->setCellValue("L{$row}", $ref['totalAmount'] ?? 0);
                         $row++;
                     }
                 }
