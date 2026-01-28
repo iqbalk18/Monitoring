@@ -95,14 +95,11 @@ class PriceSubmissionController extends Controller
 
         foreach ($submissions as $sub) {
             $apiPrice = [
-                'ITPRank' => $sub->ITP_Rank,
                 'ITPEpisodeType' => $sub->ITP_EpisodeType,
-                'ITPPrice' => (string) $sub->ITP_Price,
+                'ITPROOMTCode' => $sub->ITP_ROOMT_Code ?? '', // Ensure empty string if null
+                'ITPPrice' => (string) (int) $sub->ITP_Price,
+                'ITPRank' => (string) $sub->ITP_Rank,
             ];
-
-            if ($sub->ITP_EpisodeType == 'I') {
-                $apiPrice['ITPROOMTCode'] = $sub->ITP_ROOMT_Code;
-            }
             $pricesForApi[] = $apiPrice;
         }
 
@@ -118,6 +115,9 @@ class PriceSubmissionController extends Controller
             'prices' => $pricesForApi,
         ];
 
+        // Log the JSON payload for verification
+        Log::info('Price Approval Payload: ' . json_encode($apiPayload, JSON_PRETTY_PRINT));
+
         try {
             $response = Http::timeout(30)->post('https://trakcare.com/api/prices', $apiPayload);
 
@@ -130,8 +130,8 @@ class PriceSubmissionController extends Controller
                         ->whereNull('ITP_DateTo')
                         ->where('ITP_DateFrom', '<', $newDateFrom)
                         ->update([
-                                'ITP_DateTo' => \Carbon\Carbon::parse($newDateFrom)->subDay()->format('Y-m-d')
-                            ]);
+                            'ITP_DateTo' => \Carbon\Carbon::parse($newDateFrom)->subDay()->format('Y-m-d')
+                        ]);
                 }
 
                 foreach ($submissions as $sub) {
