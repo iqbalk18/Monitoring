@@ -18,7 +18,7 @@ class AdminUserSeeder extends Seeder
         \App\Models\User::updateOrCreate(
             ['username' => 'iqbal'],
             [
-                'role' => 'ADMIN',
+                'roles' => ['ADMIN'],
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
             ]
         );

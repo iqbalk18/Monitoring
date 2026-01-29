@@ -118,7 +118,7 @@
                                 <td>
                                     <a href="{{ route('price-submissions.show', $submission->id) }}"
                                         class="btn-shadcn btn-shadcn-sm btn-shadcn-primary">
-                                        {{ session('user')['role'] == 'PRICE_APPROVER' && $status == 'PENDING' ? 'Review Batch' : 'View Batch' }}
+                                        {{ user_has_role(session('user'), 'PRICE_APPROVER') && $status == 'PENDING' ? 'Review Batch' : 'View Batch' }}
                                     </a>
                                 </td>
                             </tr>

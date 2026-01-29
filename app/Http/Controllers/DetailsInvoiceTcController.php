@@ -11,7 +11,11 @@ class DetailsInvoiceTcController extends Controller
      */
     public function index()
     {
-        return view('details.index'); // Placeholder or similar
+        if (!user_has_role(session('user'), 'ADMIN')) {
+            return redirect()->route('dashboard')->withErrors(['access' => 'Access denied. Only ADMIN can view Details Invoice TC module.']);
+        }
+
+        return view('details_invoice_tc.index');
     }
 
     /**

@@ -16,7 +16,7 @@
                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                     <circle cx="12" cy="7" r="4" />
                 </svg>
-                {{ $user['username'] }} ({{ $user['role'] }})
+                {{ $user['username'] }} ({{ implode(', ', user_roles_list($user)) }})
             </span>
             <button type="button" class="btn-shadcn btn-shadcn-primary" data-bs-toggle="modal"
                 data-bs-target="#addUserModal">
@@ -96,7 +96,7 @@
                         <tr>
                             <th style="width: 60px;">#</th>
                             <th>Username</th>
-                            <th>Role</th>
+                            <th>Roles</th>
                             <th>Created At</th>
                             <th>Updated</th>
                             <th style="text-align: center;">Actions</th>
@@ -121,16 +121,31 @@
                                     </div>
                                 </td>
                                 <td>
-                                    @if($u->role === 'ADMIN')
-                                        <span class="badge-shadcn badge-shadcn-primary">{{ $u->role }}</span>
-                                    @else
-                                        <span class="badge-shadcn badge-shadcn-secondary">{{ $u->role }}</span>
-                                    @endif
+                                    @php $uRoles = $u->getRolesList(); @endphp
+                                    <div class="d-flex flex-wrap" style="gap: 0.25rem;">
+                                        @foreach($uRoles as $r)
+                                            @if($r === 'ADMIN')
+                                                <span class="badge-shadcn badge-shadcn-primary">{{ $r }}</span>
+                                            @else
+                                                <span class="badge-shadcn badge-shadcn-secondary">{{ $r }}</span>
+                                            @endif
+                                        @endforeach
+                                        @if(empty($uRoles))
+                                            <span class="text-muted" style="font-size: 0.875rem;">—</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>{{ $u->created_at->format('d M Y H:i') }}</td>
                                 <td>{{ $u->updated_at->format('d M Y H:i') }}</td>
                                 <td style="text-align: center;">
-                                    <div class="d-flex align-items-center justify-content-center" style="gap: 0.375rem;">
+                                    <div class="d-flex align-items-center justify-content-center flex-wrap" style="gap: 0.375rem;">
+                                        <button type="button" class="btn-shadcn btn-shadcn-outline btn-shadcn-sm btn-edit-roles"
+                                            data-bs-toggle="modal" data-bs-target="#editRolesModal"
+                                            data-id="{{ $u->id }}" data-username="{{ $u->username }}"
+                                            data-roles="{{ json_encode($u->getRolesList()) }}" title="Edit Roles">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                            Roles
+                                        </button>
                                         <button type="button" class="btn-shadcn btn-shadcn-outline btn-shadcn-sm"
                                             data-bs-toggle="modal" data-bs-target="#changePasswordModal" data-id="{{ $u->id }}"
                                             data-username="{{ $u->username }}" title="Change Password">
@@ -223,14 +238,30 @@
                                 class="form-control-shadcn" placeholder="Confirm password" required>
                         </div>
                         <div class="mb-3">
-                            <label for="role" class="form-label-shadcn">Role</label>
-                            <select name="role" id="role" class="form-select-shadcn" required>
-                                <option value="">-- Select Role --</option>
-                                <option value="ADMIN">Admin</option>
-                                <option value="PRICE_STRATEGY">Price Strategy</option>
-                                <option value="PRICE_ENTRY">Price Entry</option>
-                                <option value="PRICE_APPROVER">Price Approver</option>
-                            </select>
+                            <label class="form-label-shadcn">Roles</label>
+                            <p class="text-muted" style="font-size: 0.8125rem; margin-bottom: 0.5rem;">Pilih satu atau lebih role. Hak akses menu adalah gabungan dari semua role.</p>
+                            <div class="d-flex flex-wrap" style="gap: 0.5rem 1rem;">
+                                @php
+                                    $roleLabels = [
+                                        'ADMIN' => 'Admin',
+                                        'PRICE_STRATEGY' => 'Price Strategy',
+                                        'PRICE_ENTRY' => 'Price Entry',
+                                        'PRICE_APPROVER' => 'Price Approver',
+                                        'FINANCE' => 'Finance',
+                                        'PHARMACY' => 'Pharmacy',
+                                        'PROCUREMENT' => 'Procurement',
+                                    ];
+                                @endphp
+                                @foreach($availableRoles ?? config('roles.all', []) as $roleCode)
+                                    <label class="d-inline-flex align-items-center" style="cursor: pointer;">
+                                        <input type="checkbox" name="roles[]" value="{{ $roleCode }}" class="form-check-input me-2">
+                                        <span>{{ $roleLabels[$roleCode] ?? $roleCode }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('roles')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="modal-footer-shadcn">
@@ -245,6 +276,47 @@
                             </svg>
                             Add User
                         </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Roles -->
+    <div class="modal fade" id="editRolesModal" tabindex="-1" aria-labelledby="editRolesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-shadcn">
+                <div class="modal-header-shadcn">
+                    <h5 class="modal-title" id="editRolesModalLabel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Edit Roles
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editRolesForm" method="POST" action="#">
+                    @csrf
+                    <div class="modal-body-shadcn">
+                        <p class="mb-3" id="editRolesUsername"></p>
+                        <div class="mb-3">
+                            <label class="form-label-shadcn">Roles</label>
+                            <p class="text-muted" style="font-size: 0.8125rem; margin-bottom: 0.5rem;">Pilih satu atau lebih role. Hak akses menu adalah gabungan dari semua role.</p>
+                            <div class="d-flex flex-wrap" style="gap: 0.5rem 1rem;" id="editRolesCheckboxes">
+                                @php $roleLabels = ['ADMIN' => 'Admin', 'PRICE_STRATEGY' => 'Price Strategy', 'PRICE_ENTRY' => 'Price Entry', 'PRICE_APPROVER' => 'Price Approver', 'FINANCE' => 'Finance', 'PHARMACY' => 'Pharmacy', 'PROCUREMENT' => 'Procurement']; @endphp
+                                @foreach($availableRoles ?? config('roles.all', []) as $roleCode)
+                                    <label class="d-inline-flex align-items-center" style="cursor: pointer;">
+                                        <input type="checkbox" name="roles[]" value="{{ $roleCode }}" class="form-check-input me-2 edit-role-cb">
+                                        <span>{{ $roleLabels[$roleCode] ?? $roleCode }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('roles')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer-shadcn">
+                        <button type="button" class="btn-shadcn btn-shadcn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-shadcn btn-shadcn-primary">Save Roles</button>
                     </div>
                 </form>
             </div>
@@ -313,9 +385,35 @@
                 const username = button.getAttribute('data-username') || 'User';
 
                 changeForm.action = "{{ url('/settings/change-password') }}/" + userId;
-                // Update title with SVG icon
                 changeTitle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Change Password - ' + username;
                 changeForm.reset();
+            });
+
+            const editRolesModal = document.getElementById('editRolesModal');
+            const editRolesForm = document.getElementById('editRolesForm');
+            const editRolesUsername = document.getElementById('editRolesUsername');
+            editRolesModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                if (!button || !button.classList.contains('btn-edit-roles')) return;
+                const userId = button.getAttribute('data-id');
+                const username = button.getAttribute('data-username') || 'User';
+                let roles = [];
+                try {
+                    roles = JSON.parse(button.getAttribute('data-roles') || '[]');
+                } catch (e) {}
+                editRolesForm.action = "{{ url('/settings/update-roles') }}/" + userId;
+                editRolesUsername.textContent = 'User: ' + username;
+                document.querySelectorAll('#editRolesModal .edit-role-cb').forEach(function (cb) {
+                    cb.checked = roles.indexOf(cb.value) !== -1;
+                });
+            });
+
+            document.querySelector('#addUserModal form').addEventListener('submit', function (e) {
+                const checked = this.querySelectorAll('input[name="roles[]"]:checked');
+                if (!checked.length) {
+                    e.preventDefault();
+                    alert('Pilih minimal satu role.');
+                }
             });
 
             document.querySelectorAll('.btn-delete').forEach(function (btn) {

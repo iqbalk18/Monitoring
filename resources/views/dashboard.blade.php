@@ -469,7 +469,7 @@
                     Online
                 </span>
                 <span class="hero-badge hero-badge-role">
-                    {{ $user['role'] }}
+                    {{ implode(', ', user_roles_list($user)) }}
                 </span>
             </div>
             <div class="datetime-display">
@@ -494,8 +494,8 @@
         <div class="stat-card">
             <div class="stat-icon stat-icon-green">👤</div>
             <div class="stat-content">
-                <h5>User Role</h5>
-                <p>{{ $user['role'] }}</p>
+                <h5>User Roles</h5>
+                <p>{{ implode(', ', user_roles_list($user)) ?: '—' }}</p>
             </div>
         </div>
         <div class="stat-card">
@@ -528,13 +528,8 @@
         <h3>Quick Access</h3>
     </div>
 
-    @php
-        $priceRoles = ['PRICE_STRATEGY', 'PRICE_ENTRY', 'PRICE_APPROVER'];
-        $isPriceRole = in_array($user['role'], $priceRoles);
-    @endphp
-
     <div class="dashboard-grid">
-        @if(!$isPriceRole)
+        @if(user_can_data_monitoring($user, 'adjustment_stock'))
             <!-- Adjustment Stock -->
             <a href="{{ route('stock-management.index') }}" class="dashboard-card" style="--card-accent: #3b82f6;">
                 <div class="dashboard-card-icon dashboard-card-icon-stock">📦</div>
@@ -550,7 +545,9 @@
                     </svg>
                 </div>
             </a>
+        @endif
 
+        @if(user_can_data_monitoring($user, 'data_monitoring'))
             <!-- Data Monitoring (form POST) -->
             <form method="POST" action="{{ url('/loginmdw') }}" id="formDataMonitoring" style="margin: 0;">
                 @csrf
@@ -571,7 +568,7 @@
             </form>
         @endif
 
-        @if(isset($user['role']) && $user['role'] == 'PRICE_APPROVER')
+        @if(user_has_role($user, 'PRICE_APPROVER'))
             <!-- Price Approvals -->
             <a href="{{ route('price-submissions.index') }}" class="dashboard-card" style="--card-accent: #8b5cf6;">
                 <div class="dashboard-card-icon" style="background-color: #f3e8ff; color: #8b5cf6;">✅</div>
@@ -594,7 +591,7 @@
                     </div>
                     </a>
         @endif
-            @if(isset($user['role']) && $user['role'] == 'PRICE_ENTRY')
+            @if(user_has_role($user, 'PRICE_ENTRY'))
                 <!-- My Submissions -->
                 <a href="{{ route('price-submissions.index') }}" class="dashboard-card" style="--card-accent: #3b82f6;">
                     <div class="dashboard-card-icon" style="background-color: #eff6ff; color: #3b82f6;">📝</div>
@@ -612,6 +609,7 @@
                 </a>
             @endif
 
+                @if(user_can_data_monitoring($user, 'list_item_pricing'))
                 <!-- List Item & Pricing -->
                 <a href="{{ url('/arc-itm-mast') }}" class="dashboard-card" style="--card-accent: #f59e0b;">
                     <div class="dashboard-card-icon dashboard-card-icon-pricing">💰</div>
@@ -627,8 +625,9 @@
                         </svg>
                     </div>
                 </a>
+                @endif
 
-                @if(!$isPriceRole)
+                @if(user_can_data_monitoring($user, 'activity-log'))
                     <!-- Log -->
                     <a href="#" class="dashboard-card" style="--card-accent: #a855f7;">
                         <div class="dashboard-card-icon dashboard-card-icon-log">🧾</div>
@@ -647,7 +646,7 @@
                 @endif
 
                 <!-- Settings (ADMIN only) -->
-                @if($user['role'] === 'ADMIN')
+                @if(user_has_role($user, 'ADMIN'))
                     <!-- Doctors Fee -->
                     <a href="{{ route('doctors-fee.index') }}" class="dashboard-card" style="--card-accent: #10b981;">
                         <div class="dashboard-card-icon" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #059669;">
@@ -707,11 +706,14 @@
                 setInterval(updateDateTime, 60000); // Update every minute
 
                 // Show loading state when clicking Data Monitoring
-                document.getElementById('btnDataMonitoring').addEventListener('click', function () {
-                    this.classList.add('loading');
-                    this.querySelector('.dashboard-card-icon').textContent = '⏳';
-                    this.querySelector('.dashboard-card-title').textContent = 'Connecting...';
-                    this.querySelector('.dashboard-card-desc').textContent = 'Please wait, connecting to server...';
-                });
+                const btnDataMonitoring = document.getElementById('btnDataMonitoring');
+                if (btnDataMonitoring) {
+                    btnDataMonitoring.addEventListener('click', function () {
+                        this.classList.add('loading');
+                        this.querySelector('.dashboard-card-icon').textContent = '⏳';
+                        this.querySelector('.dashboard-card-title').textContent = 'Connecting...';
+                        this.querySelector('.dashboard-card-desc').textContent = 'Please wait, connecting to server...';
+                    });
+                }
             </script>
 @endsection

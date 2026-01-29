@@ -26,6 +26,7 @@ Route::get('/dashboard', [WebAuthController::class, 'dashboard'])->name('dashboa
 // SETTINGS & USER MANAGEMENT
 Route::get('/settings', [WebAuthController::class, 'settingsPage'])->name('settings');
 Route::post('/settings/add-user', [WebAuthController::class, 'addUserWeb'])->name('settings.addUser');
+Route::post('/settings/update-roles/{id}', [WebAuthController::class, 'updateUserRolesWeb'])->name('settings.updateRoles');
 Route::post('/settings/change-password/{id}', [WebAuthController::class, 'changePasswordWeb'])->name('settings.changePassword');
 Route::delete('/settings/delete-user/{id}', [WebAuthController::class, 'deleteUserWeb'])->name('settings.deleteUser');
 
@@ -51,12 +52,14 @@ Route::get('/rejected', [RejectedController::class, 'index'])->name('rejected.in
 Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
 Route::get('/stock/export', [StockController::class, 'exportExcel'])->name('stock.export');
 
-// Stock Management Routes
-Route::get('/stock-management', [StockManagementController::class, 'index'])->name('stock-management.index');
-Route::post('/stock-management/kalkulasi', [StockManagementController::class, 'kalkulasi'])->name('stock-management.kalkulasi');
-Route::post('/stock-management/compare', [StockManagementController::class, 'compare'])->name('stock-management.compare');
-Route::match(['get', 'post'], '/stock-management/download-json', [StockManagementController::class, 'downloadJson'])->name('stock-management.download-json');
-Route::post('/stock-management/download-json-by-material-doc', [StockManagementController::class, 'downloadJsonByMaterialDocument'])->name('stock-management.download-json-by-material-doc');
+// Stock Management Routes (Data Monitoring: adjustment_stock)
+Route::middleware(['check.data.monitoring:adjustment_stock'])->group(function () {
+    Route::get('/stock-management', [StockManagementController::class, 'index'])->name('stock-management.index');
+    Route::post('/stock-management/kalkulasi', [StockManagementController::class, 'kalkulasi'])->name('stock-management.kalkulasi');
+    Route::post('/stock-management/compare', [StockManagementController::class, 'compare'])->name('stock-management.compare');
+    Route::match(['get', 'post'], '/stock-management/download-json', [StockManagementController::class, 'downloadJson'])->name('stock-management.download-json');
+    Route::post('/stock-management/download-json-by-material-doc', [StockManagementController::class, 'downloadJsonByMaterialDocument'])->name('stock-management.download-json-by-material-doc');
+});
 
 Route::get('import', [ImportController::class, 'showForm'])->name('showForm');
 Route::post('import', [ImportController::class, 'import'])->name('import');
@@ -66,18 +69,21 @@ Route::post('save-manual', [FormStockController::class, 'store'])->name('save_ma
 
 Route::get('download-json', [ImportController::class, 'downloadJson']);
 
-Route::resource('arc-itm-mast', ArcItmMastController::class);
+// List Item & Pricing (Data Monitoring: list_item_pricing)
+Route::middleware(['check.data.monitoring:list_item_pricing'])->group(function () {
+    Route::resource('arc-itm-mast', ArcItmMastController::class);
+});
 Route::resource('margin', MarginController::class);
 Route::resource('details-invoice-tc', \App\Http\Controllers\DetailsInvoiceTcController::class);
 Route::resource('doctors-fee', \App\Http\Controllers\DoctorsFeeController::class);
 
-Route::get('arc-item-price-italy/create', [ARCItemPriceItalyController::class, 'createPage'])->name('arc-item-price-italy.create');
-Route::post('arc-item-price-italy', [ARCItemPriceItalyController::class, 'store'])->name('arc-item-price-italy.store');
-
-// Manage price routes
-Route::get('arc-item-price-italy/manage/{arcimCode}', [ARCItemPriceItalyController::class, 'managePrice'])->name('arc-item-price-italy.manage');
-Route::post('arc-item-price-italy/manage/{arcimCode}', [ARCItemPriceItalyController::class, 'storeFromManage'])->name('arc-item-price-italy.store-manage');
-Route::put('arc-item-price-italy/manage/{arcimCode}/{id}', [ARCItemPriceItalyController::class, 'updateFromManage'])->name('arc-item-price-italy.update-manage');
+Route::middleware(['check.data.monitoring:list_item_pricing'])->group(function () {
+    Route::get('arc-item-price-italy/create', [ARCItemPriceItalyController::class, 'createPage'])->name('arc-item-price-italy.create');
+    Route::post('arc-item-price-italy', [ARCItemPriceItalyController::class, 'store'])->name('arc-item-price-italy.store');
+    Route::get('arc-item-price-italy/manage/{arcimCode}', [ARCItemPriceItalyController::class, 'managePrice'])->name('arc-item-price-italy.manage');
+    Route::post('arc-item-price-italy/manage/{arcimCode}', [ARCItemPriceItalyController::class, 'storeFromManage'])->name('arc-item-price-italy.store-manage');
+    Route::put('arc-item-price-italy/manage/{arcimCode}/{id}', [ARCItemPriceItalyController::class, 'updateFromManage'])->name('arc-item-price-italy.update-manage');
+});
 
 // Price Submission Approval Workflow
 use App\Http\Controllers\PriceSubmissionController;

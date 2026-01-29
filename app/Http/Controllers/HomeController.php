@@ -13,6 +13,7 @@ class HomeController extends Controller
             return redirect('/loginmdw')->withErrors(['loginmdw' => 'Please Login.']);
         }
 
-        return view('home');
+        $user = Session::get('user');
+        return view('home', compact('user'));
     }
 }

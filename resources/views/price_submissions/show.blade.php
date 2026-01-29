@@ -130,7 +130,7 @@
         </div>
 
         <!-- Actions -->
-        @if($baseSubmission->status == 'PENDING' && session('user')['role'] == 'PRICE_APPROVER')
+        @if($baseSubmission->status == 'PENDING' && user_has_role(session('user'), 'PRICE_APPROVER'))
             <div class="d-flex flex-column gap-3">
                 <!-- Approve -->
                 <div class="card-shadcn">

@@ -12,6 +12,11 @@ class DoctorsFeeController extends Controller
      */
     public function index(Request $request)
     {
+        // Check if user is ADMIN
+        if (!user_has_role(session('user'), 'ADMIN')) {
+            return redirect()->route('dashboard')->withErrors(['access' => 'Access denied. Only ADMIN can view Doctors Fee module.']);
+        }
+        
         $query = DoctorsFee::query();
 
         if ($request->filled('search')) {

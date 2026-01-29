@@ -3,6 +3,9 @@
 @section('title', 'Home - Bali International Hospital')
 
 @section('content')
+@php
+    $user = $user ?? session('user');
+@endphp
 <style>
     .home-header {
         text-align: center;
@@ -29,7 +32,7 @@
     /* Dashboard Cards Grid */
     .menu-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 1.25rem;
         max-width: 1000px;
         margin: 0 auto;
@@ -124,31 +127,39 @@
 <!-- Menu Cards -->
 <div class="menu-grid">
     <!-- Billing Dashboard -->
-    <a href="{{ route('billing.index') }}" class="menu-card">
-        <div class="menu-card-icon menu-card-icon-billing">💰</div>
-        <h3 class="menu-card-title">Billing Dashboard</h3>
-        <p class="menu-card-desc">View patient billing data</p>
-    </a>
+    @if(user_can_data_monitoring($user, 'data_monitoring_billing'))
+        <a href="{{ route('billing.index') }}" class="menu-card">
+            <div class="menu-card-icon menu-card-icon-billing">💰</div>
+            <h3 class="menu-card-title">Billing Dashboard</h3>
+            <p class="menu-card-desc">View patient billing data</p>
+        </a>
+    @endif
 
     <!-- Stock -->
+    @if(user_can_data_monitoring($user, 'data_monitoring_stock'))
     <a href="{{ route('stock.index') }}" class="menu-card">
         <div class="menu-card-icon menu-card-icon-stock">📦</div>
         <h3 class="menu-card-title">Stock</h3>
         <p class="menu-card-desc">Monitor stock consumption</p>
     </a>
+    @endif
 
     <!-- Rejected -->
+    @if(user_can_data_monitoring($user, 'data_monitoring_rejected'))
     <a href="{{ route('rejected.index') }}" class="menu-card">
         <div class="menu-card-icon menu-card-icon-rejected">❌</div>
         <h3 class="menu-card-title">Rejected</h3>
         <p class="menu-card-desc">Track rejected data</p>
     </a>
+    @endif
 
     <!-- Stock Management -->
+    {{-- @if(user_can_data_monitoring($user, 'data_monitoring_stock_management'))
     <a href="{{ route('stock-management.index') }}" class="menu-card">
         <div class="menu-card-icon menu-card-icon-management">🗃️</div>
         <h3 class="menu-card-title">Stock Management</h3>
         <p class="menu-card-desc">Manage imports & calculations</p>
     </a>
+    @endif --}}
 </div>
 @endsection

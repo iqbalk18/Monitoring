@@ -48,7 +48,7 @@ class WebAuthController extends Controller
         $user = $request->session()->get('user');
         $pendingApprovals = 0;
 
-        if (isset($user['role']) && $user['role'] == 'PRICE_APPROVER') {
+        if (user_has_role($user, 'PRICE_APPROVER')) {
             $pendingApprovals = \App\Models\PriceSubmission::where('status', 'PENDING')->count();
         }
 
@@ -63,36 +63,78 @@ class WebAuthController extends Controller
 
         $user = $request->session()->get('user');
 
-        if ($user['role'] !== 'ADMIN') {
+        if (!user_has_role($user, 'ADMIN')) {
             return redirect('/dashboard')->withErrors(['access' => 'Anda tidak memiliki akses ke halaman ini.']);
         }
 
         $users = User::orderBy('created_at', 'desc')->get();
-        return view('settings', compact('user', 'users'));
+        $availableRoles = config('roles.all', []);
+        return view('settings', compact('user', 'users', 'availableRoles'));
     }
 
-    public function addUserWeb(Request $request)
+    public function updateUserRolesWeb(Request $request, $id)
     {
         $currentUser = session('user');
 
-        if (!$currentUser || $currentUser['role'] !== 'ADMIN') {
-            return redirect('/dashboard')->withErrors(['access' => 'Hanya ADMIN yang dapat menambahkan user.']);
+        if (!$currentUser || !user_has_role($currentUser, 'ADMIN')) {
+            return redirect('/dashboard')->withErrors(['access' => 'Hanya ADMIN yang dapat mengubah role user.']);
         }
 
+        $targetUser = User::findOrFail($id);
+        $allowedRoles = config('roles.all', []);
         $validator = Validator::make($request->all(), [
-            'username' => 'required|string|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|in:ADMIN,PRICE_STRATEGY,PRICE_ENTRY,PRICE_APPROVER',
+            'roles' => 'required|array',
+            'roles.*' => 'in:' . implode(',', $allowedRoles),
+        ], [
+            'roles.required' => 'Pilih minimal satu role.',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
+        $roles = array_values(array_unique($request->input('roles', [])));
+        if (empty($roles)) {
+            return back()->withErrors(['roles' => 'Pilih minimal satu role.'])->withInput();
+        }
+
+        $targetUser->roles = $roles;
+        $targetUser->save();
+
+        return redirect()->route('settings')->with('success', 'Role user ' . $targetUser->username . ' berhasil diperbarui.');
+    }
+
+    public function addUserWeb(Request $request)
+    {
+        $currentUser = session('user');
+
+        if (!$currentUser || !user_has_role($currentUser, 'ADMIN')) {
+            return redirect('/dashboard')->withErrors(['access' => 'Hanya ADMIN yang dapat menambahkan user.']);
+        }
+
+        $allowedRoles = config('roles.all', []);
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+            'roles' => 'required|array',
+            'roles.*' => 'in:' . implode(',', $allowedRoles),
+        ], [
+            'roles.required' => 'Pilih minimal satu role.',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $roles = array_values(array_unique($request->input('roles', [])));
+        if (empty($roles)) {
+            return back()->withErrors(['roles' => 'Pilih minimal satu role.'])->withInput();
+        }
+
         $user = new User();
         $user->username = $request->username;
         $user->password = Hash::make($request->password);
-        $user->role = $request->role;
+        $user->roles = $roles;
         $user->save();
 
         return redirect()->route('settings')->with('success', 'User added successfully!');
@@ -103,7 +145,7 @@ class WebAuthController extends Controller
         $currentUser = session('user');
         $targetUser = User::findOrFail($id);
 
-        if ($currentUser['role'] !== 'ADMIN' && $currentUser['id'] !== $targetUser->id) {
+        if (!user_has_role($currentUser, 'ADMIN') && ($currentUser['id'] ?? null) !== $targetUser->id) {
             return redirect()->back()->withErrors(['access' => 'Anda tidak memiliki izin untuk mengubah password ini.']);
         }
 
@@ -121,13 +163,13 @@ class WebAuthController extends Controller
     {
         $currentUser = session('user');
 
-        if ($currentUser['role'] !== 'ADMIN') {
+        if (!user_has_role($currentUser, 'ADMIN')) {
             return redirect()->back()->withErrors(['access' => 'Hanya ADMIN yang dapat menghapus user.']);
         }
 
         $user = User::findOrFail($id);
 
-        if ($user->id === $currentUser['id']) {
+        if ($user->id === ($currentUser['id'] ?? $currentUser->id ?? null)) {
             return redirect()->back()->withErrors(['access' => 'Anda tidak dapat menghapus akun Anda sendiri.']);
         }
 

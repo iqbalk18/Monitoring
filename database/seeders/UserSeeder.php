@@ -16,17 +16,17 @@ class UserSeeder extends Seeder
             [
                 'username' => 'widy',
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                'role' => 'PRICE_APPROVER',
+                'roles' => ['PRICE_APPROVER'],
             ],
             [
                 'username' => 'iqbal',
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                'role' => 'PRICE_ENTRY',
+                'roles' => ['PRICE_ENTRY'],
             ],
             [
                 'username' => 'windy',
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                'role' => 'PRICE_STRATEGY',
+                'roles' => ['PRICE_STRATEGY'],
             ],
         ];
 

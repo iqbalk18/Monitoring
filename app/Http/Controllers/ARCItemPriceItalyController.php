@@ -204,7 +204,7 @@ class ARCItemPriceItalyController extends Controller
             }
 
             // Logic for PRICE_ENTRY (Submission) or Normal Entry
-            $isPriceEntry = session('user') && session('user')['role'] == 'PRICE_ENTRY';
+            $isPriceEntry = session('user') && user_has_role(session('user'), 'PRICE_ENTRY');
 
             if ($isPriceEntry) {
                 // Check for existing pending submission
@@ -463,7 +463,7 @@ class ARCItemPriceItalyController extends Controller
             return $this->storeManualPrice($request, $arcimCode, $item);
         }
 
-        if (session('user') && session('user')['role'] == 'PRICE_ENTRY') {
+        if (session('user') && user_has_role(session('user'), 'PRICE_ENTRY')) {
             // Check for existing pending submission
             $existingPending = PriceSubmission::where('ITP_ARCIM_Code', $arcimCode)
                 ->where('status', 'PENDING')
@@ -759,7 +759,7 @@ class ARCItemPriceItalyController extends Controller
             }
 
             // Check if user is PRICE_ENTRY -> Create Submission
-            if (session('user') && session('user')['role'] == 'PRICE_ENTRY') {
+            if (session('user') && user_has_role(session('user'), 'PRICE_ENTRY')) {
                 // Check for existing pending submission for this price/item
                 $existingPending = PriceSubmission::where('ITP_ARCIM_Code', $arcimCode)
                     ->where('status', 'PENDING')
@@ -841,7 +841,7 @@ class ARCItemPriceItalyController extends Controller
                 ->withInput();
         }
 
-        if (session('user') && session('user')['role'] == 'PRICE_ENTRY') {
+        if (session('user') && user_has_role(session('user'), 'PRICE_ENTRY')) {
             // Check for existing pending submission
             $existingPending = PriceSubmission::where('ITP_ARCIM_Code', $arcimCode)
                 ->where('status', 'PENDING')
@@ -975,7 +975,7 @@ class ARCItemPriceItalyController extends Controller
             }
         }
 
-        if (session('user') && session('user')['role'] == 'PRICE_ENTRY') {
+        if (session('user') && user_has_role(session('user'), 'PRICE_ENTRY')) {
             // Check for existing pending submission
             $existingPending = PriceSubmission::where('ITP_ARCIM_Code', $arcimCode)
                 ->where('status', 'PENDING')

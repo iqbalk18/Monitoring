@@ -48,7 +48,7 @@
             <p class="section-desc">Manage master data items and pricing configuration.</p>
         </div>
         <div class="d-flex align-items-center" style="gap: 0.5rem;">
-            @if(session('user') && session('user')['role'] !== 'PRICE_ENTRY')
+            @if(session('user') && !user_has_role(session('user'), 'PRICE_ENTRY'))
                 <a href="{{ route('margin.index') }}" class="btn-shadcn btn-shadcn-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -205,7 +205,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center" style="gap: 0.375rem;">
-                                        @if(session('user') && session('user')['role'] !== 'PRICE_ENTRY')
+                                        @if(session('user') && !user_has_role(session('user'), 'PRICE_ENTRY'))
                                             <a href="{{ route('arc-itm-mast.edit', $item->id) }}"
                                                 class="btn-shadcn btn-shadcn-outline btn-shadcn-sm" title="Edit">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"

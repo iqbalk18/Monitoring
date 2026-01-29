@@ -12,7 +12,7 @@ class PriceSubmissionController extends Controller
 {
     public function index(Request $request)
     {
-        $role = session('user')['role'] ?? null;
+        $user = session('user');
 
         $query = PriceSubmission::select('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by', 'submission_type', 'approved_by')
             ->selectRaw('COUNT(*) as total_items')
@@ -21,11 +21,10 @@ class PriceSubmissionController extends Controller
             ->groupBy('batch_id', 'ITP_ARCIM_Code', 'ITP_ARCIM_Desc', 'created_at', 'submitted_by', 'submission_type', 'approved_by')
             ->orderBy('created_at', 'desc');
 
-        if ($role == 'PRICE_APPROVER') {
+        if (user_has_role($user, 'PRICE_APPROVER')) {
             // Show all statuses (PENDING, APPROVED, REJECTED)
-            // $query->where('status', 'PENDING');
-        } elseif ($role == 'PRICE_ENTRY') {
-            $query->where('submitted_by', session('user')['id']);
+        } elseif (user_has_role($user, 'PRICE_ENTRY')) {
+            $query->where('submitted_by', $user['id'] ?? $user->id ?? null);
         }
 
         // Search Filter (Batch ID, Item Code, Description, Submitted By)
@@ -66,7 +65,7 @@ class PriceSubmissionController extends Controller
 
     public function approve(Request $request, $id)
     {
-        if (session('user')['role'] !== 'PRICE_APPROVER') {
+        if (!user_has_role(session('user'), 'PRICE_APPROVER')) {
             return redirect()->back()->withErrors(['access' => 'Unauthorized access.']);
         }
 
@@ -210,7 +209,7 @@ class PriceSubmissionController extends Controller
 
     public function reject(Request $request, $id)
     {
-        if (session('user')['role'] !== 'PRICE_APPROVER') {
+        if (!user_has_role(session('user'), 'PRICE_APPROVER')) {
             return redirect()->back()->withErrors(['access' => 'Unauthorized access.']);
         }
 

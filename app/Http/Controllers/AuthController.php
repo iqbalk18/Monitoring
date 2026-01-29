@@ -17,17 +17,19 @@ class AuthController extends Controller
         try {
             $currentUser = JWTAuth::parseToken()->authenticate();
 
-            if ($currentUser->role !== 'ADMIN') {
+            if (!$currentUser->hasRole('ADMIN')) {
                 return response()->json([
                     'status' => 'failed',
                     'message' => 'Hanya ADMIN yang dapat menambahkan user baru.'
                 ], 403);
             }
 
+            $allowedRoles = config('roles.all', []);
             $validator = Validator::make($request->all(), [
                 'username' => 'required|string|max:255|unique:users',
                 'password' => 'required|string|min:6|confirmed',
-                'role' => 'required|in:ADMIN,PRICE_STRATEGY,PRICE_ENTRY,PRICE_APPROVER',
+                'roles' => 'required|array',
+                'roles.*' => 'in:' . implode(',', $allowedRoles),
             ]);
 
             if ($validator->fails()) {
@@ -38,10 +40,11 @@ class AuthController extends Controller
                 ], 422);
             }
 
+            $roles = array_values(array_unique($request->input('roles', [])));
             $user = User::create([
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
-                'role' => $request->role,
+                'roles' => $roles,
             ]);
 
             return response()->json([
@@ -63,7 +66,7 @@ class AuthController extends Controller
         try {
             $currentUser = JWTAuth::parseToken()->authenticate();
 
-            if ($currentUser->role !== 'ADMIN') {
+            if (!$currentUser->hasRole('ADMIN')) {
                 return response()->json([
                     'status' => 'failed',
                     'message' => 'Hanya ADMIN yang dapat menghapus user.'
