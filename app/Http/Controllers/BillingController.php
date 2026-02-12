@@ -41,6 +41,9 @@ class BillingController extends Controller
         $typeFilter = $request->query('type', 'FinalBilling');
         $page = (int) $request->query('page', 1);
 
+        $refId = $request->query('refId');
+        $recapCode = $request->query('recapCode');
+
         try {
             $response = Http::withToken($token)
                 ->timeout(30)
@@ -53,6 +56,8 @@ class BillingController extends Controller
                     'status' => count($status) === count($statusOptions) ? null : implode(',', $status),
                     'includeDetails' => 1,
                     'type' => $typeFilter,
+                    'refId' => $refId,
+                    'recapCode' => $recapCode,
                 ]);
         } catch (ConnectionException $e) {
             return view('billing', [
@@ -73,6 +78,8 @@ class BillingController extends Controller
                 'recapCount' => 0,
                 'totalData' => 0,
                 'typeFilter' => $typeFilter,
+                'refId' => $refId,
+                'recapCode' => $recapCode,
             ]);
         }
 
@@ -89,25 +96,71 @@ class BillingController extends Controller
                 $recaps = $recapsRaw->values();
             }
 
+            // Client-side filtering for Ref ID
+            if (!empty($refId)) {
+                $recaps = $recaps->filter(function ($recap) use ($refId) {
+                    $refs = collect($recap['refs'] ?? []);
+                    return $refs->contains(function ($ref) use ($refId) {
+                        return stripos($ref['refId'], $refId) !== false;
+                    });
+                })->values();
+            }
+
+            // Client-side filtering for Recap Code
+            if (!empty($recapCode)) {
+                $recaps = $recaps->filter(function ($recap) use ($recapCode) {
+                    return stripos($recap['recapCode'], $recapCode) !== false;
+                })->values();
+            }
+
             $recapCount = $recaps->count();
 
-            $totalFinalAmount = isset($data['additional']['totalFinalAmount'])
-                ? (int) $data['additional']['totalFinalAmount']
-                : (int) $recaps->sum('totalFinalAmount');
+            // Calculate totals from filtered data
+            // Any existing 'additional' data from API is invalid if we filtered locally
+            $shouldRecalculate = !empty($refId) || !empty($recapCode) || $status === 'failed';
 
-            $totalAmount = isset($data['additional']['totalAmount'])
+            $totalFinalAmount = (!$shouldRecalculate && isset($data['additional']['totalFinalAmount']))
+                ? (int) $data['additional']['totalFinalAmount']
+                : (int) $recaps->sum(fn($r) => collect($r['refs'] ?? [])->sum('totalFinalAmount'));
+
+            // Note: API might allow top-level totalFinalAmount, but if filtered by RefID, matches might be partial?
+            // Actually, if we filter by RefID, we keep the WHOLE recap if it has the refid.
+            // But usually totals should reflect the filtered view.
+            // For now, simple sum of the recap's totals is safest.
+            if ($shouldRecalculate && $recaps->isNotEmpty() && isset($recaps->first()['totalFinalAmount'])) {
+                // Optimization: use top level keys if available and trustworthy, but for safety let's sum keys
+                $totalFinalAmount = $recaps->sum('totalFinalAmount');
+            }
+
+
+            $totalAmount = (!$shouldRecalculate && isset($data['additional']['totalAmount']))
                 ? (int) $data['additional']['totalAmount']
                 : (int) $recaps->sum('totalAmount');
 
-            $totalAmountFree = isset($data['additional']['totalAmountFree'])
+            $totalAmountFree = (!$shouldRecalculate && isset($data['additional']['totalAmountFree']))
                 ? (int) $data['additional']['totalAmountFree']
                 : (int) $recaps->sum('totalAmountFree');
 
-            $totalDepositAmount = isset($data['additional']['totalDepositAmount'])
+            $totalDepositAmount = (!$shouldRecalculate && isset($data['additional']['totalDepositAmount']))
                 ? (int) $data['additional']['totalDepositAmount']
-                : (int) ($data['additional']['totalDepositAmount'] ?? 0);
+                : (int) $recaps->sum(fn($r) => collect($r['refs'] ?? [])->sum('depositAmount'));
 
-            $totalData = $data['total'] ?? $recapsRaw->count();
+            // if top level depositAmount exists on recap
+            if ($shouldRecalculate) {
+                // Fallback for deposit if it's not in refs? API structure isn't fully clear on where deposit lives,
+                // assuming it sums up or lives in 'additional'.
+                // Let's rely on what we have.
+                // Previous code: (int) ($data['additional']['totalDepositAmount'] ?? 0);
+                // There is no recap->sum('depositAmount') in original code lines 106-108.
+                // But lines 274 in export use $ref['depositAmount'].
+                // So we should calculate it.
+                $totalDepositAmount = $recaps->reduce(function ($carry, $recap) {
+                    return $carry + collect($recap['refs'] ?? [])->sum('depositAmount');
+                }, 0);
+            }
+
+
+            $totalData = $shouldRecalculate ? $recaps->count() : ($data['total'] ?? $recapsRaw->count());
 
             $currentPage = $data['current_page'] ?? $page;
             $lastPage = $data['last_page'] ?? (int) ceil(($totalData ?: $recapsRaw->count()) / 5);
@@ -129,6 +182,8 @@ class BillingController extends Controller
                 'recapCount' => $recapCount,
                 'totalData' => $totalData,
                 'typeFilter' => $typeFilter,
+                'refId' => $refId,
+                'recapCode' => $recapCode,
             ]);
         }
 
@@ -150,6 +205,8 @@ class BillingController extends Controller
             'recapCount' => 0,
             'totalData' => 0,
             'typeFilter' => $typeFilter,
+            'refId' => $refId,
+            'recapCode' => $recapCode,
         ]);
     }
 
@@ -179,6 +236,8 @@ class BillingController extends Controller
 
         $status = $request->query('status', []);
         $typeFilter = $request->query('type', 'FinalBilling');
+        $refId = $request->query('refId');
+        $recapCode = $request->query('recapCode');
 
         if (!is_array($status))
             $status = [$status];
@@ -232,6 +291,8 @@ class BillingController extends Controller
                         'includeDetails' => 1,
                         'type' => $typeFilter,
                         'page' => $page,
+                        'refId' => $refId,
+                        'recapCode' => $recapCode,
                     ]);
 
                 if (!$response->successful())
@@ -246,9 +307,27 @@ class BillingController extends Controller
 
                 // Process current page data directly to Excel
                 foreach ($recaps as $recap) {
+                    // Filter by Recap Code
+                    if (!empty($recapCode) && stripos($recap['recapCode'], $recapCode) === false) {
+                        continue;
+                    }
+
                     $refs = collect($recap['refs'] ?? []);
 
+                    // Filter by Ref ID
+                    if (!empty($refId)) {
+                        $refs = $refs->filter(function ($ref) use ($refId) {
+                            return stripos($ref['refId'], $refId) !== false;
+                        });
+
+                        // If filtering by Ref ID and no refs match, skip this recap
+                        if ($refs->isEmpty()) {
+                            continue;
+                        }
+                    }
+
                     if ($refs->isEmpty()) {
+                        // If no refs (and not filtered out by empty ref search), show header info
                         $refs = collect([
                             [
                                 'refId' => '-',

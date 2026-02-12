@@ -148,7 +148,13 @@ class ARCItemPriceItalyController extends Controller
         $prices->appends($request->only(['status']));
 
         // Get margins for Material type (M) for Type of Item Code dropdown
+        $today = now()->startOfDay();
         $materialMargins = Margin::where('ARCIM_ServMateria', 'M')
+            ->where('DateFrom', '<=', $today)
+            ->where(function ($q) use ($today) {
+                $q->whereNull('DateTo')
+                    ->orWhere('DateTo', '>=', $today);
+            })
             ->orderBy('TypeofItemCode', 'asc')
             ->get();
 
@@ -361,8 +367,8 @@ class ARCItemPriceItalyController extends Controller
                             ->whereNull('ITP_DateTo')
                             ->where('ITP_DateFrom', '<', $newDateFrom)
                             ->update([
-                                    'ITP_DateTo' => \Carbon\Carbon::parse($newDateFrom)->subDay()->format('Y-m-d')
-                                ]);
+                                'ITP_DateTo' => \Carbon\Carbon::parse($newDateFrom)->subDay()->format('Y-m-d')
+                            ]);
                     }
                     // Generate Batch ID for direct submission
                     $batchId = 'BATCH-' . now()->format('YmdHis') . '-' . strtoupper(uniqid());
@@ -497,7 +503,14 @@ class ARCItemPriceItalyController extends Controller
             ];
 
             if ($request->ITP_Price !== null) {
-                $margins = Margin::where('ARCIM_ServMateria', 'S')->get();
+                $today = now()->startOfDay();
+                $margins = Margin::where('ARCIM_ServMateria', 'S')
+                    ->where('DateFrom', '<=', $today)
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('DateTo')
+                            ->orWhere('DateTo', '>=', $today);
+                    })
+                    ->get();
 
                 if ($margins->count() > 0) {
                     $originalPrice = (float) $request->ITP_Price;
@@ -568,7 +581,14 @@ class ARCItemPriceItalyController extends Controller
         $createdCount = 0;
 
         if ($request->ITP_Price !== null) {
-            $margins = Margin::where('ARCIM_ServMateria', 'S')->get();
+            $today = now()->startOfDay();
+            $margins = Margin::where('ARCIM_ServMateria', 'S')
+                ->where('DateFrom', '<=', $today)
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('DateTo')
+                        ->orWhere('DateTo', '>=', $today);
+                })
+                ->get();
 
             if ($margins->count() > 0) {
                 $originalPrice = (float) $request->ITP_Price;
@@ -1023,8 +1043,8 @@ class ARCItemPriceItalyController extends Controller
                         ->whereNull('ITP_DateTo')
                         ->where('ITP_DateFrom', '<', $newDateFrom)
                         ->update([
-                                'ITP_DateTo' => \Carbon\Carbon::parse($newDateFrom)->subDay()->format('Y-m-d')
-                            ]);
+                            'ITP_DateTo' => \Carbon\Carbon::parse($newDateFrom)->subDay()->format('Y-m-d')
+                        ]);
                 }
                 ARCItemPriceItaly::create($priceData);
 
