@@ -47,6 +47,9 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
 Route::get('/billing/export', [BillingController::class, 'exportExcel'])->name('billing.export');
 
+Route::get('/billing2', [\App\Http\Controllers\Billing2Controller::class, 'index'])->name('billing2.index');
+Route::get('/billing2/export', [\App\Http\Controllers\Billing2Controller::class, 'exportExcel'])->name('billing2.export');
+
 Route::get('/rejected', [RejectedController::class, 'index'])->name('rejected.index');
 
 Route::get('/stock', [StockController::class, 'index'])->name('stock.index');

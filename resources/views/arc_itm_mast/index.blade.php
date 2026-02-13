@@ -37,6 +37,11 @@
             border-bottom-width: 0;
             margin-top: 3px;
         }
+
+        /* Override container width for this page */
+        .container-shadcn {
+            max-width: 95% !important;
+        }
     </style>
 @endpush
 
@@ -290,15 +295,15 @@
                 if (visibleRows === 0 && value !== '') {
                     if ($('#noFilterResults').length === 0) {
                         $('#arcTable tbody').append(`
-                                        <tr id="noFilterResults">
-                                            <td colspan="14" class="text-center" style="padding: 2rem;">
-                                                <div style="color: var(--muted-foreground);">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                                                    <p class="mb-0" style="font-size: 0.875rem;">No results found for "${value}"</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    `);
+                                            <tr id="noFilterResults">
+                                                <td colspan="14" class="text-center" style="padding: 2rem;">
+                                                    <div style="color: var(--muted-foreground);">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                                        <p class="mb-0" style="font-size: 0.875rem;">No results found for "${value}"</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `);
                     }
                 } else {
                     $('#noFilterResults').remove();

@@ -256,6 +256,11 @@
             font-size: 0.75rem;
             line-height: 1rem;
         }
+
+        /* Override container width for this page */
+        .container-shadcn {
+            max-width: 95% !important;
+        }
     </style>
 @endpush
 
@@ -362,7 +367,14 @@
                     <button type="button" class="btn-shadcn btn-shadcn-info" id="btnCompareInline">
                         <span class="spinner-border spinner-border-sm d-none" id="spinnerCompareInline" role="status"
                             aria-hidden="true"></span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-git-pull-request"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><line x1="6" x2="6" y1="9" y2="21"></line></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="feather feather-git-pull-request">
+                            <circle cx="18" cy="18" r="3"></circle>
+                            <circle cx="6" cy="6" r="3"></circle>
+                            <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+                            <line x1="6" x2="6" y1="9" y2="21"></line>
+                        </svg>
                         Compare
                     </button>
                     <button type="button" class="btn-shadcn btn-shadcn-success" id="btnKalkulasiInline">
@@ -603,16 +615,17 @@
                             <tbody>
                                 @if(isset($stockComparisons))
                                     @foreach($stockComparisons as $item)
-                                    <tr>
-                                        <td>{{ \Carbon\Carbon::parse($item->Period_DateTime)->format('d/m/Y') }}</td>
-                                        <td>{{ $item->Combine_Code }}</td>
-                                        <td>{{ $item->Material_Code }}<br><small class="text-muted">{{ $item->Material_Desc }}</small></td>
-                                        <td>{{ $item->Storage_Loc }}</td>
-                                        <td>{{ $item->Batch_No }}</td>
-                                        <td class="fw-bold text-success">{{ number_format($item->QTY_SAP, 2) }}</td>
-                                        <td class="fw-bold text-info">{{ number_format($item->QTY_TC, 2) }}</td>
-                                        <td>{{ $item->BU_Code }}</td>
-                                    </tr>
+                                        <tr>
+                                            <td>{{ \Carbon\Carbon::parse($item->Period_DateTime)->format('d/m/Y') }}</td>
+                                            <td>{{ $item->Combine_Code }}</td>
+                                            <td>{{ $item->Material_Code }}<br><small
+                                                    class="text-muted">{{ $item->Material_Desc }}</small></td>
+                                            <td>{{ $item->Storage_Loc }}</td>
+                                            <td>{{ $item->Batch_No }}</td>
+                                            <td class="fw-bold text-success">{{ number_format($item->QTY_SAP, 2) }}</td>
+                                            <td class="fw-bold text-info">{{ number_format($item->QTY_TC, 2) }}</td>
+                                            <td>{{ $item->BU_Code }}</td>
+                                        </tr>
                                     @endforeach
                                 @endif
                             </tbody>
@@ -856,32 +869,32 @@
                     data: { period_date: periodDate },
                     success: function (response) {
                         $('#kalkulasiResultInline').show().html(`
-                                        <div class="alert-shadcn alert-shadcn-success">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                            <div>
-                                                <div class="alert-title">${response.message}</div>
-                                                <div class="alert-description">
-                                                    <div class="mt-2 mb-2"><strong>Period Date:</strong> ${response.data.period_date}</div>
-                                                    <hr style="border-color: var(--border); margin: 0.5rem 0;">
-                                                    <div class="row mt-2">
-                                                        <div class="col-6">
-                                                            <small><strong>SAP Data:</strong> ${response.data.total_sap_records.toLocaleString()}</small><br>
-                                                            <small><strong>TrakCare Data:</strong> ${response.data.total_tc_records.toLocaleString()}</small><br>
-                                                            <small><strong>Processed:</strong> ${response.data.total_processed.toLocaleString()}</small>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <small><strong>Plus (P):</strong> <span class="badge-shadcn badge-shadcn-success">${response.data.plus_indicator.toLocaleString()}</span></small><br>
-                                                            <small><strong>Minus (M):</strong> <span class="badge-shadcn badge-shadcn-destructive">${response.data.minus_indicator.toLocaleString()}</span></small><br>
-                                                            <small><strong>Skipped:</strong> <span class="badge-shadcn badge-shadcn-secondary">${response.data.skipped_zero.toLocaleString()}</span></small>
+                                            <div class="alert-shadcn alert-shadcn-success">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                                <div>
+                                                    <div class="alert-title">${response.message}</div>
+                                                    <div class="alert-description">
+                                                        <div class="mt-2 mb-2"><strong>Period Date:</strong> ${response.data.period_date}</div>
+                                                        <hr style="border-color: var(--border); margin: 0.5rem 0;">
+                                                        <div class="row mt-2">
+                                                            <div class="col-6">
+                                                                <small><strong>SAP Data:</strong> ${response.data.total_sap_records.toLocaleString()}</small><br>
+                                                                <small><strong>TrakCare Data:</strong> ${response.data.total_tc_records.toLocaleString()}</small><br>
+                                                                <small><strong>Processed:</strong> ${response.data.total_processed.toLocaleString()}</small>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <small><strong>Plus (P):</strong> <span class="badge-shadcn badge-shadcn-success">${response.data.plus_indicator.toLocaleString()}</span></small><br>
+                                                                <small><strong>Minus (M):</strong> <span class="badge-shadcn badge-shadcn-destructive">${response.data.minus_indicator.toLocaleString()}</span></small><br>
+                                                                <small><strong>Skipped:</strong> <span class="badge-shadcn badge-shadcn-secondary">${response.data.skipped_zero.toLocaleString()}</span></small>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    `);
+                                        `);
                         // Auto-hide after 10 seconds
                         setTimeout(() => { $('#kalkulasiResultInline').fadeOut(); }, 10000);
-                        
+
                         // Optional: Reload the page or update the Calculated tab if you want to see results immediately
                         // For now we just show the success message. Users can click 'Filter' on the inspector to see new data.
                     },
@@ -916,20 +929,20 @@
                     data: { period_date: periodDate, _token: '{{ csrf_token() }}' },
                     success: function (response) {
                         $('#kalkulasiResultInline').show().html(`
-                            <div class="alert-shadcn alert-shadcn-success">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                <div>
-                                    <div class="alert-title">${response.message}</div>
-                                    <div class="alert-description">
-                                        <div class="mt-2 mb-2"><strong>Period Date:</strong> ${response.data.period_date}</div>
-                                        <hr style="border-color: var(--border); margin: 0.5rem 0;">
-                                        <div class="mt-2">
-                                            <small><strong>Processed:</strong> ${response.data.total_processed.toLocaleString()}</small>
+                                <div class="alert-shadcn alert-shadcn-success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    <div>
+                                        <div class="alert-title">${response.message}</div>
+                                        <div class="alert-description">
+                                            <div class="mt-2 mb-2"><strong>Period Date:</strong> ${response.data.period_date}</div>
+                                            <hr style="border-color: var(--border); margin: 0.5rem 0;">
+                                            <div class="mt-2">
+                                                <small><strong>Processed:</strong> ${response.data.total_processed.toLocaleString()}</small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        `);
+                            `);
                         // Auto-hide after 10 seconds
                         setTimeout(() => { $('#kalkulasiResultInline').fadeOut(); }, 10000);
                     },
@@ -944,178 +957,178 @@
                 });
             });
 
-        $('#btnDownloadJsonByMaterialDoc').click(function () {
-            const btn = $(this);
-            const spinner = btn.find('.spinner-border');
-            const formstockId = $('#formstock_id').val();
-            const materialDoc = $('#formstock_id option:selected').data('material-doc');
+            $('#btnDownloadJsonByMaterialDoc').click(function () {
+                const btn = $(this);
+                const spinner = btn.find('.spinner-border');
+                const formstockId = $('#formstock_id').val();
+                const materialDoc = $('#formstock_id option:selected').data('material-doc');
 
-            if (!formstockId || !materialDoc) {
-                showAlert('Please select a Material Document first!', 'error');
-                return;
-            }
+                if (!formstockId || !materialDoc) {
+                    showAlert('Please select a Material Document first!', 'error');
+                    return;
+                }
 
-            btn.prop('disabled', true);
-            spinner.removeClass('d-none');
+                btn.prop('disabled', true);
+                spinner.removeClass('d-none');
 
-            const form = $('<form>', { 'method': 'POST', 'action': '{{ route("stock-management.download-json") }}' });
-            form.append($('<input>', { 'type': 'hidden', 'name': '_token', 'value': '{{ csrf_token() }}' }));
-            form.append($('<input>', { 'type': 'hidden', 'name': 'materialDocument', 'value': materialDoc }));
-            $('body').append(form);
-            form.submit();
-            form.remove();
+                const form = $('<form>', { 'method': 'POST', 'action': '{{ route("stock-management.download-json") }}' });
+                form.append($('<input>', { 'type': 'hidden', 'name': '_token', 'value': '{{ csrf_token() }}' }));
+                form.append($('<input>', { 'type': 'hidden', 'name': 'materialDocument', 'value': materialDoc }));
+                $('body').append(form);
+                form.submit();
+                form.remove();
 
-            setTimeout(function () {
-                $('#modalDownloadJson').modal('hide');
-                btn.prop('disabled', false);
-                spinner.addClass('d-none');
+                setTimeout(function () {
+                    $('#modalDownloadJson').modal('hide');
+                    btn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                    $('#formDownloadJson')[0].reset();
+                    showAlert('JSON file is being downloaded...', 'success');
+                }, 500);
+            });
+
+            $('#modalDownloadJson').on('hidden.bs.modal', function () {
                 $('#formDownloadJson')[0].reset();
-                showAlert('JSON file is being downloaded...', 'success');
-            }, 500);
-        });
-
-        $('#modalDownloadJson').on('hidden.bs.modal', function () {
-            $('#formDownloadJson')[0].reset();
-            $('#btnDownloadJsonByMaterialDoc').prop('disabled', false);
-            $('#btnDownloadJsonByMaterialDoc .spinner-border').addClass('d-none');
-        });
+                $('#btnDownloadJsonByMaterialDoc').prop('disabled', false);
+                $('#btnDownloadJsonByMaterialDoc .spinner-border').addClass('d-none');
+            });
 
 
 
 
-        // Import with Progress Bar
-        let progressInterval = null;
-        let sessionId = '{{ session()->getId() }}';
-        let startTime = null;
+            // Import with Progress Bar
+            let progressInterval = null;
+            let sessionId = '{{ session()->getId() }}';
+            let startTime = null;
 
-        $('#modalImportExcel form').on('submit', function (e) {
-            e.preventDefault();
+            $('#modalImportExcel form').on('submit', function (e) {
+                e.preventDefault();
 
-            const form = $(this);
-            const formData = new FormData(form[0]);
-            formData.append('session_id', sessionId);
+                const form = $(this);
+                const formData = new FormData(form[0]);
+                formData.append('session_id', sessionId);
 
-            // Show progress container
-            $('#importProgressContainer').removeClass('d-none');
-            $('#btnSubmitImport').prop('disabled', true);
-            $('#btnCancelImport').prop('disabled', true);
-            $('#spinnerImportExcel').removeClass('d-none');
+                // Show progress container
+                $('#importProgressContainer').removeClass('d-none');
+                $('#btnSubmitImport').prop('disabled', true);
+                $('#btnCancelImport').prop('disabled', true);
+                $('#spinnerImportExcel').removeClass('d-none');
 
-            // Reset progress
-            updateProgressUI(0, 0, 0, 'Initializing...');
-            startTime = Date.now();
+                // Reset progress
+                updateProgressUI(0, 0, 0, 'Initializing...');
+                startTime = Date.now();
 
-            // Start progress polling
-            startProgressPolling();
+                // Start progress polling
+                startProgressPolling();
 
-            // Submit via AJAX
-            $.ajax({
-                url: form.attr('action'),
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                success: function (response) {
-                    stopProgressPolling();
+                // Submit via AJAX
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function (response) {
+                        stopProgressPolling();
 
-                    if (response.success) {
-                        updateProgressUI(response.imported, response.imported, 100, response.message);
+                        if (response.success) {
+                            updateProgressUI(response.imported, response.imported, 100, response.message);
 
-                        setTimeout(function () {
-                            $('#modalImportExcel').modal('hide');
-                            showAlert(response.message, 'success');
-                            location.reload();
-                        }, 1500);
-                    } else {
-                        showAlert(response.message, 'error');
+                            setTimeout(function () {
+                                $('#modalImportExcel').modal('hide');
+                                showAlert(response.message, 'success');
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            showAlert(response.message, 'error');
+                            resetImportForm();
+                        }
+                    },
+                    error: function (xhr) {
+                        stopProgressPolling();
+                        const message = xhr.responseJSON?.message || 'Error during import';
+                        showAlert(message, 'error');
                         resetImportForm();
                     }
-                },
-                error: function (xhr) {
-                    stopProgressPolling();
-                    const message = xhr.responseJSON?.message || 'Error during import';
-                    showAlert(message, 'error');
-                    resetImportForm();
+                });
+            });
+
+            function startProgressPolling() {
+                progressInterval = setInterval(function () {
+                    $.get('{{ route("import.progress") }}', { session_id: sessionId }, function (progress) {
+                        if (progress && progress.percentage !== undefined) {
+                            updateProgressUI(
+                                progress.imported,
+                                progress.total,
+                                progress.percentage,
+                                progress.message
+                            );
+                        }
+                    });
+                }, 500); // Poll every 500ms
+            }
+
+            function stopProgressPolling() {
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
                 }
-            });
-        });
-
-        function startProgressPolling() {
-            progressInterval = setInterval(function () {
-                $.get('{{ route("import.progress") }}', { session_id: sessionId }, function (progress) {
-                    if (progress && progress.percentage !== undefined) {
-                        updateProgressUI(
-                            progress.imported,
-                            progress.total,
-                            progress.percentage,
-                            progress.message
-                        );
-                    }
-                });
-            }, 500); // Poll every 500ms
-        }
-
-        function stopProgressPolling() {
-            if (progressInterval) {
-                clearInterval(progressInterval);
-                progressInterval = null;
             }
-        }
 
-        function updateProgressUI(imported, total, percentage, message) {
-            $('#importProgressBar').css('width', percentage + '%');
-            $('#importProgressText').text(Math.round(percentage) + '%');
-            $('#importProgressMessage').text(message);
-            $('#importStats').text(imported + ' / ' + total + ' records');
+            function updateProgressUI(imported, total, percentage, message) {
+                $('#importProgressBar').css('width', percentage + '%');
+                $('#importProgressText').text(Math.round(percentage) + '%');
+                $('#importProgressMessage').text(message);
+                $('#importStats').text(imported + ' / ' + total + ' records');
 
-            // Calculate speed
-            if (startTime && imported > 0) {
-                const elapsed = (Date.now() - startTime) / 1000; // seconds
-                const speed = Math.round(imported / elapsed);
-                $('#importSpeed').text(speed + ' rec/s');
+                // Calculate speed
+                if (startTime && imported > 0) {
+                    const elapsed = (Date.now() - startTime) / 1000; // seconds
+                    const speed = Math.round(imported / elapsed);
+                    $('#importSpeed').text(speed + ' rec/s');
+                }
             }
-        }
 
-        function resetImportForm() {
-            $('#importProgressContainer').addClass('d-none');
-            $('#btnSubmitImport').prop('disabled', false);
-            $('#btnCancelImport').prop('disabled', false);
-            $('#spinnerImportExcel').addClass('d-none');
-            updateProgressUI(0, 0, 0, 'Initializing...');
-        }
+            function resetImportForm() {
+                $('#importProgressContainer').addClass('d-none');
+                $('#btnSubmitImport').prop('disabled', false);
+                $('#btnCancelImport').prop('disabled', false);
+                $('#spinnerImportExcel').addClass('d-none');
+                updateProgressUI(0, 0, 0, 'Initializing...');
+            }
 
-        // Reset form when modal is closed
-        $('#modalImportExcel').on('hidden.bs.modal', function () {
-            stopProgressPolling();
-            resetImportForm();
-            $('#modalImportExcel form')[0].reset();
+            // Reset form when modal is closed
+            $('#modalImportExcel').on('hidden.bs.modal', function () {
+                stopProgressPolling();
+                resetImportForm();
+                $('#modalImportExcel form')[0].reset();
 
-            // Clear progress on server
-            $.post('{{ route("import.clear-progress") }}', {
-                _token: '{{ csrf_token() }}',
-                session_id: sessionId
-            });
-        });
-
-        function showAlert(message, type) {
-            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-            const alertHtml = `
-                            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                                ${message}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        `;
-            $('.container-fluid').prepend(alertHtml);
-
-            setTimeout(function () {
-                $('.alert').fadeOut(function () {
-                    $(this).remove();
+                // Clear progress on server
+                $.post('{{ route("import.clear-progress") }}', {
+                    _token: '{{ csrf_token() }}',
+                    session_id: sessionId
                 });
-            }, 5000);
-        }
-    }); // Close $(document).ready
+            });
+
+            function showAlert(message, type) {
+                const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+                const alertHtml = `
+                                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                                    ${message}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            `;
+                $('.container-fluid').prepend(alertHtml);
+
+                setTimeout(function () {
+                    $('.alert').fadeOut(function () {
+                        $(this).remove();
+                    });
+                }, 5000);
+            }
+        }); // Close $(document).ready
     </script>
 @endpush
