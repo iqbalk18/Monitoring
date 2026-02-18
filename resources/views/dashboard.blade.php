@@ -588,132 +588,136 @@
                         <path d="M5 12h14" />
                         <path d="m12 5 7 7-7 7" />
                     </svg>
-                    </div>
-                    </a>
+                </div>
+            </a>
         @endif
-            @if(user_has_role($user, 'PRICE_ENTRY'))
-                <!-- My Submissions -->
-                <a href="{{ route('price-submissions.index') }}" class="dashboard-card" style="--card-accent: #3b82f6;">
-                    <div class="dashboard-card-icon" style="background-color: #eff6ff; color: #3b82f6;">📝</div>
-                    <div class="dashboard-card-content">
-                        <h4 class="dashboard-card-title">My Submissions</h4>
-                        <p class="dashboard-card-desc">View status of your submitted price changes.</p>
-                    </div>
-                    <div class="dashboard-card-arrow">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 12h14" />
-                            <path d="m12 5 7 7-7 7" />
-                        </svg>
-                    </div>
-                </a>
-            @endif
+        @if(user_has_role($user, 'PRICE_ENTRY'))
+            <!-- My Submissions -->
+            <a href="{{ route('price-submissions.index') }}" class="dashboard-card" style="--card-accent: #3b82f6;">
+                <div class="dashboard-card-icon" style="background-color: #eff6ff; color: #3b82f6;">📝</div>
+                <div class="dashboard-card-content">
+                    <h4 class="dashboard-card-title">My Submissions</h4>
+                    <p class="dashboard-card-desc">View status of your submitted price changes.</p>
+                </div>
+                <div class="dashboard-card-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </div>
+            </a>
+        @endif
 
-                @if(user_can_data_monitoring($user, 'list_item_pricing'))
-                <!-- List Item & Pricing -->
-                <a href="{{ url('/arc-itm-mast') }}" class="dashboard-card" style="--card-accent: #f59e0b;">
-                    <div class="dashboard-card-icon dashboard-card-icon-pricing">💰</div>
-                    <div class="dashboard-card-content">
-                        <h4 class="dashboard-card-title">List Item & Pricing</h4>
-                        <p class="dashboard-card-desc">Input and manage pricing for item price.</p>
-                    </div>
-                    <div class="dashboard-card-arrow">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 12h14" />
-                            <path d="m12 5 7 7-7 7" />
-                        </svg>
-                    </div>
-                </a>
-                @endif
+        @if(user_can_data_monitoring($user, 'list_item_pricing'))
+            <!-- List Item & Pricing -->
+            <a href="{{ url('/arc-itm-mast') }}" class="dashboard-card" style="--card-accent: #f59e0b;">
+                <div class="dashboard-card-icon dashboard-card-icon-pricing">💰</div>
+                <div class="dashboard-card-content">
+                    <h4 class="dashboard-card-title">List Item & Pricing</h4>
+                    <p class="dashboard-card-desc">Input and manage pricing for item price.</p>
+                </div>
+                <div class="dashboard-card-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </div>
+            </a>
+        @endif
 
-                @if(user_can_data_monitoring($user, 'activity-log'))
-                    <!-- Log -->
-                    <a href="#" class="dashboard-card" style="--card-accent: #a855f7;">
-                        <div class="dashboard-card-icon dashboard-card-icon-log">🧾</div>
-                        <div class="dashboard-card-content">
-                            <h4 class="dashboard-card-title">Activity Log</h4>
-                            <p class="dashboard-card-desc">View log activity in this application.</p>
-                        </div>
-                        <div class="dashboard-card-arrow">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M5 12h14" />
-                                <path d="m12 5 7 7-7 7" />
-                            </svg>
-                        </div>
-                    </a>
-                @endif
+        @if(user_can_data_monitoring($user, 'activity-log'))
+            <!-- Log -->
+            <a href="#" class="dashboard-card" style="--card-accent: #a855f7;">
+                <div class="dashboard-card-icon dashboard-card-icon-log">🧾</div>
+                <div class="dashboard-card-content">
+                    <h4 class="dashboard-card-title">Activity Log</h4>
+                    <p class="dashboard-card-desc">View log activity in this application.</p>
+                </div>
+                <div class="dashboard-card-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </div>
+            </a>
+        @endif
 
-                <!-- Settings (ADMIN only) -->
-                @if(user_has_role($user, 'ADMIN'))
-                    <!-- Doctors Fee -->
-                    <a href="{{ route('doctors-fee.index') }}" class="dashboard-card" style="--card-accent: #10b981;">
-                        <div class="dashboard-card-icon" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #059669;">
-                            🩺
-                        </div>
-                        <div class="dashboard-card-content">
-                            <h4 class="dashboard-card-title">Doctors Fee</h4>
-                            <p class="dashboard-card-desc">View and manage doctor fees and calculations.</p>
-                        </div>
-                        <div class="dashboard-card-arrow">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M5 12h14" />
-                                <path d="m12 5 7 7-7 7" />
-                            </svg>
-                        </div>
-                    </a>
-
-                    <a href="{{ route('settings') }}" class="dashboard-card" style="--card-accent: #71717a;">
-                        <div class="dashboard-card-icon dashboard-card-icon-settings">⚙️</div>
-                        <div class="dashboard-card-content">
-                            <h4 class="dashboard-card-title">Settings</h4>
-                            <p class="dashboard-card-desc">Configuration system & manage user access.</p>
-                        </div>
-                        <div class="dashboard-card-arrow">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M5 12h14" />
-                                <path d="m12 5 7 7-7 7" />
-                            </svg>
-                        </div>
-                    </a>
-                @endif
-            </div>
+        @if(user_can_data_monitoring($user, 'doctors_fee') || user_has_role($user, 'ADMIN'))
+            <!-- Doctors Fee -->
+            <a href="{{ route('doctors_fee.index') }}" class="dashboard-card" style="--card-accent: #10b981;">
+                <div class="dashboard-card-icon" style="background-color: #d1fae5; color: #10b981;">👨‍⚕️</div>
+                <div class="dashboard-card-content">
+                    <h4 class="dashboard-card-title">Doctors Fee</h4>
+                    <p class="dashboard-card-desc">Manage doctors fee data.</p>
+                </div>
+                <div class="dashboard-card-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </div>
+            </a>
+        @endif
 
 
 
-            <script>
-                // Update date/time display
-                function updateDateTime() {
-                    const now = new Date();
-                    const options = {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    };
-                    document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+        <!-- Settings (ADMIN only) -->
+        @if(user_has_role($user, 'ADMIN'))
 
-                    const dateOptions = { month: 'short', day: 'numeric' };
-                    document.getElementById('todayDate').textContent = now.toLocaleDateString('en-US', dateOptions);
-                }
 
-                updateDateTime();
-                setInterval(updateDateTime, 60000); // Update every minute
+            <a href="{{ route('settings') }}" class="dashboard-card" style="--card-accent: #71717a;">
+                <div class="dashboard-card-icon dashboard-card-icon-settings">⚙️</div>
+                <div class="dashboard-card-content">
+                    <h4 class="dashboard-card-title">Settings</h4>
+                    <p class="dashboard-card-desc">Configuration system & manage user access.</p>
+                </div>
+                <div class="dashboard-card-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </div>
+            </a>
+        @endif
+    </div>
 
-                // Show loading state when clicking Data Monitoring
-                const btnDataMonitoring = document.getElementById('btnDataMonitoring');
-                if (btnDataMonitoring) {
-                    btnDataMonitoring.addEventListener('click', function () {
-                        this.classList.add('loading');
-                        this.querySelector('.dashboard-card-icon').textContent = '⏳';
-                        this.querySelector('.dashboard-card-title').textContent = 'Connecting...';
-                        this.querySelector('.dashboard-card-desc').textContent = 'Please wait, connecting to server...';
-                    });
-                }
-            </script>
+
+
+    <script>
+        // Update date/time display
+        function updateDateTime() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+
+            const dateOptions = { month: 'short', day: 'numeric' };
+            document.getElementById('todayDate').textContent = now.toLocaleDateString('en-US', dateOptions);
+        }
+
+        updateDateTime();
+        setInterval(updateDateTime, 60000); // Update every minute
+
+        // Show loading state when clicking Data Monitoring
+        const btnDataMonitoring = document.getElementById('btnDataMonitoring');
+        if (btnDataMonitoring) {
+            btnDataMonitoring.addEventListener('click', function () {
+                this.classList.add('loading');
+                this.querySelector('.dashboard-card-icon').textContent = '⏳';
+                this.querySelector('.dashboard-card-title').textContent = 'Connecting...';
+                this.querySelector('.dashboard-card-desc').textContent = 'Please wait, connecting to server...';
+            });
+        }
+    </script>
 @endsection

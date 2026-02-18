@@ -10,4 +10,5 @@ class DoctorsFee extends Model
     use HasFactory;
 
     protected $table = 'doctors_fee';
+    protected $guarded = [];
 }

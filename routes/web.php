@@ -78,7 +78,7 @@ Route::middleware(['check.data.monitoring:list_item_pricing'])->group(function (
 });
 Route::resource('margin', MarginController::class);
 Route::resource('details-invoice-tc', \App\Http\Controllers\DetailsInvoiceTcController::class);
-Route::resource('doctors-fee', \App\Http\Controllers\DoctorsFeeController::class);
+
 
 Route::middleware(['check.data.monitoring:list_item_pricing'])->group(function () {
     Route::get('arc-item-price-italy/create', [ARCItemPriceItalyController::class, 'createPage'])->name('arc-item-price-italy.create');
@@ -94,6 +94,12 @@ Route::get('/price-submissions', [PriceSubmissionController::class, 'index'])->n
 Route::get('/price-submissions/{id}', [PriceSubmissionController::class, 'show'])->name('price-submissions.show');
 Route::post('/price-submissions/{id}/approve', [PriceSubmissionController::class, 'approve'])->name('price-submissions.approve');
 Route::post('/price-submissions/{id}/reject', [PriceSubmissionController::class, 'reject'])->name('price-submissions.reject');
+
+// Doctors Fee
+use App\Http\Controllers\DoctorsFeeController;
+Route::get('/doctors-fee', [DoctorsFeeController::class, 'index'])->name('doctors_fee.index');
+
+
 
 Route::prefix('api')->group(function () {
     Route::get('arc-item-price-italy', [ARCItemPriceItalyController::class, 'index']);

@@ -2,6 +2,21 @@
 
 @section('title', 'Stock Recap - BIH')
 
+@push('styles')
+<style>
+    /* Override container width for this page */
+    .container-shadcn {
+        max-width: 95% !important;
+    }
+    
+    /* Make table scrollable vertically if needed */
+    .card-shadcn-body .table-shadcn {
+        width: 100%;
+        min-width: 1500px; /* Ensure table is wide enough to show columns properly */
+    }
+</style>
+@endpush
+
 @section('content')
 <!-- Page Header -->
 <div class="flex-between mb-4" style="flex-wrap: wrap; gap: 1rem;">
