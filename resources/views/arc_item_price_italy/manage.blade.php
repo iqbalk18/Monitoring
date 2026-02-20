@@ -282,7 +282,7 @@
                                 Episode Type <span class="text-danger manual-required" style="display:none;">*</span>
                             </label>
                             <select name="ITP_EpisodeType" id="ITP_EpisodeType"
-                                class="form-select-shadcn @error('ITP_EpisodeType') is-invalid @enderror" disabled>
+                                class="form-select-shadcn @error('ITP_EpisodeType') is-invalid @enderror">
                                 <option value="">-- Select Episode Type --</option>
                                 <option value="O" selected>O - Outpatient</option>
                                 <option value="E">E - Emergency</option>
@@ -294,8 +294,7 @@
                             @error('ITP_EpisodeType')
                                 <div class="invalid-feedback-shadcn">{{ $message }}</div>
                             @enderror
-                            <p class="form-description-shadcn" id="episodeTypeHelp" style="display:none;">Select episode
-                                type for manual input</p>
+                            <p class="form-description-shadcn" id="episodeTypeHelp">Pilih episode type sebagai harga awal (initial price). Harga episode lainnya dihitung otomatis dari margin.</p>
                         </div>
                     </div>
 
@@ -306,7 +305,8 @@
                                 Episode Type <span class="text-danger">*</span>
                             </label>
                             <select name="ITP_EpisodeType" id="ITP_EpisodeType_Material"
-                                class="form-select-shadcn @error('ITP_EpisodeType') is-invalid @enderror">
+                                class="form-select-shadcn @error('ITP_EpisodeType') is-invalid @enderror"
+                                @if($item->ARCIM_ServMaterial != 'M') disabled @endif>
                                 <option value="">-- Select Episode Type --</option>
                                 <option value="O" {{ old('ITP_EpisodeType') == 'O' ? 'selected' : '' }}>O - Outpatient</option>
                                 <option value="E" {{ old('ITP_EpisodeType') == 'E' ? 'selected' : '' }}>E - Emergency</option>
@@ -698,11 +698,14 @@
 
             // Reset episode type
             const servMaterial = '{{ $item->ARCIM_ServMaterial }}';
-            document.getElementById('ITP_EpisodeType').disabled = true;
-            document.getElementById('ITP_EpisodeType').required = false;
-            document.getElementById('ITP_EpisodeType').value = 'O';
-            document.getElementById('episodeTypeHelp').style.display = 'none';
-            document.querySelector('.manual-required').style.display = 'none';
+            if (servMaterial !== 'M') {
+                document.getElementById('ITP_EpisodeType').disabled = false;
+                document.getElementById('ITP_EpisodeType').required = true;
+                document.getElementById('ITP_EpisodeType').value = 'O';
+                document.getElementById('episodeTypeHelp').style.display = 'block';
+                document.getElementById('episodeTypeHelp').textContent = 'Pilih episode type sebagai harga awal (initial price). Harga episode lainnya dihitung otomatis dari margin.';
+                document.querySelector('.manual-required').style.display = 'inline';
+            }
 
             // Reset Type of Item Code for Material
             if (servMaterial === 'M') {
@@ -807,6 +810,12 @@
                 if (episodeTypeMaterialContainerService) {
                     episodeTypeMaterialContainerService.style.display = 'none';
                 }
+
+                // Enable episode type select for Service (selectable as initial price)
+                if (episodeTypeField) {
+                    episodeTypeField.disabled = false;
+                    episodeTypeField.value = episodeTypeField.value || 'O';
+                }
             }
 
             // Function to toggle mode (only for Service)
@@ -833,12 +842,13 @@
                 } else {
                     document.querySelector('label[for="modeGenerate"]').classList.add('active');
 
-                    // Generate mode: Disable dropdown, set to O, show generate button
-                    episodeTypeField.disabled = true;
-                    episodeTypeField.required = false;
-                    episodeTypeField.value = 'O'; // Set default to O
-                    episodeTypeHelp.style.display = 'none';
-                    manualRequired.style.display = 'none';
+                    // Generate mode: Enable dropdown (selectable as initial/base price), set default O
+                    episodeTypeField.disabled = false;
+                    episodeTypeField.required = true;
+                    if (!episodeTypeField.value) episodeTypeField.value = 'O';
+                    episodeTypeHelp.style.display = 'block';
+                    episodeTypeHelp.textContent = 'Pilih episode type sebagai harga awal (initial price). Harga episode lainnya dihitung otomatis dari margin.';
+                    manualRequired.style.display = 'inline';
                     manualBtn.style.display = 'none';
                     generateBtn.style.display = 'inline-block';
                 }

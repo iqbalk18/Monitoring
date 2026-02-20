@@ -426,11 +426,8 @@ class ARCItemPriceItalyController extends Controller
         $rules = [
             'ITP_DateFrom' => 'required|date',
             'ITP_Price' => 'required|numeric|min:0',
+            'ITP_EpisodeType' => 'required|string', // Required for both generate and manual
         ];
-
-        if ($action === 'manual') {
-            $rules['ITP_EpisodeType'] = 'required|string';
-        }
 
         $validator = Validator::make($request->all(), $rules, [
             'ITP_DateFrom.required' => 'Date From is required',
@@ -438,7 +435,7 @@ class ARCItemPriceItalyController extends Controller
             'ITP_Price.required' => 'Price is required',
             'ITP_Price.numeric' => 'Price must be a number',
             'ITP_Price.min' => 'Price must be greater than or equal to 0',
-            'ITP_EpisodeType.required' => 'Episode Type is required for manual input',
+            'ITP_EpisodeType.required' => 'Episode Type is required. Please select the initial price episode type.',
         ]);
 
 
@@ -514,13 +511,21 @@ class ARCItemPriceItalyController extends Controller
 
                 if ($margins->count() > 0) {
                     $originalPrice = (float) $request->ITP_Price;
+                    $baseEpisodeType = $request->ITP_EpisodeType ?: 'O'; // user-selected initial price episode type
 
                     foreach ($margins as $margin) {
                         $priceData = $baseData;
 
-                        if ($margin->TypeofItemCode == 'O') {
+                        if ($margin->TypeofItemCode == $baseEpisodeType) {
+                            // This is the base/initial price episode type — use entered price directly
                             $priceData['ITP_Price'] = $originalPrice;
-                            $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
+                            if (in_array($margin->TypeofItemCode, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
+                                $priceData['ITP_EpisodeType'] = 'I';
+                                $priceData['ITP_ROOMT_Code'] = $margin->TypeofItemCode;
+                                $priceData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc;
+                            } else {
+                                $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
+                            }
                         } else {
                             if ($margin->Margin !== null) {
                                 if (in_array($margin->TypeofItemCode, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
@@ -551,11 +556,11 @@ class ARCItemPriceItalyController extends Controller
                     }
                 } else {
                     $baseData['ITP_Price'] = (float) $request->ITP_Price;
-                    $baseData['ITP_EpisodeType'] = 'O';
+                    $baseData['ITP_EpisodeType'] = $request->ITP_EpisodeType ?: 'O';
                     PriceSubmission::create($baseData);
                 }
             } else {
-                $baseData['ITP_EpisodeType'] = 'O';
+                $baseData['ITP_EpisodeType'] = $request->ITP_EpisodeType ?: 'O';
                 PriceSubmission::create($baseData);
             }
 
@@ -592,6 +597,7 @@ class ARCItemPriceItalyController extends Controller
 
             if ($margins->count() > 0) {
                 $originalPrice = (float) $request->ITP_Price;
+                $baseEpisodeType = $request->ITP_EpisodeType ?: 'O'; // user-selected initial price episode type
 
                 foreach ($margins as $margin) {
                     $priceData = $baseData;
@@ -599,11 +605,20 @@ class ARCItemPriceItalyController extends Controller
                         'ITPRank' => '99',
                     ];
 
-                    if ($margin->TypeofItemCode == 'O') {
+                    if ($margin->TypeofItemCode == $baseEpisodeType) {
+                        // This is the base/initial price episode type — use entered price directly
                         $priceData['ITP_Price'] = $originalPrice;
-                        $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
+                        if (in_array($margin->TypeofItemCode, ['VIP', 'VVIP', 'SUITE', 'CU'])) {
+                            $priceData['ITP_EpisodeType'] = 'I';
+                            $priceData['ITP_ROOMT_Code'] = $margin->TypeofItemCode;
+                            $priceData['ITP_ROOMT_Desc'] = $margin->TypeofItemDesc;
 
-                        $apiPrice['ITPEpisodeType'] = $margin->TypeofItemCode;
+                            $apiPrice['ITPEpisodeType'] = 'I';
+                            $apiPrice['ITPROOMTCode'] = $margin->TypeofItemCode;
+                        } else {
+                            $priceData['ITP_EpisodeType'] = $margin->TypeofItemCode;
+                            $apiPrice['ITPEpisodeType'] = $margin->TypeofItemCode;
+                        }
                         $apiPrice['ITPPrice'] = (string) $originalPrice;
                     } else {
                         if ($margin->Margin !== null) {
@@ -647,22 +662,22 @@ class ARCItemPriceItalyController extends Controller
                 }
             } else {
                 $baseData['ITP_Price'] = (float) $request->ITP_Price;
-                $baseData['ITP_EpisodeType'] = 'O';
+                $baseData['ITP_EpisodeType'] = $request->ITP_EpisodeType ?: 'O';
                 $pricesForDb[] = $baseData;
 
                 $pricesForApi[] = [
-                    'ITPEpisodeType' => 'O',
+                    'ITPEpisodeType' => $request->ITP_EpisodeType ?: 'O',
                     'ITPPrice' => (string) $request->ITP_Price,
                     'ITPRank' => '99',
                 ];
                 $createdCount = 1;
             }
         } else {
-            $baseData['ITP_EpisodeType'] = 'O';
+            $baseData['ITP_EpisodeType'] = $request->ITP_EpisodeType ?: 'O';
             $pricesForDb[] = $baseData;
 
             $pricesForApi[] = [
-                'ITPEpisodeType' => 'O',
+                'ITPEpisodeType' => $request->ITP_EpisodeType ?: 'O',
                 'ITPPrice' => '0',
                 'ITPRank' => '99',
             ];
