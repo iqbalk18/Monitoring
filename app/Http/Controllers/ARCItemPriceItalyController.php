@@ -493,6 +493,7 @@ class ARCItemPriceItalyController extends Controller
                 'ITP_HOSP_Code' => 'BI00',
                 'ITP_HOSP_Desc' => 'Bali International Hospital',
                 'ITP_Rank' => '99',
+                'ITP_UrgentRate' => $request->ITP_UrgentRate ?: null,
                 'status' => 'PENDING',
                 'submitted_by' => session('user')['id'],
                 'batch_id' => $batchId,
@@ -579,6 +580,7 @@ class ARCItemPriceItalyController extends Controller
             'ITP_HOSP_Code' => 'BI00',
             'ITP_HOSP_Desc' => 'Bali International Hospital',
             'ITP_Rank' => '99',
+            'ITP_UrgentRate' => $request->ITP_UrgentRate ?: null,
         ];
 
         $pricesForApi = [];
@@ -921,7 +923,10 @@ class ARCItemPriceItalyController extends Controller
             return redirect()->back()->with('success', 'Price change successfully submitted and awaiting approval.');
         }
 
-        $updateData = $request->only(['ITP_DateFrom', 'ITP_DateTo', 'ITP_Price']);
+        $updateData = array_merge(
+            $request->only(['ITP_DateFrom', 'ITP_DateTo', 'ITP_Price']),
+            ['ITP_UrgentRate' => $request->ITP_UrgentRate ?: null]
+        );
 
         $price->update($updateData);
 
@@ -947,6 +952,7 @@ class ARCItemPriceItalyController extends Controller
             'ITP_HOSP_Code' => 'BI00',
             'ITP_HOSP_Desc' => 'Bali International Hospital',
             'ITP_Rank' => '99',
+            'ITP_UrgentRate' => $request->ITP_UrgentRate ?: null,
         ];
 
         $originalPrice = (float) $request->ITP_Price;

@@ -219,6 +219,24 @@
                         </div>
                     </div>
 
+                    <div class="col-md-6">
+                        <div class="form-group-shadcn">
+                            <label class="form-label-shadcn" for="ITP_UrgentRate">
+                                Urgent Rate
+                            </label>
+                            <div class="input-group">
+                                <input type="number" id="ITP_UrgentRate" step="0.01" name="ITP_UrgentRate"
+                                    class="form-control @error('ITP_UrgentRate') is-invalid @enderror"
+                                    value="{{ old('ITP_UrgentRate') }}" placeholder="Enter urgent rate" min="0">
+                                <span class="input-group-text">%</span>
+                            </div>
+                            @error('ITP_UrgentRate')
+                                <div class="invalid-feedback-shadcn">{{ $message }}</div>
+                            @enderror
+                            <!-- <p class="form-description-shadcn">Opsional. Harga khusus untuk pasien urgent.</p> -->
+                        </div>
+                    </div>
+
                     <div class="col-md-3">
                         <div class="form-group-shadcn">
                             <label class="form-label-shadcn" for="ITP_CTCUR_Code">Currency Code</label>
@@ -294,7 +312,7 @@
                             @error('ITP_EpisodeType')
                                 <div class="invalid-feedback-shadcn">{{ $message }}</div>
                             @enderror
-                            <p class="form-description-shadcn" id="episodeTypeHelp">Pilih episode type sebagai harga awal (initial price). Harga episode lainnya dihitung otomatis dari margin.</p>
+                            <!-- <p class="form-description-shadcn" id="episodeTypeHelp">Pilih episode type sebagai harga awal (initial price). Harga episode lainnya dihitung otomatis dari margin.</p> -->
                         </div>
                     </div>
 
@@ -457,6 +475,7 @@
                             <th>TAR Code</th>
                             <th>TAR Desc</th>
                             <th>Price</th>
+                            <th>Urgent Rate</th>
                             <th>Currency</th>
                             <th>Room Type</th>
                             <th>Hospital</th>
@@ -479,6 +498,15 @@
                                     <span class="badge-shadcn badge-shadcn-success">
                                         {{ number_format($price->ITP_Price) }}
                                     </span>
+                                </td>
+                                <td>
+                                    @if($price->ITP_UrgentRate)
+                                        <span class="badge-shadcn badge-shadcn-secondary">
+                                            {{ number_format($price->ITP_UrgentRate) }}
+                                        </span>
+                                    @else
+                                        -
+                                    @endif
                                 </td>
                                 <td>{{ $price->ITP_CTCUR_Code ?? '-' }}</td>
                                 <td>{{ Str::limit($price->ITP_ROOMT_Desc ?? '-', 20) }}</td>
@@ -511,7 +539,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="13" class="text-center" style="padding: 3rem;">
+                                <td colspan="14" class="text-center" style="padding: 3rem;">
                                     <div style="color: var(--muted-foreground);">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
                                             fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
@@ -649,6 +677,7 @@
                     document.querySelector('input[name="ITP_HOSP_Code"]').value = data.ITP_HOSP_Code || '';
                     document.querySelector('input[name="ITP_HOSP_Desc"]').value = data.ITP_HOSP_Desc || '';
                     document.querySelector('input[name="ITP_Rank"]').value = data.ITP_Rank || '';
+                    document.getElementById('ITP_UrgentRate').value = data.ITP_UrgentRate || '';
 
                     // Set episode type value for select element
                     if (servMaterial === 'M') {

@@ -28,6 +28,7 @@ class PriceSubmission extends Model
         'approved_by',
         'rejection_reason',
         'hna',
+        'ITP_UrgentRate',
         'batch_id',
         'submission_type',
         'original_price_id'

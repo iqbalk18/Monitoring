@@ -28,6 +28,7 @@ class ARCItemPriceItaly extends Model
         'ITP_HOSP_Desc',
         'ITP_Rank',
         'ITP_EpisodeType',
+        'ITP_UrgentRate',
         'batch_id',
     ];
 
@@ -36,5 +37,6 @@ class ARCItemPriceItaly extends Model
         'ITP_DateTo' => 'date',
         'ITP_Price' => 'decimal:2',
         'hna' => 'decimal:2',
+        'ITP_UrgentRate' => 'decimal:2',
     ];
 }
