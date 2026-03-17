@@ -64,6 +64,11 @@ Route::middleware(['check.data.monitoring:adjustment_stock'])->group(function ()
     Route::post('/stock-management/download-json-by-material-doc', [StockManagementController::class, 'downloadJsonByMaterialDocument'])->name('stock-management.download-json-by-material-doc');
 });
 
+// Tracking Insurance
+Route::middleware(['check.data.monitoring:track-insurance'])->group(function () {
+    Route::get('/track', [\App\Http\Controllers\ArTrackingController::class, 'index'])->name('track.index');
+});
+
 Route::get('import', [ImportController::class, 'showForm'])->name('showForm');
 Route::post('import', [ImportController::class, 'import'])->name('import');
 Route::get('import/progress', [ImportController::class, 'getProgress'])->name('import.progress');

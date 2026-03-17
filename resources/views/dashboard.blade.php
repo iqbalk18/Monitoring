@@ -665,6 +665,24 @@
 
 
 
+        @if(user_has_role($user, 'ADMIN') && user_can_data_monitoring($user, 'track-insurance'))
+            <!-- Tracking Insurance -->
+            <a href="{{ url('/track') }}" class="dashboard-card" style="--card-accent: #ef4444;">
+                <div class="dashboard-card-icon" style="background-color: #fee2e2; color: #ef4444;">🛡️</div>
+                <div class="dashboard-card-content">
+                    <h4 class="dashboard-card-title">Tracking Insurance</h4>
+                    <p class="dashboard-card-desc">Track and monitor insurance data.</p>
+                </div>
+                <div class="dashboard-card-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </div>
+            </a>
+        @endif
+
         <!-- Settings (ADMIN only) -->
         @if(user_has_role($user, 'ADMIN'))
 

@@ -14,6 +14,7 @@ return [
         'FINANCE',
         'PHARMACY',
         'PROCUREMENT',
+        'TRACK_INSURANCE',
     ],
 
     /*
@@ -24,7 +25,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'data_monitoring_permissions' => [
-        'ADMIN' => ['all' => true],
+        'ADMIN' => ['all' => true, 'track-insurance' => true],
         'FINANCE' => ['data_monitoring' => true, 
                     'data_monitoring_billing' => true, 
                     'data_monitoring_stock' => true, 
@@ -43,5 +44,6 @@ return [
         'PRICE_STRATEGY' => ['list_item_pricing' => true],
         'PRICE_ENTRY' => ['list_item_pricing' => true],
         'PRICE_APPROVER' => ['list_item_pricing' => true],
+        'TRACK_INSURANCE' => ['track-insurance' => true],
     ],
 ];
