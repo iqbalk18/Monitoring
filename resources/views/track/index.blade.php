@@ -161,16 +161,16 @@
             letter-spacing: 0.05em;
         }
         
-        .badge-status.UNPROCESSED { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-        .badge-status.COVER_NOTE { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .badge-status.BATCHING { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
         .badge-status.SENT { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-        .badge-status.RECEIVED { background-color: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+        .badge-status.RECEIVED { background-color: #fef9c3; color: #a16207; border: 1px solid #fef08a; }
+        .badge-status.REVISE { background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
         .badge-status.PAID { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 
-        .dark .badge-status.UNPROCESSED { background-color: #334155; color: #cbd5e1; border-color: #475569; }
-        .dark .badge-status.COVER_NOTE { background-color: #422006; color: #fde047; border-color: #854d0e; }
+        .dark .badge-status.BATCHING { background-color: #334155; color: #cbd5e1; border-color: #475569; }
         .dark .badge-status.SENT { background-color: #1e3a8a; color: #93c5fd; border-color: #1d4ed8; }
-        .dark .badge-status.RECEIVED { background-color: #4c1d95; color: #c4b5fd; border-color: #6d28d9; }
+        .dark .badge-status.RECEIVED { background-color: #713f12; color: #fde047; border-color: #a16207; }
+        .dark .badge-status.REVISE { background-color: #7f1d1d; color: #fca5a5; border-color: #dc2626; }
         .dark .badge-status.PAID { background-color: #14532d; color: #86efac; border-color: #15803d; }
 
         .hidden-col { display: none; }
@@ -312,10 +312,6 @@
         </div>
     </div>
 
-    <!-- Status Tabs -->
-    <div class="status-tabs" id="statusTabs">
-        <!-- JS will populate tabs -->
-    </div>
 
     <!-- Data Grid -->
     <div class="grid-container">
@@ -323,25 +319,28 @@
             <table class="table-shadcn" id="dataTable">
                 <thead>
                     <tr>
-                        <th class="sticky-col sticky-checkbox">
-                            <input class="form-check-input" type="checkbox" id="selectAll">
-                        </th>
-                        <th class="sticky-col sticky-date">Inv Date</th>
-                        <th class="sticky-col sticky-invno">Inv No</th>
-                        <th class="sticky-col sticky-patient">Patient Name</th>
-                        <th class="col-mrn sticky-col sticky-mrn">MRN</th>
-                        <th class="col-ref-no hidden-col sticky-col sticky-ref">Ref No</th>
+                        <th class="sticky-col sticky-date" rowspan="2" style="background-color: var(--background-color, #f8fafc); z-index: 5;">Inv Dat</th>
+                        <th class="sticky-col sticky-invno" rowspan="2" style="background-color: var(--background-color, #f8fafc); z-index: 5;">Inv No</th>
+                        <th class="sticky-col sticky-mrn" rowspan="2" style="background-color: var(--background-color, #f8fafc); z-index: 5;">MRN</th>
+                        <th class="sticky-col sticky-patient" rowspan="2" style="background-color: var(--background-color, #f8fafc); z-index: 5;">Patient Name</th>
+                        <th class="sticky-col sticky-ref" rowspan="2" style="border-right: 2px solid var(--border-color, #e2e8f0) !important; background-color: var(--background-color, #f8fafc); z-index: 5;">Ref No</th>
+                        <th colspan="11" class="text-center" style="border-bottom: 1px solid var(--border-color, #e2e8f0); border-right: 2px solid var(--border-color, #e2e8f0) !important;">💰 Section: Tracking</th>
+                        <th rowspan="2">Remarks</th>
+                        <th rowspan="2">Status</th>
+                        <th rowspan="2">Action</th>
+                    </tr>
+                    <tr>
                         <th>Amount IDR</th>
-                        <th class="col-paid hidden-col">Paid</th>
+                        <th>Curr</th>
+                        <th>Cur</th>
+                        <th>Cur (2)</th>
+                        <th>Paid</th>
                         <th>Balance</th>
-                        <th class="col-tracking hidden-col">Sent Doc</th>
-                        <th class="col-tracking hidden-col">VIA</th>
-                        <th class="col-tracking hidden-col">Tracking#</th>
-                        <th class="col-rcvd-date hidden-col">Rcvd Date</th>
-                        <th class="col-due hidden-col">Due</th>
-                        <th class="col-paid-on hidden-col">Paid On</th>
-                        <th>Remarks</th>
-                        <th>Status</th>
+                        <th>Sent Doc</th>
+                        <th>VIA</th>
+                        <th>Tracking#</th>
+                        <th>Rcvd date</th>
+                        <th style="border-right: 2px solid var(--border-color, #e2e8f0) !important;">Due</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -349,21 +348,23 @@
                 </tbody>
                 <tfoot id="tableFooter">
                     <tr>
-                        <td class="sticky-col sticky-checkbox text-center font-weight-bold" id="tfCount">0</td>
-                        <td class="sticky-col sticky-date"></td>
+                        <td class="sticky-col sticky-date text-center font-weight-bold" id="tfCount">0</td>
                         <td class="sticky-col sticky-invno"></td>
+                        <td class="sticky-col sticky-mrn"></td>
                         <td class="sticky-col sticky-patient text-end font-weight-bold" style="padding-right: 1.5rem;">Grand Total</td>
-                        <td class="col-mrn sticky-col sticky-mrn"></td>
-                        <td class="col-ref-no hidden-col sticky-col sticky-ref"></td>
+                        <td class="sticky-col sticky-ref" style="border-right: 2px solid var(--border-color, #cbd5e1) !important;"></td>
                         <td class="text-end font-weight-bold" style="color: var(--heading-color);" id="tfAmount">0</td>
-                        <td class="col-paid hidden-col text-end font-weight-bold" style="color: var(--heading-color);" id="tfPaid">0</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="text-end font-weight-bold" style="color: var(--heading-color);" id="tfPaid">0</td>
                         <td class="text-end font-weight-bold" style="color: #059669;" id="tfBalance">0</td>
-                        <td class="col-tracking hidden-col"></td>
-                        <td class="col-tracking hidden-col"></td>
-                        <td class="col-tracking hidden-col"></td>
-                        <td class="col-rcvd-date hidden-col"></td>
-                        <td class="col-due hidden-col"></td>
-                        <td class="col-paid-on hidden-col"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td style="border-right: 2px solid var(--border-color, #cbd5e1) !important;"></td>
+                        <td></td>
                         <td></td>
                         <td></td>
                     </tr>
@@ -380,21 +381,8 @@
         </div>
     </div>
 
-    <!-- Sticky Action Footer -->
-    <div class="sticky-action-footer" id="actionFooter">
-        <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-primary rounded-pill px-3 py-2" id="selectedCountBadge" style="font-size: 0.875rem;">
-                0 Selected
-            </span>
-            <div class="d-flex gap-2" id="dynamicActionButtons">
-                <!-- Action buttons will be injected here based on tab/status -->
-            </div>
-        </div>
-        <div>
-            <button class="btn btn-sm btn-outline-secondary" id="cancelSelectionBtn">Cancel</button>
-        </div>
-    </div>
-
+    <!-- Removed Sticky Action Footer -->
+    
     <!-- Modals -->
     <!-- Cover Note Modal -->
     <div class="modal fade" id="coverNoteModal" tabindex="-1">
@@ -521,32 +509,16 @@
         return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-');
     };
 
-    const tabsDef = [
-        { id: 'all', label: 'Show All', query: () => true },
-        { id: 'paid', label: 'Paid All', query: (item) => item.status === 'PAID' },
-        { id: 'os_paid30', label: 'OS All + Paid (-30)', query: (item) => true /* simplified for UI demo */ },
-        { id: 'os_all', label: 'OS All', query: (item) => item.status !== 'PAID' },
-        { id: 'unprocessed', label: 'OS (Unprocessed)', query: (item) => item.status === 'UNPROCESSED' },
-        { id: 'cover_note', label: 'OS (Cover Note Only)', query: (item) => item.status === 'COVER_NOTE' },
-        { id: 'sent', label: 'OS (Sent Doc)', query: (item) => item.status === 'SENT' },
-        { id: 'received', label: 'OS (Received)', query: (item) => item.status === 'RECEIVED' },
-    ];
-
-    let currentTab = 'all';
     let selectedIds = new Set();
     
     // DOM Elements
     const tableBody = document.getElementById('tableBody');
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const actionFooter = document.getElementById('actionFooter');
-    const cancelSelectionBtn = document.getElementById('cancelSelectionBtn');
     const statusTabsContainer = document.getElementById('statusTabs');
     const payerFilter = document.getElementById('payerFilter');
     const searchFilter = document.getElementById('searchFilter');
     const recordCountDisplay = document.getElementById('recordCount');
     const totalAmountDisplay = document.getElementById('totalAmount');
     
-    const dynamicActionButtons = document.getElementById('dynamicActionButtons');
     const btnExportExcel = document.getElementById('btnExportExcel');
 
     // Modals
@@ -564,166 +536,45 @@
         remarksModal = new bootstrap.Modal(remarksModalElement);
     }
     
-    const initTabs = () => {
-        statusTabsContainer.innerHTML = '';
-        tabsDef.forEach(tab => {
-            const btn = document.createElement('button');
-            btn.className = `status-tab ${currentTab === tab.id ? 'active' : ''}`;
-            btn.textContent = tab.label;
-            btn.onclick = () => {
-                currentTab = tab.id;
-                selectedIds.clear(); // clear selection on tab change
-                updateUI();
-                renderTable();
-            };
-            statusTabsContainer.appendChild(btn);
-        });
-    };
 
-    const updateColumnVisibility = () => {
-        // Logic for column visibility based on tab exactly as requested
-        const thObj = {
-            'col-ref-no': ['all', 'os_all', 'os_paid30', 'cover_note', 'received'],
-            'col-tracking': ['all', 'os_all', 'os_paid30', 'sent', 'received', 'paid'],
-            'col-rcvd-date': ['all', 'os_all', 'os_paid30', 'received', 'paid'],
-            'col-due': ['all', 'os_all', 'os_paid30', 'unprocessed', 'cover_note', 'sent', 'received', 'paid'],
-            'col-paid': ['all', 'paid'],
-            'col-paid-on': ['all', 'paid'],
-            'col-mrn': ['all', 'os_all', 'os_paid30', 'unprocessed', 'cover_note']
-        };
-
-        // KONDISI A: OS (Sent Doc) -> Inv Date, Inv No, Patient Name, Amount IDR, Balance, Sent Doc Date, VIA, Tracking#
-        // Paid & Paid On disembunyikan.
-
-        // KONDISI B: Paid All -> Inv Date, Inv No, Patient Name, Amount IDR, Paid, Balance, Tracking#, Rcvd Date, Due, Paid On
-        
-        Object.keys(thObj).forEach(className => {
-            const isVisible = thObj[className].includes(currentTab);
-            document.querySelectorAll(`.${className}`).forEach(el => {
-                if (isVisible) el.classList.remove('hidden-col');
-                else el.classList.add('hidden-col');
-            });
-        });
-
-        // Update the dynamic calculation of 'left' for sticky headers if columns are hidden
+    const updateStickyPositions = () => {
         setTimeout(() => {
             const getWidth = (className) => {
                 const head = document.querySelector(`thead th.${className}`);
-                return head && !head.classList.contains('hidden-col') ? head.offsetWidth : 0;
+                return head ? head.offsetWidth : 0;
             };
             
             let currentLeft = 0;
             const cols = [
-                { class: 'sticky-checkbox' },
                 { class: 'sticky-date' },
                 { class: 'sticky-invno' },
-                { class: 'sticky-patient' },
                 { class: 'sticky-mrn' },
+                { class: 'sticky-patient' },
                 { class: 'sticky-ref' }
             ];
 
             cols.forEach((col) => {
                 document.querySelectorAll(`.${col.class}`).forEach(el => {
                     el.style.left = `${currentLeft}px`;
-                    el.style.borderRight = 'none'; // reset border
                 });
                 currentLeft += getWidth(col.class);
             });
-            
-            // Apply border-right to the visually last sticky column
-            for (let i = cols.length - 1; i >= 0; i--) {
-                const el = document.querySelector(`thead th.${cols[i].class}`);
-                if (el && !el.classList.contains('hidden-col')) {
-                     document.querySelectorAll(`.${cols[i].class}`).forEach(cel => cel.style.borderRight = '2px solid var(--border-color, #e2e8f0)');
-                     break;
-                }
-            }
-        }, 50); // small delay to allow DOM to render
+        }, 50);
     };
 
-    const updateActionButtons = () => {
-        dynamicActionButtons.innerHTML = '';
-        if (selectedIds.size === 0) return;
 
-        const selectedItems = invoicesData.filter(inv => selectedIds.has(inv.id));
-        
-        // Exact logic based on state machine:
-        // 1. Cover Note: ALL selected items must be UNPROCESSED
-        const allUnprocessed = selectedItems.every(i => i.status === 'UNPROCESSED');
-        // 2. Send Document: ALL selected items must be COVER_NOTE or UNPROCESSED
-        const allCoverNoteOrUnprocessed = selectedItems.every(i => i.status === 'COVER_NOTE' || i.status === 'UNPROCESSED');
-        // 3. Set Received: ALL selected items must be SENT
-        const allSent = selectedItems.every(i => i.status === 'SENT');
-
-        if (allUnprocessed) {
-            const btn = document.createElement('button');
-            btn.className = 'btn-shadcn btn-shadcn-sm';
-            btn.style.backgroundColor = '#d97706'; // amber-600
-            btn.style.color = 'white';
-            btn.textContent = 'Create Cover Note';
-            btn.onclick = () => {
-                document.getElementById('cnItemCount').textContent = selectedIds.size;
-                coverNoteModal?.show();
-            };
-            dynamicActionButtons.appendChild(btn);
-        }
-
-        if (allCoverNoteOrUnprocessed) {
-            const btn = document.createElement('button');
-            btn.className = 'btn-shadcn btn-shadcn-sm';
-            btn.style.backgroundColor = '#1d4ed8'; // blue-700
-            btn.style.color = 'white';
-            btn.textContent = 'Send Document';
-            btn.onclick = () => {
-                document.getElementById('sdItemCount').textContent = selectedIds.size;
-                sendDocModal?.show();
-            };
-            dynamicActionButtons.appendChild(btn);
-        }
-
-        if (allSent) {
-            const btn = document.createElement('button');
-            btn.className = 'btn-shadcn btn-shadcn-sm';
-            btn.style.backgroundColor = '#6d28d9'; // purple-700
-            btn.style.color = 'white';
-            btn.textContent = 'Set Received';
-            btn.onclick = () => {
-                document.getElementById('rcItemCount').textContent = selectedIds.size;
-                setReceivedModal?.show();
-            };
-            dynamicActionButtons.appendChild(btn);
-        }
-
-        // Remarks can be updated from ANY state, always show if > 0 checked
-        const btnRm = document.createElement('button');
-        btnRm.className = 'btn-shadcn btn-shadcn-sm btn-shadcn-outline';
-        btnRm.textContent = 'Update Remarks';
-        btnRm.onclick = () => {
-            document.getElementById('rmItemCount').textContent = selectedIds.size;
-            // Pre-fill if exactly 1 is selected
-            if(selectedIds.size === 1) {
-                document.getElementById('inputRemarks').value = selectedItems[0].remarks || '';
-            } else {
-                document.getElementById('inputRemarks').value = '';
-            }
-            remarksModal?.show();
-        };
-        dynamicActionButtons.appendChild(btnRm);
-    };
 
     const getFilteredData = () => {
-        const tabDef = tabsDef.find(t => t.id === currentTab);
         const payerVal = payerFilter.value;
         const searchVal = searchFilter.value.toLowerCase();
 
         return invoicesData.filter(item => {
-            const matchTab = tabDef.query(item);
             const matchPayer = payerVal === 'All' || item.payer_name === payerVal;
             const matchSearch = searchVal === '' || 
                                 item.patient_name.toLowerCase().includes(searchVal) ||
                                 item.mrn.toLowerCase().includes(searchVal) ||
                                 item.invoice_no.toLowerCase().includes(searchVal);
-            return matchTab && matchPayer && matchSearch;
+            return matchPayer && matchSearch;
         });
     };
 
@@ -746,7 +597,6 @@
             document.getElementById('tfPaid').textContent = formatCurrency(0);
             document.getElementById('tfBalance').textContent = formatCurrency(0);
 
-            updateCheckboxState();
             return;
         }
 
@@ -757,39 +607,45 @@
             
             const tr = document.createElement('tr');
             
-            const isChecked = selectedIds.has(item.id);
-            if (isChecked) {
-                // If using Shadcn styles, maybe highlight class
-                tr.style.backgroundColor = 'var(--background-color, #f1f5f9)';
-            }
-            
-            // Generate columns based on visibility logic
-            // Since JS can't easily query CSS classes of hidden columns generated dynamically during loop,
-            // we will output all columns, but add the same visibility classes we manage in updateColumnVisibility()
-            
+            let actionButtons = `
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.75rem;">
+                    Update Status
+                  </button>
+                  <ul class="dropdown-menu shadow-sm" style="font-size: 0.875rem;">
+                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="BATCHING">Set Batching</a></li>
+                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="SENT">Set Sent</a></li>
+                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="RECEIVED">Set Received</a></li>
+                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="REVISE">Set Revise</a></li>
+                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="PAID">Set Paid</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="REMARKS">Update Remarks</a></li>
+                  </ul>
+                </div>
+            `;
+
             tr.innerHTML = `
-                <td class="sticky-col sticky-checkbox">
-                    <input class="form-check-input row-checkbox" type="checkbox" value="${item.id}" ${isChecked ? 'checked' : ''}>
-                </td>
                 <td class="sticky-col sticky-date">${formatDate(item.invoice_date)}</td>
                 <td class="sticky-col sticky-invno">${item.invoice_no}</td>
+                <td class="sticky-col sticky-mrn">${item.mrn}</td>
                 <td class="sticky-col sticky-patient">
                     <div class="font-weight-bold" style="color: var(--heading-color);">${item.patient_name}</div>
                     <div style="font-size: 0.75rem; color: var(--text-color);">${item.payer_name}</div>
                 </td>
-                <td class="col-mrn sticky-col sticky-mrn">${item.mrn}</td>
-                <td class="col-ref-no hidden-col sticky-col sticky-ref">${item.ref_no || '-'}</td>
+                <td class="sticky-col sticky-ref" style="border-right: 2px solid var(--border-color, #e2e8f0) !important;">${item.ref_no || '-'}</td>
                 <td class="text-end">${formatCurrency(item.amount)}</td>
-                <td class="col-paid hidden-col text-end">${formatCurrency(item.paid_amount || 0)}</td>
+                <td class="text-center">-</td>
+                <td class="text-center">-</td>
+                <td class="text-center">-</td>
+                <td class="text-end">${formatCurrency(item.paid_amount || 0)}</td>
                 <td class="text-end font-weight-bold" style="color: var(--heading-color);">${formatCurrency(item.balance)}</td>
-                <td class="col-tracking hidden-col">${formatDate(item.sent_date)}</td>
-                <td class="col-tracking hidden-col">${item.courier_via || '-'}</td>
-                <td class="col-tracking hidden-col">${item.tracking_no || '-'}</td>
-                <td class="col-rcvd-date hidden-col">${formatDate(item.received_date)}</td>
-                <td class="col-due hidden-col text-center">
+                <td>${formatDate(item.sent_date)}</td>
+                <td>${item.courier_via || '-'}</td>
+                <td>${item.tracking_no || '-'}</td>
+                <td>${formatDate(item.received_date)}</td>
+                <td class="text-center" style="border-right: 2px solid var(--border-color, #e2e8f0) !important;">
                     ${item.due_days > 0 ? `<span style="color: #059669; font-weight: bold;">${item.due_days}</span>` : '-'}
                 </td>
-                <td class="col-paid-on hidden-col">${formatDate(item.paid_on)}</td>
                 <td>
                     <div style="font-size: 0.8rem; max-width: 150px; white-space: normal; color: var(--text-color);">
                         ${item.remarks ? item.remarks : '<span class="text-muted" style="opacity: 0.5;">No remarks</span>'}
@@ -798,27 +654,12 @@
                 <td>
                     <span class="badge-status ${item.status}">${item.status.replace('_', ' ')}</span>
                 </td>
+                <td>
+                    <div class="d-flex flex-wrap gap-1">
+                        ${actionButtons}
+                    </div>
+                </td>
             `;
-
-            // Row click event to check/uncheck
-            const checkbox = tr.querySelector('.row-checkbox');
-            
-            // Allow clicking anywhere on the row to toggle the checkbox
-            tr.addEventListener('click', (e) => {
-                // Prevent double toggling if the user expressly clicked the checkbox or another input
-                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
-                    checkbox.checked = !checkbox.checked;
-                    // Trigger the change event manually after setting the state
-                    const event = new Event('change');
-                    checkbox.dispatchEvent(event);
-                }
-            });
-
-            checkbox.addEventListener('change', (e) => {
-                if (e.target.checked) selectedIds.add(item.id);
-                else selectedIds.delete(item.id);
-                updateUI();
-            });
 
             tableBody.appendChild(tr);
         });
@@ -832,82 +673,57 @@
         recordCountDisplay.textContent = `Showing ${data.length} records`;
         totalAmountDisplay.textContent = `Total Balance: ${formatCurrency(totalVal)}`;
 
-        updateColumnVisibility();
-        updateCheckboxState();
-    };
-
-    const updateCheckboxState = () => {
-        const checkboxes = document.querySelectorAll('.row-checkbox');
-        let allChecked = true;
-        let anyChecked = false;
-
-        if (checkboxes.length === 0) {
-            allChecked = false;
-        } else {
-            checkboxes.forEach(cb => {
-                if (!cb.checked) allChecked = false;
-                if (cb.checked) anyChecked = true;
-            });
-        }
-
-        selectAllCheckbox.checked = allChecked;
-        selectAllCheckbox.indeterminate = anyChecked && !allChecked;
-    };
-
-    const updateUI = () => {
-        initTabs(); // re-render tabs
-        
-        if (selectedIds.size > 0) {
-            actionFooter.classList.add('active');
-            document.getElementById('selectedCountBadge').textContent = `${selectedIds.size} Selected`;
-            updateActionButtons();
-            
-            // Add padding to body so footer doesn't cover content
-            document.body.style.paddingBottom = '80px';
-        } else {
-            actionFooter.classList.remove('active');
-            document.body.style.paddingBottom = '0';
-        }
-
-        // Apply dark mode styling to dynamically rendered elements if needed (handled by CSS in this case)
+        updateStickyPositions();
     };
 
     // Event Listeners
-    selectAllCheckbox.addEventListener('change', (e) => {
-        const data = getFilteredData();
-        if (e.target.checked) {
-            data.forEach(item => selectedIds.add(item.id));
-        } else {
-            selectedIds.clear();
-        }
-        renderTable();
-        updateUI();
-    });
+    tableBody.addEventListener('click', (e) => {
+        const itemEl = e.target.closest('.action-dd-item');
+        if (!itemEl) return;
+        e.preventDefault();
 
-    cancelSelectionBtn.addEventListener('click', () => {
-        selectedIds.clear();
-        renderTable();
-        updateUI();
+        const id = parseInt(itemEl.getAttribute('data-id'));
+        const action = itemEl.getAttribute('data-action');
+        const item = invoicesData.find(i => i.id === id);
+        if (!item) return;
+
+        if (action === 'SENT') {
+            selectedIds.clear();
+            selectedIds.add(id);
+            document.getElementById('sdItemCount').textContent = '1';
+            sendDocModal?.show();
+        } else if (action === 'RECEIVED') {
+            selectedIds.clear();
+            selectedIds.add(id);
+            document.getElementById('rcItemCount').textContent = '1';
+            setReceivedModal?.show();
+        } else if (action === 'REMARKS') {
+            selectedIds.clear();
+            selectedIds.add(id);
+            document.getElementById('rmItemCount').textContent = '1';
+            document.getElementById('inputRemarks').value = item.remarks || '';
+            remarksModal?.show();
+        } else {
+            // For BATCHING, REVISE, PAID -> direct update
+            invoicesData = invoicesData.map(inv => {
+                if (inv.id === id) return { ...inv, status: action };
+                return inv;
+            });
+            renderTable();
+        }
     });
 
     payerFilter.addEventListener('change', () => {
-        selectedIds.clear();
         renderTable();
-        updateUI();
     });
 
     searchFilter.addEventListener('input', () => {
-        selectedIds.clear();
         renderTable();
-        updateUI();
     });
 
     document.getElementById('resetBtn').addEventListener('click', () => {
         payerFilter.value = 'All';
         searchFilter.value = '';
-        currentTab = 'all';
-        selectedIds.clear();
-        updateUI();
         renderTable();
     });
 
@@ -926,7 +742,6 @@
         coverNoteModal?.hide();
         document.getElementById('inputRefNo').value = '';
         selectedIds.clear();
-        updateUI();
         renderTable();
     });
 
@@ -946,7 +761,6 @@
         sendDocModal?.hide();
         document.getElementById('inputTrackingNo').value = '';
         selectedIds.clear();
-        updateUI();
         renderTable();
     });
 
@@ -962,7 +776,6 @@
 
         setReceivedModal?.hide();
         selectedIds.clear();
-        updateUI();
         renderTable();
     });
 
@@ -979,7 +792,6 @@
         remarksModal?.hide();
         document.getElementById('inputRemarks').value = '';
         selectedIds.clear(); // User choice whether clearing selection is better after remarks
-        updateUI();
         renderTable();
     });
 
@@ -1067,7 +879,6 @@
         }
 
     // Initial Render
-    initTabs();
     renderTable();
     updateUI();
 </script>
