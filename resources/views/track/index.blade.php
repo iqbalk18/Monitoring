@@ -772,8 +772,8 @@
                     ${item.due_days > 0 ? `<span style="color: #059669; font-weight: bold;">${item.due_days}</span>` : '-'}
                 </td>
                 <td>
-                    <div style="font-size: 0.8rem; max-width: 150px; white-space: normal; color: var(--muted-foreground);">
-                        ${item.remarks ? item.remarks : '<span class="text-muted" style="opacity: 0.5;">No remarks</span>'}
+                    <div style="min-width: 250px; max-width: 300px; color: var(--muted-foreground); white-space: normal;">
+                        ${item.remarks ? item.remarks : '<span class="text-muted" style="opacity: 0.5;">-</span>'}
                     </div>
                 </td>
                 <td>
