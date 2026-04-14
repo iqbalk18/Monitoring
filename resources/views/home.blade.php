@@ -103,6 +103,10 @@
             background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
         }
 
+        .menu-card-icon-accrual {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+        }
+
         .menu-card-title {
             font-size: 0.9375rem;
             font-weight: 600;
@@ -158,6 +162,15 @@
                 <div class="menu-card-icon menu-card-icon-rejected">❌</div>
                 <h3 class="menu-card-title">Rejected</h3>
                 <p class="menu-card-desc">Track rejected data</p>
+            </a>
+        @endif
+
+        <!-- Accrual -->
+        @if(user_can_data_monitoring($user, 'data_monitoring_accrual'))
+            <a href="{{ route('accrual.index') }}" class="menu-card">
+                <div class="menu-card-icon menu-card-icon-accrual">📝</div>
+                <h3 class="menu-card-title">Accrual</h3>
+                <p class="menu-card-desc">Monitor accrual data</p>
             </a>
         @endif
 

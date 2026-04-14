@@ -30,7 +30,8 @@ return [
                     'data_monitoring_billing' => true, 
                     'data_monitoring_stock' => true, 
                     'data_monitoring_rejected' => true, 
-                    'data_monitoring_stock_management' => true
+                    'data_monitoring_stock_management' => true,
+                    'data_monitoring_accrual' => true
                     ],
         'PHARMACY' => [
             'data_monitoring' => true,

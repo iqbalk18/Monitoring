@@ -55,6 +55,10 @@ Route::get('/rejected', [RejectedController::class, 'index'])->name('rejected.in
 Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
 Route::get('/stock/export', [StockController::class, 'exportExcel'])->name('stock.export');
 
+// Accrual
+Route::get('/accrual', [\App\Http\Controllers\AccrualController::class, 'index'])->name('accrual.index');
+Route::get('/accrual/export', [\App\Http\Controllers\AccrualController::class, 'exportExcel'])->name('accrual.export');
+
 // Stock Management Routes (Data Monitoring: adjustment_stock)
 Route::middleware(['check.data.monitoring:adjustment_stock'])->group(function () {
     Route::get('/stock-management', [StockManagementController::class, 'index'])->name('stock-management.index');
