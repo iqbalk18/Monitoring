@@ -91,6 +91,8 @@
         .table-container {
             width: 100%;
             overflow-x: auto;
+            overflow-y: auto;
+            max-height: 80vh;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -118,6 +120,9 @@
             padding-bottom: 0.35rem;
             color: var(--muted-foreground);
             background-color: var(--muted);
+            position: sticky;
+            top: 0;
+            z-index: 4;
         }
 
         .table-shadcn tbody tr:hover {
@@ -364,6 +369,11 @@
             color: var(--foreground);
             border-color: var(--input);
         }
+        .dark .form-control::placeholder,
+        .dark .form-select::placeholder {
+            color: var(--muted-foreground);
+            opacity: 1;
+        }
         .dark .form-control:focus, .dark .form-select:focus {
             background-color: var(--background);
             border-color: var(--brand);
@@ -396,22 +406,186 @@
         }
 
         .action-modal-summary {
-            padding: 0.85rem 1rem;
+            padding: 0.8rem 0.9rem;
             border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            background-color: var(--muted);
-            margin-bottom: 1rem;
+            border-radius: 1rem;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
+                var(--muted);
+            margin-bottom: 0.75rem;
         }
 
         .action-modal-btn {
             width: 100%;
             justify-content: flex-start;
             text-align: left;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0;
+            min-height: 2.45rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .action-modal-btn.action-sent {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+            border-color: #93c5fd;
+        }
+
+        .action-modal-btn.action-sent:hover {
+            background-color: #bfdbfe;
+            color: #1d4ed8;
+            border-color: #60a5fa;
+        }
+
+        .action-modal-btn.action-received {
+            background-color: #e5e7eb;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+
+        .action-modal-btn.action-received:hover {
+            background-color: #d1d5db;
+            color: #1f2937;
+            border-color: #9ca3af;
+        }
+
+        .action-modal-btn.action-revise {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        .action-modal-btn.action-revise:hover {
+            background-color: #fecaca;
+            color: #b91c1c;
+            border-color: #f87171;
+        }
+
+        .action-modal-btn.action-paid {
+            background-color: #dcfce7;
+            color: #15803d;
+            border-color: #86efac;
+        }
+
+        .action-modal-btn.action-paid:hover {
+            background-color: #bbf7d0;
+            color: #166534;
+            border-color: #4ade80;
         }
 
         .action-modal-btn:last-child {
             margin-bottom: 0;
+        }
+
+        .action-modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.45rem;
+        }
+
+        .action-modal-btn.action-danger {
+            background-color: #dc2626;
+            color: #fff;
+            border-color: #dc2626;
+            grid-column: 1 / -1;
+        }
+
+        .action-modal-btn.action-danger:hover {
+            background-color: #b91c1c;
+            border-color: #b91c1c;
+            color: #fff;
+        }
+
+        .action-meta-label {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 700;
+            color: var(--muted-foreground);
+            margin-bottom: 0.15rem;
+        }
+
+        .action-meta-value {
+            font-size: 0.84rem;
+            color: var(--foreground);
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .action-modal-statusline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.55rem;
+            margin-top: 0.65rem;
+            padding-top: 0.65rem;
+            border-top: 1px dashed var(--border);
+            flex-wrap: wrap;
+        }
+
+        .action-modal-subtitle {
+            font-size: 0.76rem;
+            color: var(--muted-foreground);
+            margin: 0 0 0.55rem;
+        }
+
+        .action-modal-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted-foreground);
+            font-weight: 700;
+            margin-bottom: 0.45rem;
+        }
+
+        .action-modal-dialog {
+            max-width: 560px;
+        }
+
+        .action-modal-content {
+            border-radius: 1.1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.14);
+            overflow: hidden;
+        }
+
+        .dark .action-modal-content {
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+        }
+
+        .dark .action-modal-btn.action-sent {
+            background-color: rgba(29, 78, 216, 0.2);
+            color: #93c5fd;
+            border-color: rgba(147, 197, 253, 0.3);
+        }
+
+        .dark .action-modal-btn.action-received {
+            background-color: rgba(148, 163, 184, 0.16);
+            color: #e5e7eb;
+            border-color: rgba(203, 213, 225, 0.2);
+        }
+
+        .dark .action-modal-btn.action-revise {
+            background-color: rgba(220, 38, 38, 0.2);
+            color: #fca5a5;
+            border-color: rgba(252, 165, 165, 0.28);
+        }
+
+        .dark .action-modal-btn.action-paid {
+            background-color: rgba(21, 128, 61, 0.22);
+            color: #86efac;
+            border-color: rgba(134, 239, 172, 0.28);
+        }
+
+        .action-modal-header {
+            padding-bottom: 0.15rem !important;
+        }
+
+        @media (max-width: 767.98px) {
+            .action-modal-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .modal.fade .modal-dialog {
@@ -420,6 +594,29 @@
 
         .modal-backdrop.fade {
             transition-duration: 0.12s;
+        }
+
+        .table-controls {
+            padding: 0.6rem 0.9rem !important;
+        }
+
+        .table-controls .form-select-sm {
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+            min-height: auto;
+        }
+
+        .table-controls .btn {
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+            line-height: 1.2;
+        }
+
+        .table-controls .text-sm,
+        .table-controls label,
+        .table-controls span {
+            font-size: 0.8rem;
+            line-height: 1.2;
         }
     </style>
 @endpush
@@ -540,7 +737,7 @@
                 </tfoot>
             </table>
         </div>
-        <div class="d-flex justify-content-between align-items-center p-3 border-top flex-wrap gap-2">
+        <div class="table-controls d-flex justify-content-between align-items-center border-top flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
                 <label class="text-sm" style="color: var(--muted-foreground); white-space: nowrap;">Show</label>
                 <select id="pageSizeSelect" class="form-select form-select-sm" style="width: auto; background-color: var(--card); border-color: var(--input); color: var(--foreground);">
@@ -647,6 +844,28 @@
         </div>
     </div>
 
+    <div class="modal fade" id="reviseModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title font-weight-bold" style="color: #dc2626;">Revise Invoice</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Mark <span id="rvItemCount">0</span> invoice(s) as <strong>REVISE</strong> because the payer returned the invoice.</p>
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold small">Revise Reason</label>
+                        <textarea class="form-control" id="inputReviseReason" rows="3" placeholder="Reason from insurance..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn-shadcn btn-shadcn-ghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn-shadcn" style="background-color: #dc2626; color: white;" id="btnSubmitRevise">Update to REVISE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Cancel Invoice Modal -->
     <div class="modal fade" id="cancelInvModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -676,9 +895,9 @@
     </div>
 
     <div class="modal fade" id="rowActionModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header border-bottom-0 pb-0">
+        <div class="modal-dialog modal-dialog-centered action-modal-dialog">
+            <div class="modal-content action-modal-content">
+                <div class="modal-header border-bottom-0 pb-0 action-modal-header">
                     <div>
                         <h5 class="modal-title font-weight-bold">Invoice Actions</h5>
                         <div id="rowActionMeta" class="small text-muted"></div>
@@ -687,11 +906,21 @@
                 </div>
                 <div class="modal-body">
                     <div class="action-modal-summary">
-                        <div id="rowActionPatient" class="font-weight-bold" style="color: var(--foreground);"></div>
-                        <div id="rowActionPayer" class="small" style="color: var(--muted-foreground);"></div>
-                        <div id="rowActionStatus" class="small mt-2" style="color: var(--muted-foreground);"></div>
+                        <div class="action-meta-label">Patient</div>
+                        <div id="rowActionPatient" class="action-meta-value"></div>
+                        <div class="action-meta-label mt-3">Payer</div>
+                        <div id="rowActionPayer" class="action-meta-value"></div>
+                        <div class="action-modal-statusline">
+                            <div>
+                                <div class="action-meta-label mb-1">Current Status</div>
+                                <div id="rowActionStatus" class="action-meta-value"></div>
+                            </div>
+                            <div id="rowActionCancelInfo"></div>
+                        </div>
                     </div>
-                    <div id="rowActionButtons"></div>
+                    <p class="action-modal-subtitle">Pilih langkah berikutnya untuk invoice ini.</p>
+                    <div class="action-modal-section-title">Available Actions</div>
+                    <div id="rowActionButtons" class="action-modal-grid"></div>
                 </div>
             </div>
         </div>
@@ -818,14 +1047,16 @@
     const sendDocModalElement = document.getElementById('sendDocModal');
     const setReceivedModalElement = document.getElementById('setReceivedModal');
     const remarksModalElement = document.getElementById('remarksModal');
+    const reviseModalElement = document.getElementById('reviseModal');
     const cancelInvModalElement = document.getElementById('cancelInvModal');
     const rowActionModalElement = document.getElementById('rowActionModal');
 
-    let sendDocModal, setReceivedModal, remarksModal, cancelInvModal, rowActionModal;
+    let sendDocModal, setReceivedModal, remarksModal, reviseModal, cancelInvModal, rowActionModal;
     if (typeof bootstrap !== 'undefined') {
         sendDocModal = new bootstrap.Modal(sendDocModalElement);
         setReceivedModal = new bootstrap.Modal(setReceivedModalElement);
         remarksModal = new bootstrap.Modal(remarksModalElement);
+        reviseModal = new bootstrap.Modal(reviseModalElement);
         cancelInvModal = new bootstrap.Modal(cancelInvModalElement);
         rowActionModal = new bootstrap.Modal(rowActionModalElement);
     }
@@ -837,14 +1068,11 @@
     const updateStickyPositions = () => { /* no-op */ };
 
     const getActionAvailability = (item) => {
-        const statusOrder = { 'BATCHING': 0, 'SENT': 1, 'RECEIVED': 2, 'PAID': 3 };
-        const currentOrder = statusOrder[item.status] ?? 0;
-
         return {
-            currentOrder,
-            canSent: currentOrder === 0 && !item.is_cancelled,
-            canReceived: currentOrder === 1 && !item.is_cancelled,
-            canPaid: currentOrder === 2 && !item.is_cancelled,
+            canSent: (item.status === 'BATCHING' || item.status === 'REVISE') && !item.is_cancelled,
+            canReceived: item.status === 'SENT' && !item.is_cancelled,
+            canRevise: item.status === 'RECEIVED' && !item.is_cancelled,
+            canPaid: item.status === 'RECEIVED' && !item.is_cancelled,
             isCancelledItem: item.is_cancelled
         };
     };
@@ -905,6 +1133,12 @@
             document.getElementById('rmItemCount').textContent = '1';
             document.getElementById('inputRemarks').value = item.remarks || '';
             openNextModal(remarksModal);
+        } else if (action === 'REVISE') {
+            selectedIds.clear();
+            selectedIds.add(item.id);
+            document.getElementById('rvItemCount').textContent = '1';
+            document.getElementById('inputReviseReason').value = '';
+            openNextModal(reviseModal);
         } else if (action === 'CANCEL') {
             selectedIds.clear();
             selectedIds.add(item.id);
@@ -917,21 +1151,27 @@
     const openRowActionModal = (item) => {
         if (!item) return;
 
-        const { currentOrder, canSent, canReceived, canPaid, isCancelledItem } = getActionAvailability(item);
+        const { canSent, canReceived, canRevise, canPaid, isCancelledItem } = getActionAvailability(item);
         document.getElementById('rowActionMeta').textContent = `Invoice ${item.invoice_no || '-'} • Batch ${item.batch_number || '-'}`;
         document.getElementById('rowActionPatient').textContent = item.patient_name || '-';
         document.getElementById('rowActionPayer').textContent = item.payer_name || '-';
-        document.getElementById('rowActionStatus').textContent = `Status: ${item.status || '-'}${item.is_cancelled ? ` • Cancelled ${formatDate(item.cancelled_date)}` : ''}`;
+        document.getElementById('rowActionStatus').innerHTML = `<span class="badge-status ${item.status}" style="font-size: 0.68rem; padding: 0.24rem 0.5rem;">${item.status || '-'}</span>`;
+        document.getElementById('rowActionCancelInfo').innerHTML = item.is_cancelled
+            ? `<span class="cancel-flag">Cancelled ${formatDate(item.cancelled_date)}</span>`
+            : '';
 
         const buttons = [];
-        if (currentOrder === 0 && canSent) {
-            buttons.push(`<button type="button" class="btn-shadcn btn-shadcn-outline action-modal-btn" data-row-action="SENT" data-id="${item.id}">Set Sent</button>`);
+        if (canSent) {
+            buttons.push(`<button type="button" class="btn-shadcn action-modal-btn action-sent" data-row-action="SENT" data-id="${item.id}">Set Sent</button>`);
         }
-        if (currentOrder === 1 && canReceived) {
-            buttons.push(`<button type="button" class="btn-shadcn btn-shadcn-outline action-modal-btn" data-row-action="RECEIVED" data-id="${item.id}">Set Received</button>`);
+        if (canReceived) {
+            buttons.push(`<button type="button" class="btn-shadcn action-modal-btn action-received" data-row-action="RECEIVED" data-id="${item.id}">Set Received</button>`);
         }
-        if (currentOrder === 2 && canPaid) {
-            buttons.push(`<button type="button" class="btn-shadcn btn-shadcn-outline action-modal-btn" data-row-action="PAID" data-id="${item.id}">Set Paid</button>`);
+        if (canRevise) {
+            buttons.push(`<button type="button" class="btn-shadcn action-modal-btn action-revise" data-row-action="REVISE" data-id="${item.id}">Set Revise</button>`);
+        }
+        if (canPaid) {
+            buttons.push(`<button type="button" class="btn-shadcn action-modal-btn action-paid" data-row-action="PAID" data-id="${item.id}">Set Paid</button>`);
         }
 
         buttons.push(
@@ -939,7 +1179,7 @@
         );
 
         if (!isCancelledItem) {
-            buttons.push(`<button type="button" class="btn-shadcn action-modal-btn" style="background-color: #dc2626; color: white;" data-row-action="CANCEL" data-id="${item.id}">Cancel Invoice</button>`);
+            buttons.push(`<button type="button" class="btn-shadcn action-modal-btn action-danger" data-row-action="CANCEL" data-id="${item.id}">Cancel Invoice</button>`);
         }
 
         document.getElementById('rowActionButtons').innerHTML = buttons.join('');
@@ -1108,11 +1348,12 @@
                 ? `<span class="cancel-flag" title="Cancelled on ${formatDate(item.cancelled_date)}">CANCEL</span>${cancelSourceLabel ? `<span class="cancel-source-badge">${cancelSourceLabel}</span>` : ''}`
                 : '';
 
-            const { canSent, canReceived, canPaid, isCancelledItem } = getActionAvailability(item);
+            const { canSent, canReceived, canRevise, canPaid, isCancelledItem } = getActionAvailability(item);
 
             // SVG Icons
             const iconSent = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>`;
             const iconReceived = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+            const iconRevise = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/><path d="M21 9a9 9 0 0 0-15-6.7L3 5"/><path d="M3 15a9 9 0 0 0 15 6.7l3-2.7"/></svg>`;
             const iconPaid = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`;
             const iconRemarks = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
             const iconCancel = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`;
@@ -1146,6 +1387,13 @@
                                 ${iconReceived}
                                 <span>Set Received</span>
                                 ${canReceived ? '<span class="action-badge badge-next">NEXT</span>' : ''}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item action-dd-item ${canRevise ? '' : 'disabled'}" href="#" data-id="${item.id}" data-action="REVISE" ${canRevise ? '' : 'aria-disabled="true" tabindex="-1"'} style="${canRevise ? 'color: #dc2626;' : ''}">
+                                ${iconRevise}
+                                <span>Set Revise</span>
+                                ${canRevise ? '<span class="action-badge badge-next">NEXT</span>' : ''}
                             </a>
                         </li>
                         <li><hr class="dropdown-divider" style="margin: 0.25rem 0;"></li>
@@ -1301,7 +1549,8 @@
         }
 
         const rowEl = e.target.closest('tr[data-id]');
-        if (rowEl && !e.target.closest('.dropdown') && !e.target.closest('button') && !e.target.closest('a') && !e.target.closest('input') && !e.target.closest('select') && !e.target.closest('textarea')) {
+        const clickedStickyArea = !!e.target.closest('.sticky-col');
+        if (rowEl && !clickedStickyArea && !e.target.closest('.dropdown') && !e.target.closest('button') && !e.target.closest('a') && !e.target.closest('input') && !e.target.closest('select') && !e.target.closest('textarea')) {
             const id = parseInt(rowEl.dataset.id);
             const item = invoicesData.find(i => i.id === id);
             openRowActionModal(item);
@@ -1417,6 +1666,34 @@
             selectedIds.clear();
         } catch (error) {
             alert(error.message || 'Failed to save remarks.');
+        }
+    });
+
+    document.getElementById('btnSubmitRevise').addEventListener('click', async () => {
+        const reviseReason = document.getElementById('inputReviseReason').value;
+        const selectedItem = invoicesData.find(inv => selectedIds.has(inv.id));
+        if (!selectedItem) return alert('Invoice not found.');
+
+        try {
+            await persistTrackingUpdate({
+                invoice_no: selectedItem.invoice_no,
+                status: 'REVISE',
+                ref_no: selectedItem.ref_no || null,
+                courier_via: selectedItem.courier_via || null,
+                tracking_no: selectedItem.tracking_no || null,
+                sent_date: selectedItem.sent_date || null,
+                received_date: selectedItem.received_date || null,
+                paid_on: selectedItem.paid_on || null,
+                cancelled_date: selectedItem.cancelled_date || null,
+                due_days: selectedItem.due_days ?? null,
+                remarks: reviseReason ? `[REVISE] ${reviseReason}` : (selectedItem.remarks ? `[REVISE] ${selectedItem.remarks}` : '[REVISE]')
+            });
+
+            reviseModal?.hide();
+            document.getElementById('inputReviseReason').value = '';
+            selectedIds.clear();
+        } catch (error) {
+            alert(error.message || 'Failed to save revise status.');
         }
     });
 
