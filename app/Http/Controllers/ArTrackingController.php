@@ -92,7 +92,7 @@ class ArTrackingController extends Controller
                 'received_date' => $validated['received_date'] ?? null,
                 'paid_on' => $validated['paid_on'] ?? null,
                 'cancelled_date' => $validated['cancelled_date'] ?? null,
-                'due_days' => $validated['due_days'] ?? null,
+                'due_days' => $validated['due_days'] ?? 0,
                 'remarks' => $validated['remarks'] ?? null,
             ]
         );
@@ -194,6 +194,8 @@ class ArTrackingController extends Controller
             $balance = 0;
         }
 
+        $dueDays = isset($row->due_days) && (int) $row->due_days !== 0 ? (int) $row->due_days : null;
+
         return [
             'id' => $row->id,
             'batch_number' => $row->bat_number,
@@ -215,7 +217,7 @@ class ArTrackingController extends Controller
             'balance' => $balance,
             'amount' => $outstanding,
             'total_insurance' => $outstanding,
-            'due_days' => $row->due_days,
+            'due_days' => $dueDays,
             'status' => $status,
             'ref_no' => $row->ref_no,
             'courier_via' => $row->courier_via,

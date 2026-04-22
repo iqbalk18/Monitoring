@@ -18,10 +18,67 @@
         .status-tabs {
             display: flex;
             flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
             gap: 0.25rem;
             padding-bottom: 0;
             margin-bottom: 1rem;
             border-bottom: 2px solid var(--border);
+        }
+
+        .status-tabs-left {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            min-width: 0;
+        }
+
+        .status-tabs-right {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            padding-bottom: 0.3rem;
+        }
+
+        .status-search {
+            width: 250px;
+        }
+
+        .status-search .input-group-text,
+        .status-search .form-control {
+            height: 2.25rem;
+            font-size: 0.8125rem;
+        }
+
+        .status-search .input-group-text {
+            padding: 0 0.7rem;
+        }
+
+        .status-search .form-control {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .filter-actions {
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .filter-actions .btn-shadcn {
+            height: 2.45rem;
+            min-width: 96px;
+        }
+
+        @media (max-width: 991.98px) {
+            .status-tabs-right {
+                width: 100%;
+                margin-left: 0;
+                padding-top: 0.5rem;
+            }
+
+            .status-search {
+                width: 100%;
+            }
         }
 
         .status-tab {
@@ -654,31 +711,34 @@
                     <!-- Dynamically populated from data -->
                 </select>
             </div>
-            <div class="col-md-2">
-                <label for="searchFilter" class="form-label" style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);">Search</label>
-                <div class="input-group">
-                    <span class="input-group-text" style="background-color: var(--muted); border-color: var(--input); color: var(--muted-foreground);">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </span>
-                    <input type="text" id="searchFilter" class="form-control" placeholder="Patient, MRN, Inv No..." style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
-                </div>
-            </div>
         </div>
         <div class="row g-3 mt-1">
-            <div class="col-md-12 d-flex justify-content-end gap-2">
-                 <button class="btn-shadcn btn-shadcn-outline" id="resetBtn" style="min-width: 100px;">
-                     Reset
-                 </button>
-                 <button class="btn-shadcn btn-shadcn-primary" id="btnExportExcel" style="min-width: 100px;">
-                     Export
+            <div class="col-md-12 d-flex justify-content-end filter-actions">
+                 <button class="btn-shadcn btn-shadcn-primary" id="btnExportExcel">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.45rem;">
+                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                         <polyline points="7 10 12 15 17 10"/>
+                         <line x1="12" y1="15" x2="12" y2="3"/>
+                     </svg>
+                     Export to Excel
                  </button>
             </div>
         </div>
     </div>
 
     <!-- Status Tabs -->
-    <div class="status-tabs" id="statusTabs">
-        <!-- JS will populate tabs -->
+    <div class="status-tabs">
+        <div class="status-tabs-left" id="statusTabs">
+            <!-- JS will populate tabs -->
+        </div>
+        <div class="status-tabs-right">
+            <div class="input-group status-search">
+                <span class="input-group-text" style="background-color: var(--muted); border-color: var(--input); color: var(--muted-foreground);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </span>
+                <input type="text" id="searchFilter" class="form-control" placeholder="Patient, MRN, Inv No..." style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
+            </div>
+        </div>
     </div>
 
     <!-- Data Grid -->
@@ -1077,10 +1137,10 @@
 
     const getActionAvailability = (item) => {
         return {
-            canSent: (item.status === 'BATCHING' || item.status === 'REVISE') && !item.is_cancelled,
+            canSent: item.is_cancelled || item.status === 'BATCHING' || item.status === 'REVISE',
             canReceived: item.status === 'SENT' && !item.is_cancelled,
-            canRevise: item.status === 'RECEIVED' && !item.is_cancelled,
             canPaid: item.status === 'RECEIVED' && !item.is_cancelled,
+            canRevise: item.status === 'RECEIVED' && !item.is_cancelled,
             isCancelledItem: item.is_cancelled
         };
     };
@@ -1179,11 +1239,11 @@
         if (canReceived) {
             buttons.push(`<button type="button" class="btn-shadcn action-modal-btn action-received" data-row-action="RECEIVED" data-id="${item.id}">Set Received</button>`);
         }
-        if (canRevise) {
-            buttons.push(`<button type="button" class="btn-shadcn action-modal-btn action-revise" data-row-action="REVISE" data-id="${item.id}">Set Revise</button>`);
-        }
         if (canPaid) {
             buttons.push(`<button type="button" class="btn-shadcn action-modal-btn action-paid" data-row-action="PAID" data-id="${item.id}">Set Paid</button>`);
+        }
+        if (canRevise) {
+            buttons.push(`<button type="button" class="btn-shadcn action-modal-btn action-revise" data-row-action="REVISE" data-id="${item.id}">Set Revise</button>`);
         }
 
         buttons.push(
@@ -1371,9 +1431,7 @@
             const iconCancel = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`;
 
             // Action dropdown
-            let actionButtons = '';
-            if (!isCancelledItem) {
-                actionButtons = `
+            let actionButtons = `
                 <div class="dropdown d-inline-block">
                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.75rem; padding: 2px 8px;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 3px;"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
@@ -1388,17 +1446,17 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item action-dd-item action-primary ${canPaid ? '' : 'disabled'}" href="#" data-id="${item.id}" data-action="PAID" ${canPaid ? '' : 'aria-disabled="true" tabindex="-1"'}>
-                                ${iconPaid}
-                                <span>Set Paid</span>
-                                ${canPaid ? '<span class="action-badge badge-next">NEXT</span>' : ''}
-                            </a>
-                        </li>
-                        <li>
                             <a class="dropdown-item action-dd-item ${canReceived ? '' : 'disabled'}" href="#" data-id="${item.id}" data-action="RECEIVED" ${canReceived ? '' : 'aria-disabled="true" tabindex="-1"'} style="${canReceived ? 'color: #334155;' : ''}">
                                 ${iconReceived}
                                 <span>Set Received</span>
                                 ${canReceived ? '<span class="action-badge badge-next">NEXT</span>' : ''}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item action-dd-item action-primary ${canPaid ? '' : 'disabled'}" href="#" data-id="${item.id}" data-action="PAID" ${canPaid ? '' : 'aria-disabled="true" tabindex="-1"'}>
+                                ${iconPaid}
+                                <span>Set Paid</span>
+                                ${canPaid ? '<span class="action-badge badge-next">NEXT</span>' : ''}
                             </a>
                         </li>
                         <li>
@@ -1424,6 +1482,15 @@
                     </ul>
                 </div>
                 `;
+
+            if (isCancelledItem) {
+                actionButtons = actionButtons.replace(`
+                        <li>
+                            <a class="dropdown-item action-dd-item text-danger" href="#" data-id="${item.id}" data-action="CANCEL">
+                                ${iconCancel}
+                                <span>Cancel</span>
+                            </a>
+                        </li>`, '');
             }
 
             tr.innerHTML = `
@@ -1577,18 +1644,6 @@
     invDateFrom.addEventListener('change', () => { currentPage = 1; updateUI(); });
     invDateTo.addEventListener('change', () => { currentPage = 1; updateUI(); });
 
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        payerFilter.value = 'All';
-        searchFilter.value = '';
-        batchDateFrom.value = toDateStr(firstDay);
-        batchDateTo.value = toDateStr(lastDay);
-        invDateFrom.value = '';
-        invDateTo.value = '';
-        activeTab = 'ALL';
-        currentPage = 1;
-        updateUI();
-    });
-
     // ===========================
     //  MODAL ACTIONS
     // ===========================
@@ -1612,7 +1667,7 @@
                 sent_date: sDate || null,
                 received_date: selectedItem.received_date || null,
                 paid_on: selectedItem.paid_on || null,
-                cancelled_date: selectedItem.cancelled_date || null,
+                cancelled_date: null,
                 due_days: selectedItem.due_days ?? null,
                 remarks: selectedItem.remarks || null
             });
