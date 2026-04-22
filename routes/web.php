@@ -71,6 +71,7 @@ Route::middleware(['check.data.monitoring:adjustment_stock'])->group(function ()
 // Tracking Insurance
 Route::middleware(['check.data.monitoring:track-insurance'])->group(function () {
     Route::get('/track', [\App\Http\Controllers\ArTrackingController::class, 'index'])->name('track.index');
+    Route::post('/track/update', [\App\Http\Controllers\ArTrackingController::class, 'update'])->name('track.update');
 });
 
 Route::get('import', [ImportController::class, 'showForm'])->name('showForm');
@@ -116,4 +117,3 @@ Route::prefix('api')->group(function () {
     Route::get('arc-item-price-italy/{id}', [ARCItemPriceItalyController::class, 'show']);
     Route::put('arc-item-price-italy/{id}', [ARCItemPriceItalyController::class, 'update']);
 });
-

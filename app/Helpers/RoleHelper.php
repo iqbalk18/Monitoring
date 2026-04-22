@@ -13,7 +13,7 @@ if (!function_exists('user_has_role')) {
         if (!$user) {
             return false;
         }
-        $roles = is_array($user) ? ($user['roles'] ?? []) : $user->getRolesList();
+        $roles = is_array($user) ? current(array_filter([$user['roles'] ?? null, isset($user['role']) ? [$user['role']] : null])) ?: [] : $user->getRolesList();
         return is_array($roles) && in_array($role, $roles, true);
     }
 }
@@ -31,7 +31,7 @@ if (!function_exists('user_has_any_role')) {
         if (!$user) {
             return false;
         }
-        $userRoles = is_array($user) ? ($user['roles'] ?? []) : $user->getRolesList();
+        $userRoles = is_array($user) ? current(array_filter([$user['roles'] ?? null, isset($user['role']) ? [$user['role']] : null])) ?: [] : $user->getRolesList();
         if (!is_array($userRoles)) {
             return false;
         }
@@ -52,7 +52,7 @@ if (!function_exists('user_can_data_monitoring')) {
         if (!$user) {
             return false;
         }
-        $userRoles = is_array($user) ? ($user['roles'] ?? []) : $user->getRolesList();
+        $userRoles = is_array($user) ? current(array_filter([$user['roles'] ?? null, isset($user['role']) ? [$user['role']] : null])) ?: [] : $user->getRolesList();
         if (!is_array($userRoles)) {
             return false;
         }
@@ -85,7 +85,7 @@ if (!function_exists('user_roles_list')) {
         if (!$user) {
             return [];
         }
-        $roles = is_array($user) ? ($user['roles'] ?? []) : $user->getRolesList();
+        $roles = is_array($user) ? current(array_filter([$user['roles'] ?? null, isset($user['role']) ? [$user['role']] : null])) ?: [] : $user->getRolesList();
         return is_array($roles) ? $roles : [];
     }
 }

@@ -175,21 +175,49 @@
             border-color: rgba(220,38,38,0.3);
         }
 
+        .cancel-source-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.1rem 0.4rem;
+            border-radius: 9999px;
+            font-size: 0.58rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .dark .cancel-source-badge {
+            background-color: rgba(245, 158, 11, 0.18);
+            color: #fcd34d;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+
         .row-cancelled {
-            background-color: rgba(220, 38, 38, 0.03);
+            background-color: rgba(220, 38, 38, 0.08) !important;
         }
 
         .dark .row-cancelled {
-            background-color: rgba(220, 38, 38, 0.06);
+            background-color: rgba(220, 38, 38, 0.12) !important;
         }
 
         .row-cancelled td {
-            color: var(--muted-foreground) !important;
+            color: #b91c1c !important;
         }
 
-        /* Don't dim status/action columns */
-        .row-cancelled td:nth-last-child(-n+2) {
-            color: inherit !important;
+        .dark .row-cancelled td {
+            color: #fca5a5 !important;
+        }
+
+        .row-cancelled .sticky-col {
+            background-color: #fde8e8 !important;
+        }
+
+        .dark .row-cancelled .sticky-col {
+            background-color: #3b1515 !important;
         }
 
         /* ===== Dropdown dark mode ===== */
@@ -208,6 +236,58 @@
             border-color: var(--border);
         }
 
+        /* ===== Dropdown Action Items ===== */
+        .dropdown-item.action-dd-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            padding: 0.45rem 0.75rem;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item.action-dd-item .action-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            opacity: 0.8;
+        }
+
+        .dropdown-item.action-dd-item.action-primary {
+            font-weight: 600;
+            color: #15803d;
+        }
+        .dark .dropdown-item.action-dd-item.action-primary {
+            color: #86efac;
+        }
+
+        .dropdown-item.action-dd-item.disabled,
+        .dropdown-item.action-dd-item[aria-disabled="true"] {
+            opacity: 0.35;
+            pointer-events: none;
+            cursor: not-allowed;
+            color: var(--muted-foreground) !important;
+        }
+
+        .dropdown-item.action-dd-item .action-badge {
+            font-size: 0.6rem;
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+            margin-left: auto;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .action-badge.badge-next {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        .dark .action-badge.badge-next {
+            background-color: rgba(29,78,216,0.2);
+            color: #93c5fd;
+        }
+
         .hidden-col { display: none; }
 
         /* ===== Sticky Columns ===== */
@@ -215,6 +295,7 @@
             position: sticky !important;
             background-color: var(--muted);
             z-index: 2;
+            background-clip: padding-box;
         }
 
         tbody .sticky-col {
@@ -223,6 +304,22 @@
 
         tbody tr:hover .sticky-col {
             background-color: var(--muted);
+        }
+
+        thead .sticky-col {
+            background-color: var(--muted) !important;
+        }
+
+        /* Right-side shadow on last sticky column to cover scroll bleed */
+        .sticky-status::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -3px;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to right, rgba(0,0,0,0.06), transparent);
+            pointer-events: none;
         }
 
         /* ===== Summary Footer ===== */
@@ -246,11 +343,12 @@
             z-index: 5 !important;
         }
 
-        .sticky-date { left: 0; width: 90px; min-width: 90px; max-width: 90px; white-space: normal; }
-        .sticky-invno { left: 90px; width: 90px; min-width: 90px; max-width: 90px; white-space: normal; }
-        .sticky-mrn { left: 180px; width: 90px; min-width: 90px; max-width: 90px; white-space: normal; }
-        .sticky-patient { left: 270px; width: 180px; min-width: 180px; max-width: 180px; white-space: normal; }
-        .sticky-ref { left: 450px; width: 110px; min-width: 110px; max-width: 110px; white-space: normal; border-right: 2px solid var(--border); }
+        .sticky-batch { width: 110px; min-width: 110px; max-width: 110px; white-space: normal; left: 0px !important; }
+        .sticky-invno { width: 120px; min-width: 120px; max-width: 120px; white-space: normal; left: 110px !important; }
+        .sticky-adm { width: 120px; min-width: 120px; max-width: 120px; white-space: normal; left: 230px !important; }
+        .sticky-pat { width: 160px; min-width: 160px; max-width: 160px; white-space: normal !important; word-break: break-word; left: 350px !important; }
+        .sticky-ref { width: 80px; min-width: 80px; max-width: 80px; white-space: normal; left: 510px !important; }
+        .sticky-status { width: 75px; min-width: 75px; max-width: 75px; white-space: normal !important; text-align: center; border-right: 2px solid var(--border) !important; left: 590px !important; }
 
         /* ===== Modal Dark Mode ===== */
         .dark .modal-content {
@@ -296,6 +394,33 @@
             border-color: var(--input);
             color: var(--muted-foreground);
         }
+
+        .action-modal-summary {
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            background-color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        .action-modal-btn {
+            width: 100%;
+            justify-content: flex-start;
+            text-align: left;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-modal-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal.fade .modal-dialog {
+            transition-duration: 0.12s;
+        }
+
+        .modal-backdrop.fade {
+            transition-duration: 0.12s;
+        }
     </style>
 @endpush
 
@@ -307,26 +432,32 @@
         </div>
     </div>
 
-    <!-- Filter Header -->
     <div class="filter-header">
         <div class="row g-3">
             <div class="col-md-2">
-                <label for="dateFrom" class="form-label" style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);">Date From</label>
-                <input type="date" id="dateFrom" class="form-control" style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
+                <label for="batchDateFrom" class="form-label" style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);">Batch Date From</label>
+                <input type="date" id="batchDateFrom" class="form-control" style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
             </div>
             <div class="col-md-2">
-                <label for="dateTo" class="form-label" style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);">Date To</label>
-                <input type="date" id="dateTo" class="form-control" style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
+                <label for="batchDateTo" class="form-label" style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);">Batch Date To</label>
+                <input type="date" id="batchDateTo" class="form-control" style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label for="invDateFrom" class="form-label" style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);">Invoice Printed From</label>
+                <input type="date" id="invDateFrom" class="form-control" style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
+            </div>
+            <div class="col-md-2">
+                <label for="invDateTo" class="form-label" style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);">Invoice Printed To</label>
+                <input type="date" id="invDateTo" class="form-control" style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
+            </div>
+            <div class="col-md-2">
                 <label for="payerFilter" class="form-label" style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);">Payer</label>
                 <select id="payerFilter" class="form-select" style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
                     <option value="All">All Payers</option>
-                    <option value="Global Excel">Global Excel</option>
-                    <option value="Admedika">Admedika</option>
+                    <!-- Dynamically populated from data -->
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="searchFilter" class="form-label" style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);">Search</label>
                 <div class="input-group">
                     <span class="input-group-text" style="background-color: var(--muted); border-color: var(--input); color: var(--muted-foreground);">
@@ -335,11 +466,13 @@
                     <input type="text" id="searchFilter" class="form-control" placeholder="Patient, MRN, Inv No..." style="background-color: var(--card); border-color: var(--input); color: var(--foreground);">
                 </div>
             </div>
-            <div class="col-md-2 d-flex align-items-end justify-content-end gap-2">
-                 <button class="btn-shadcn btn-shadcn-outline w-100" id="resetBtn">
+        </div>
+        <div class="row g-3 mt-1">
+            <div class="col-md-12 d-flex justify-content-end gap-2">
+                 <button class="btn-shadcn btn-shadcn-outline" id="resetBtn" style="min-width: 100px;">
                      Reset
                  </button>
-                 <button class="btn-shadcn btn-shadcn-primary w-100" id="btnExportExcel">
+                 <button class="btn-shadcn btn-shadcn-primary" id="btnExportExcel" style="min-width: 100px;">
                      Export
                  </button>
             </div>
@@ -357,28 +490,27 @@
             <table class="table-shadcn" id="dataTable">
                 <thead>
                     <tr>
-                        <th class="sticky-col sticky-date" rowspan="2" style="z-index: 5;">Inv Dat</th>
-                        <th class="sticky-col sticky-invno" rowspan="2" style="z-index: 5;">Inv No</th>
-                        <th class="sticky-col sticky-mrn" rowspan="2" style="z-index: 5;">MRN</th>
-                        <th class="sticky-col sticky-patient" rowspan="2" style="z-index: 5;">Patient Name</th>
-                        <th class="sticky-col sticky-ref" rowspan="2" style="border-right: 2px solid var(--border) !important; z-index: 5;">Ref No</th>
-                        <th colspan="11" class="text-center" style="border-bottom: 1px solid var(--border); border-right: 2px solid var(--border) !important;">💰 Section: Tracking</th>
+                        <th class="sticky-col sticky-batch" rowspan="2" style="z-index: 5;">Batch Info</th>
+                        <th class="sticky-col sticky-invno" rowspan="2" style="z-index: 5;">Invoice Info</th>
+                        <th class="sticky-col sticky-adm" rowspan="2" style="z-index: 5;">Admission Info</th>
+                        <th class="sticky-col sticky-pat" rowspan="2" style="z-index: 5;">Patient & Payer</th>
+                        <th class="sticky-col sticky-ref" rowspan="2" style="z-index: 5;">Ref No</th>
+                        <th class="sticky-col sticky-status" rowspan="2" style="z-index: 5;">Status</th>
+                        <th colspan="10" class="text-center" style="border-bottom: 1px solid var(--border); border-right: 2px solid var(--border) !important;">💰 Section: Tracking</th>
                         <th rowspan="2">Remarks</th>
-                        <th rowspan="2">Status</th>
                         <th rowspan="2">Action</th>
                     </tr>
                     <tr>
-                        <th>Amount IDR</th>
-                        <th>Curr</th>
-                        <th>Cur</th>
-                        <th>Cur (2)</th>
+                        <th>Before Discount</th>
+                        <th>After Discount</th>
                         <th>Paid</th>
                         <th>Balance</th>
-                        <th>Sent Doc</th>
+                        <th>Sent Date</th>
                         <th>VIA</th>
                         <th>Tracking#</th>
-                        <th>Rcvd date</th>
-                        <th style="border-right: 2px solid var(--border) !important;">Due</th>
+                        <th>Rcvd Date</th>
+                        <th>Paid On</th>
+                        <th style="border-right: 2px solid var(--border) !important;">Due Days</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -386,17 +518,17 @@
                 </tbody>
                 <tfoot id="tableFooter">
                     <tr>
-                        <td class="sticky-col sticky-date text-center" id="tfCount">0</td>
+                        <td class="sticky-col sticky-batch text-center" id="tfCount">0</td>
                         <td class="sticky-col sticky-invno"></td>
-                        <td class="sticky-col sticky-mrn"></td>
-                        <td class="sticky-col sticky-patient text-end" style="padding-right: 1.5rem;">Grand Total</td>
-                        <td class="sticky-col sticky-ref" style="border-right: 2px solid var(--border) !important;"></td>
-                        <td class="text-end" id="tfAmount">0</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td class="sticky-col sticky-adm"></td>
+                        <td class="sticky-col sticky-pat text-end" style="padding-right: 1.5rem;">Grand Total</td>
+                        <td class="sticky-col sticky-ref"></td>
+                        <td class="sticky-col sticky-status"></td>
+                        <td class="text-end" id="tfBefore">0</td>
+                        <td class="text-end" id="tfAfter">0</td>
                         <td class="text-end" id="tfPaid">0</td>
                         <td class="text-end" style="color: #059669;" id="tfBalance">0</td>
+                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -404,17 +536,27 @@
                         <td style="border-right: 2px solid var(--border) !important;"></td>
                         <td></td>
                         <td></td>
-                        <td></td>
                     </tr>
                 </tfoot>
             </table>
         </div>
-        <div class="d-flex justify-content-between align-items-center p-3 border-top">
-            <div class="text-sm" style="color: var(--muted-foreground);" id="recordCount">
-                Showing 0 records
+        <div class="d-flex justify-content-between align-items-center p-3 border-top flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <label class="text-sm" style="color: var(--muted-foreground); white-space: nowrap;">Show</label>
+                <select id="pageSizeSelect" class="form-select form-select-sm" style="width: auto; background-color: var(--card); border-color: var(--input); color: var(--foreground);">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all" selected>All</option>
+                </select>
+                <span class="text-sm" style="color: var(--muted-foreground); white-space: nowrap;" id="recordCount">Showing 0 records</span>
             </div>
-            <div class="text-sm font-weight-bold" style="color: var(--foreground);" id="totalAmount">
-                Total Balance: 0
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-sm font-weight-bold" style="color: var(--foreground);" id="totalAmount">Total Balance: 0</span>
+                <button class="btn btn-sm btn-outline-secondary" id="btnPrevPage" disabled>&laquo; Prev</button>
+                <span class="text-sm" style="color: var(--muted-foreground);" id="pageInfo">Page 1 of 1</span>
+                <button class="btn btn-sm btn-outline-secondary" id="btnNextPage" disabled>Next &raquo;</button>
             </div>
         </div>
     </div>
@@ -431,16 +573,15 @@
                 <div class="modal-body">
                     <p class="text-muted small mb-3">You are dispatching <span id="sdItemCount">0</span> invoice(s) — Status will be set to <strong>SENT</strong>.</p>
                     <div class="mb-3">
-                        <label class="form-label font-weight-bold small">Ref No / Cover Note No</label>
+                        <label class="form-label font-weight-bold small">Ref Number / Case Number</label>
                         <input type="text" class="form-control" id="inputRefNo" placeholder="e.g. 25-JKT001">
                     </div>
                     <div class="mb-3">
                         <label class="form-label font-weight-bold small">Courier VIA</label>
                         <select class="form-select" id="inputVia" required>
                             <option value="JNE">JNE</option>
-                            <option value="TIKI">TIKI</option>
-                            <option value="Pos Indonesia">Pos Indonesia</option>
-                            <option value="Internal Courier">Internal Courier</option>
+                            <option value="EMAIL">EMAIL</option>
+                            <option value="PORTAL">PORTAL</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -534,6 +675,28 @@
         </div>
     </div>
 
+    <div class="modal fade" id="rowActionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <div>
+                        <h5 class="modal-title font-weight-bold">Invoice Actions</h5>
+                        <div id="rowActionMeta" class="small text-muted"></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="action-modal-summary">
+                        <div id="rowActionPatient" class="font-weight-bold" style="color: var(--foreground);"></div>
+                        <div id="rowActionPayer" class="small" style="color: var(--muted-foreground);"></div>
+                        <div id="rowActionStatus" class="small mt-2" style="color: var(--muted-foreground);"></div>
+                    </div>
+                    <div id="rowActionButtons"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('scripts')
@@ -543,9 +706,11 @@
     // ===========================
     //  DATA
     // ===========================
-    let invoicesData = @json($dummyInvoices);
+    let invoicesData = @json($invoices);
     let activeTab = 'ALL';
     let selectedIds = new Set();
+    let currentPage = 1;
+    let pageSize = 'all';
 
     // ===========================
     //  TABS DEFINITION
@@ -570,7 +735,40 @@
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-');
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
+    const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    const mergeUpdatedItem = (updatedItem) => {
+        invoicesData = invoicesData.map(inv => inv.invoice_no === updatedItem.invoice_no ? updatedItem : inv);
+        updateUI();
+    };
+
+    const persistTrackingUpdate = async (payload) => {
+        const response = await fetch('{{ route('track.update') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            const message = data.message || 'Failed to save tracking update.';
+            throw new Error(message);
+        }
+
+        if (!data.item) {
+            throw new Error('Server response did not include updated tracking data.');
+        }
+
+        mergeUpdatedItem(data.item);
+        return data;
     };
 
     // Check if a cancelled invoice should have balance zeroed (past 5th of next month from cancel date)
@@ -590,52 +788,162 @@
     const statusTabsContainer = document.getElementById('statusTabs');
     const payerFilter = document.getElementById('payerFilter');
     const searchFilter = document.getElementById('searchFilter');
-    const dateFrom = document.getElementById('dateFrom');
-    const dateTo = document.getElementById('dateTo');
+    const batchDateFrom = document.getElementById('batchDateFrom');
+    const batchDateTo = document.getElementById('batchDateTo');
+    const invDateFrom = document.getElementById('invDateFrom');
+    const invDateTo = document.getElementById('invDateTo');
     const recordCountDisplay = document.getElementById('recordCount');
     const totalAmountDisplay = document.getElementById('totalAmount');
     const btnExportExcel = document.getElementById('btnExportExcel');
+
+    // Set default date range for Batch Date: 1st to last day of current month (UTC+8)
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Singapore' }));
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const pad = (n) => String(n).padStart(2, '0');
+    const toDateStr = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    batchDateFrom.value = toDateStr(firstDay);
+    batchDateTo.value = toDateStr(lastDay);
+
+    // Populate payer filter dynamically from data
+    const uniquePayers = [...new Set(invoicesData.map(i => i.payer_name).filter(Boolean))].sort();
+    uniquePayers.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        payerFilter.appendChild(opt);
+    });
 
     // Modals
     const sendDocModalElement = document.getElementById('sendDocModal');
     const setReceivedModalElement = document.getElementById('setReceivedModal');
     const remarksModalElement = document.getElementById('remarksModal');
     const cancelInvModalElement = document.getElementById('cancelInvModal');
+    const rowActionModalElement = document.getElementById('rowActionModal');
 
-    let sendDocModal, setReceivedModal, remarksModal, cancelInvModal;
+    let sendDocModal, setReceivedModal, remarksModal, cancelInvModal, rowActionModal;
     if (typeof bootstrap !== 'undefined') {
         sendDocModal = new bootstrap.Modal(sendDocModalElement);
         setReceivedModal = new bootstrap.Modal(setReceivedModalElement);
         remarksModal = new bootstrap.Modal(remarksModalElement);
         cancelInvModal = new bootstrap.Modal(cancelInvModalElement);
+        rowActionModal = new bootstrap.Modal(rowActionModalElement);
     }
 
     // ===========================
     //  STICKY POSITIONS
     // ===========================
-    const updateStickyPositions = () => {
-        setTimeout(() => {
-            const getWidth = (className) => {
-                const head = document.querySelector(`thead th.${className}`);
-                return head ? head.offsetWidth : 0;
-            };
+    // Sticky positions are now hardcoded in CSS (left values)
+    const updateStickyPositions = () => { /* no-op */ };
 
-            let currentLeft = 0;
-            const cols = [
-                { class: 'sticky-date' },
-                { class: 'sticky-invno' },
-                { class: 'sticky-mrn' },
-                { class: 'sticky-patient' },
-                { class: 'sticky-ref' }
-            ];
+    const getActionAvailability = (item) => {
+        const statusOrder = { 'BATCHING': 0, 'SENT': 1, 'RECEIVED': 2, 'PAID': 3 };
+        const currentOrder = statusOrder[item.status] ?? 0;
 
-            cols.forEach((col) => {
-                document.querySelectorAll(`.${col.class}`).forEach(el => {
-                    el.style.left = `${currentLeft}px`;
-                });
-                currentLeft += getWidth(col.class);
+        return {
+            currentOrder,
+            canSent: currentOrder === 0 && !item.is_cancelled,
+            canReceived: currentOrder === 1 && !item.is_cancelled,
+            canPaid: currentOrder === 2 && !item.is_cancelled,
+            isCancelledItem: item.is_cancelled
+        };
+    };
+
+    const openNextModal = (nextModal) => {
+        if (!nextModal) return;
+        const isRowActionModalOpen = !!(rowActionModalElement && rowActionModalElement.classList.contains('show'));
+        if (!rowActionModal || !isRowActionModalOpen) {
+            nextModal.show();
+            return;
+        }
+
+        const handleHidden = () => {
+            rowActionModalElement.removeEventListener('hidden.bs.modal', handleHidden);
+            nextModal.show();
+        };
+
+        rowActionModalElement.addEventListener('hidden.bs.modal', handleHidden);
+        rowActionModal.hide();
+    };
+
+    const openActionFlow = (action, item) => {
+        if (!item) return;
+
+        if (action === 'SENT') {
+            selectedIds.clear();
+            selectedIds.add(item.id);
+            document.getElementById('sdItemCount').textContent = '1';
+            document.getElementById('inputRefNo').value = item.ref_no || '';
+            openNextModal(sendDocModal);
+        } else if (action === 'RECEIVED') {
+            selectedIds.clear();
+            selectedIds.add(item.id);
+            document.getElementById('rcItemCount').textContent = '1';
+            openNextModal(setReceivedModal);
+        } else if (action === 'PAID') {
+            rowActionModal?.hide();
+            const today = new Date().toISOString().slice(0, 10);
+
+            persistTrackingUpdate({
+                invoice_no: item.invoice_no,
+                status: 'PAID',
+                ref_no: item.ref_no || null,
+                courier_via: item.courier_via || null,
+                tracking_no: item.tracking_no || null,
+                sent_date: item.sent_date || null,
+                received_date: item.received_date || null,
+                paid_on: today,
+                cancelled_date: item.cancelled_date || null,
+                due_days: item.due_days ?? null,
+                remarks: item.remarks || null
+            }).catch(error => {
+                alert(error.message || 'Failed to update paid status.');
             });
-        }, 50);
+        } else if (action === 'REMARKS') {
+            selectedIds.clear();
+            selectedIds.add(item.id);
+            document.getElementById('rmItemCount').textContent = '1';
+            document.getElementById('inputRemarks').value = item.remarks || '';
+            openNextModal(remarksModal);
+        } else if (action === 'CANCEL') {
+            selectedIds.clear();
+            selectedIds.add(item.id);
+            document.getElementById('ccItemCount').textContent = '1';
+            document.getElementById('inputCancelReason').value = '';
+            openNextModal(cancelInvModal);
+        }
+    };
+
+    const openRowActionModal = (item) => {
+        if (!item) return;
+
+        const { currentOrder, canSent, canReceived, canPaid, isCancelledItem } = getActionAvailability(item);
+        document.getElementById('rowActionMeta').textContent = `Invoice ${item.invoice_no || '-'} • Batch ${item.batch_number || '-'}`;
+        document.getElementById('rowActionPatient').textContent = item.patient_name || '-';
+        document.getElementById('rowActionPayer').textContent = item.payer_name || '-';
+        document.getElementById('rowActionStatus').textContent = `Status: ${item.status || '-'}${item.is_cancelled ? ` • Cancelled ${formatDate(item.cancelled_date)}` : ''}`;
+
+        const buttons = [];
+        if (currentOrder === 0 && canSent) {
+            buttons.push(`<button type="button" class="btn-shadcn btn-shadcn-outline action-modal-btn" data-row-action="SENT" data-id="${item.id}">Set Sent</button>`);
+        }
+        if (currentOrder === 1 && canReceived) {
+            buttons.push(`<button type="button" class="btn-shadcn btn-shadcn-outline action-modal-btn" data-row-action="RECEIVED" data-id="${item.id}">Set Received</button>`);
+        }
+        if (currentOrder === 2 && canPaid) {
+            buttons.push(`<button type="button" class="btn-shadcn btn-shadcn-outline action-modal-btn" data-row-action="PAID" data-id="${item.id}">Set Paid</button>`);
+        }
+
+        buttons.push(
+            `<button type="button" class="btn-shadcn btn-shadcn-outline action-modal-btn" data-row-action="REMARKS" data-id="${item.id}">Update Remarks</button>`
+        );
+
+        if (!isCancelledItem) {
+            buttons.push(`<button type="button" class="btn-shadcn action-modal-btn" style="background-color: #dc2626; color: white;" data-row-action="CANCEL" data-id="${item.id}">Cancel Invoice</button>`);
+        }
+
+        document.getElementById('rowActionButtons').innerHTML = buttons.join('');
+        rowActionModal?.show();
     };
 
     // ===========================
@@ -644,13 +952,41 @@
     const renderTabs = () => {
         statusTabsContainer.innerHTML = '';
 
+        // Get data filtered by date/payer/search (but NOT by tab)
+        const getBaseFilteredData = () => {
+            const payerVal = payerFilter.value;
+            const searchVal = searchFilter.value.toLowerCase();
+            const bFromVal = batchDateFrom.value;
+            const bToVal = batchDateTo.value;
+            const iFromVal = invDateFrom.value;
+            const iToVal = invDateTo.value;
+
+            return invoicesData.filter(item => {
+                if (payerVal !== 'All' && item.payer_name !== payerVal) return false;
+                if (searchVal !== '') {
+                    const haystack = `${item.patient_name} ${item.mrn} ${item.invoice_no} ${item.batch_number || ''}`.toLowerCase();
+                    if (!haystack.includes(searchVal)) return false;
+                }
+                const batchVal = item.batch_date ? item.batch_date.slice(0, 10) : null;
+                if (bFromVal && (!batchVal || batchVal < bFromVal)) return false;
+                if (bToVal && (!batchVal || batchVal > bToVal)) return false;
+                const invVal = item.invoice_printed ? item.invoice_printed.slice(0, 10) : null;
+                if (iFromVal && (!invVal || invVal < iFromVal)) return false;
+                if (iToVal && (!invVal || invVal > iToVal)) return false;
+                return true;
+            });
+        };
+
+        const baseData = getBaseFilteredData();
+
         tabsDef.forEach(tab => {
-            const count = invoicesData.filter(tab.query).length;
+            const count = baseData.filter(tab.query).length;
             const btn = document.createElement('button');
             btn.className = `status-tab ${activeTab === tab.key ? 'active' : ''}`;
             btn.innerHTML = `${tab.label} <span class="tab-count">${count}</span>`;
             btn.addEventListener('click', () => {
                 activeTab = tab.key;
+                currentPage = 1;
                 renderTabs();
                 renderTable();
             });
@@ -664,8 +1000,10 @@
     const getFilteredData = () => {
         const payerVal = payerFilter.value;
         const searchVal = searchFilter.value.toLowerCase();
-        const fromVal = dateFrom.value;
-        const toVal = dateTo.value;
+        const bFromVal = batchDateFrom.value;
+        const bToVal = batchDateTo.value;
+        const iFromVal = invDateFrom.value;
+        const iToVal = invDateTo.value;
 
         // Get the active tab's query
         const tabQuery = tabsDef.find(t => t.key === activeTab)?.query || (() => true);
@@ -679,13 +1017,19 @@
 
             // Search filter
             if (searchVal !== '') {
-                const haystack = `${item.patient_name} ${item.mrn} ${item.invoice_no}`.toLowerCase();
+                const haystack = `${item.patient_name} ${item.mrn} ${item.invoice_no} ${item.batch_number || ''}`.toLowerCase();
                 if (!haystack.includes(searchVal)) return false;
             }
 
-            // Date range filter (based on invoice_date)
-            if (fromVal && item.invoice_date < fromVal) return false;
-            if (toVal && item.invoice_date > toVal) return false;
+            // Batch Date range filter
+            const batchVal = item.batch_date ? item.batch_date.slice(0, 10) : null;
+            if (bFromVal && (!batchVal || batchVal < bFromVal)) return false;
+            if (bToVal && (!batchVal || batchVal > bToVal)) return false;
+
+            // Invoice Printed Date range filter
+            const invVal = item.invoice_printed ? item.invoice_printed.slice(0, 10) : null;
+            if (iFromVal && (!invVal || invVal < iFromVal)) return false;
+            if (iToVal && (!invVal || invVal > iToVal)) return false;
 
             return true;
         });
@@ -698,89 +1042,169 @@
         const data = getFilteredData();
         tableBody.innerHTML = '';
 
+        // Pagination calculation
+        const totalRecords = data.length;
+        const totalPages = pageSize === 'all' ? 1 : Math.ceil(totalRecords / pageSize);
+        if (currentPage > totalPages) currentPage = totalPages || 1;
+
+        const startIdx = pageSize === 'all' ? 0 : (currentPage - 1) * pageSize;
+        const endIdx = pageSize === 'all' ? totalRecords : Math.min(startIdx + pageSize, totalRecords);
+        const pageData = data.slice(startIdx, endIdx);
+
+        // Grand totals (across ALL filtered data, not just current page)
         let totalVal = 0;
-        let totalAmount = 0;
+        let totalBefore = 0;
+        let totalAfter = 0;
         let totalPaid = 0;
+        data.forEach(item => {
+            const displayBalance = (item.is_cancelled && shouldZeroBalance(item)) ? 0 : item.balance;
+            totalVal += displayBalance;
+            totalBefore += (item.before_discount || 0);
+            totalAfter += (item.after_discount || 0);
+            totalPaid += (item.paid_amount || 0);
+        });
 
         if (data.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="19" class="text-center py-5 text-muted">No records found matching the criteria.</td></tr>`;
+            tableBody.innerHTML = `<tr>
+                <td class="sticky-col sticky-batch"></td>
+                <td class="sticky-col sticky-invno"></td>
+                <td class="sticky-col sticky-adm"></td>
+                <td class="sticky-col sticky-pat"></td>
+                <td class="sticky-col sticky-ref"></td>
+                <td class="sticky-col sticky-status"></td>
+                <td colspan="12" class="text-center py-5 text-muted">No records found matching the criteria.</td>
+            </tr>`;
             recordCountDisplay.textContent = 'Showing 0 records';
             totalAmountDisplay.textContent = 'Total Balance: IDR 0';
+            document.getElementById('pageInfo').textContent = 'Page 0 of 0';
+            document.getElementById('btnPrevPage').disabled = true;
+            document.getElementById('btnNextPage').disabled = true;
 
             document.getElementById('tfCount').textContent = '0';
-            document.getElementById('tfAmount').textContent = formatCurrency(0);
+            document.getElementById('tfBefore').textContent = formatCurrency(0);
+            document.getElementById('tfAfter').textContent = formatCurrency(0);
             document.getElementById('tfPaid').textContent = formatCurrency(0);
             document.getElementById('tfBalance').textContent = formatCurrency(0);
             return;
         }
 
-        data.forEach(item => {
-            // Apply client-side zero balance for cancelled invoices
+        // Render only current page data
+        pageData.forEach(item => {
             const displayBalance = (item.is_cancelled && shouldZeroBalance(item)) ? 0 : item.balance;
 
-            totalVal += displayBalance;
-            totalAmount += item.amount;
-            totalPaid += (item.paid_amount || 0);
-
             const tr = document.createElement('tr');
+            tr.dataset.id = item.id;
             if (item.is_cancelled) tr.classList.add('row-cancelled');
 
             // Cancel flag HTML
+            const cancelSourceLabel = item.cancel_source === 'BILLING'
+                ? 'Billing'
+                : item.cancel_source === 'TRACKING'
+                    ? 'Track'
+                    : item.cancel_source === 'BOTH'
+                        ? 'Both'
+                        : '';
             const cancelFlagHtml = item.is_cancelled
-                ? `<span class="cancel-flag" title="Cancelled on ${formatDate(item.cancelled_date)}">🚫 CANCEL</span>`
+                ? `<span class="cancel-flag" title="Cancelled on ${formatDate(item.cancelled_date)}">CANCEL</span>${cancelSourceLabel ? `<span class="cancel-source-badge">${cancelSourceLabel}</span>` : ''}`
                 : '';
 
+            const { canSent, canReceived, canPaid, isCancelledItem } = getActionAvailability(item);
+
+            // SVG Icons
+            const iconSent = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>`;
+            const iconReceived = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+            const iconPaid = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`;
+            const iconRemarks = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
+            const iconCancel = `<svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`;
+
             // Action dropdown
-            let actionButtons = `
-                <div class="dropdown">
-                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.75rem;">
-                    Action
-                  </button>
-                  <ul class="dropdown-menu shadow-sm" style="font-size: 0.875rem;">
-                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="BATCHING">Set Batching</a></li>
-                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="SENT">Set Sent</a></li>
-                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="RECEIVED">Set Received</a></li>
-                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="REVISE">Set Revise</a></li>
-                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="PAID">Set Paid</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="REMARKS">Update Remarks</a></li>
-                    ${!item.is_cancelled ? `<li><a class="dropdown-item action-dd-item" href="javascript:void(0)" data-id="${item.id}" data-action="CANCEL" style="color: #dc2626; font-weight: 600;">⛔ Cancel Invoice</a></li>` : ''}
-                  </ul>
+            let actionButtons = '';
+            if (!isCancelledItem) {
+                actionButtons = `
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.75rem; padding: 2px 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 3px;"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                        Actions
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 200px;">
+                        <li>
+                            <a class="dropdown-item action-dd-item ${canSent ? '' : 'disabled'}" href="#" data-id="${item.id}" data-action="SENT" ${canSent ? '' : 'aria-disabled="true" tabindex="-1"'} style="${canSent ? 'color: #1d4ed8;' : ''}">
+                                ${iconSent}
+                                <span>Set Sent</span>
+                                ${canSent ? '<span class="action-badge badge-next">NEXT</span>' : ''}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item action-dd-item action-primary ${canPaid ? '' : 'disabled'}" href="#" data-id="${item.id}" data-action="PAID" ${canPaid ? '' : 'aria-disabled="true" tabindex="-1"'}>
+                                ${iconPaid}
+                                <span>Set Paid</span>
+                                ${canPaid ? '<span class="action-badge badge-next">NEXT</span>' : ''}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item action-dd-item ${canReceived ? '' : 'disabled'}" href="#" data-id="${item.id}" data-action="RECEIVED" ${canReceived ? '' : 'aria-disabled="true" tabindex="-1"'} style="${canReceived ? 'color: #334155;' : ''}">
+                                ${iconReceived}
+                                <span>Set Received</span>
+                                ${canReceived ? '<span class="action-badge badge-next">NEXT</span>' : ''}
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" style="margin: 0.25rem 0;"></li>
+                        <li>
+                            <a class="dropdown-item action-dd-item" href="#" data-id="${item.id}" data-action="REMARKS">
+                                ${iconRemarks}
+                                <span>Remarks</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item action-dd-item text-danger" href="#" data-id="${item.id}" data-action="CANCEL">
+                                ${iconCancel}
+                                <span>Cancel</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-            `;
+                `;
+            }
 
             tr.innerHTML = `
-                <td class="sticky-col sticky-date">${formatDate(item.invoice_date)}</td>
-                <td class="sticky-col sticky-invno">${item.invoice_no}</td>
-                <td class="sticky-col sticky-mrn">${item.mrn}</td>
-                <td class="sticky-col sticky-patient">
-                    <div class="font-weight-bold" style="color: var(--foreground);">${item.patient_name}</div>
-                    <div style="font-size: 0.75rem; color: var(--muted-foreground);">${item.payer_name}</div>
+                <td class="sticky-col sticky-batch">
+                    <div class="font-weight-bold" style="color: var(--foreground);">${item.batch_number || '-'}</div>
+                    <div style="font-size: 0.75rem; color: var(--muted-foreground);">${formatDate(item.batch_date)}</div>
                 </td>
-                <td class="sticky-col sticky-ref" style="border-right: 2px solid var(--border) !important;">${item.ref_no || '-'}</td>
-                <td class="text-end">${formatCurrency(item.amount)}</td>
-                <td class="text-center">-</td>
-                <td class="text-center">-</td>
-                <td class="text-center">-</td>
-                <td class="text-end">${formatCurrency(item.paid_amount || 0)}</td>
-                <td class="text-end font-weight-bold">${formatCurrency(displayBalance)}</td>
-                <td>${formatDate(item.sent_date)}</td>
-                <td>${item.courier_via || '-'}</td>
-                <td>${item.tracking_no || '-'}</td>
-                <td>${formatDate(item.received_date)}</td>
-                <td class="text-center" style="border-right: 2px solid var(--border) !important;">
-                    ${item.due_days > 0 ? `<span style="color: #059669; font-weight: bold;">${item.due_days}</span>` : '-'}
+                <td class="sticky-col sticky-invno">
+                    <div class="font-weight-bold" style="color: var(--foreground);">${item.invoice_no || '-'}</div>
+                    <div style="font-size: 0.75rem; color: var(--muted-foreground);">Printed: ${formatDate(item.invoice_printed)}</div>
+                    ${item.cancelled_date ? `<div style="font-size: 0.7rem; color: #dc2626; font-weight: 600;">Cancelled: ${formatDate(item.cancelled_date)}</div>` : ''}
                 </td>
-                <td>
-                    <div style="min-width: 250px; max-width: 300px; color: var(--muted-foreground); white-space: normal;">
-                        ${item.remarks ? item.remarks : '<span class="text-muted" style="opacity: 0.5;">-</span>'}
-                    </div>
+                <td class="sticky-col sticky-adm">
+                    <div class="font-weight-bold" style="color: var(--foreground);">MRN: ${item.mrn || '-'}</div>
+                    <div style="font-size: 0.75rem; color: var(--muted-foreground);">Ep: ${item.episode_no || '-'}</div>
+                    <div style="font-size: 0.75rem; color: var(--muted-foreground);">${formatDate(item.adm_date)} &bull; ${item.adm_type || '-'}</div>
                 </td>
-                <td>
-                    <div class="d-flex flex-column align-items-start gap-1">
-                        <span class="badge-status ${item.status}">${item.status}</span>
+                <td class="sticky-col sticky-pat">
+                    <div class="font-weight-bold" style="color: var(--foreground);">${item.patient_name || '-'}</div>
+                    <div style="font-size: 0.65rem; color: var(--muted-foreground); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.payer_name || '-'}</div>
+                    <div style="font-size: 0.7rem; color: var(--muted-foreground); opacity: 0.7;">${item.nationality || '-'}</div>
+                </td>
+                <td class="sticky-col sticky-ref">${item.ref_no || '-'}</td>
+                <td class="sticky-col sticky-status">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <span class="badge-status ${item.status}" style="font-size: 0.6rem; padding: 0.2rem 0.4rem;">${item.status}</span>
                         ${cancelFlagHtml}
                     </div>
+                </td>
+                <td class="text-end">${formatCurrency(item.before_discount || 0)}</td>
+                <td class="text-end">${formatCurrency(item.after_discount || 0)}</td>
+                <td class="text-end">${formatCurrency(item.paid_amount || 0)}</td>
+                <td class="text-end" style="color: ${displayBalance > 0 ? '#059669' : 'var(--foreground)'};">${formatCurrency(displayBalance)}</td>
+                <td>${formatDate(item.sent_date)}</td>
+                <td>${item.courier_via || '-'}</td>
+                <td style="font-size: 0.8rem;">${item.tracking_no || '-'}</td>
+                <td>${formatDate(item.received_date)}</td>
+                <td>${formatDate(item.paid_on)}</td>
+                <td style="border-right: 2px solid var(--border) !important;" class="text-center">${item.due_days ?? '-'}</td>
+                <td>
+                    <div style="max-width: 200px; white-space: normal; font-size: 0.8rem; color: var(--muted-foreground);">${item.remarks || '-'}</div>
                 </td>
                 <td>
                     <div class="d-flex flex-wrap gap-1">
@@ -792,14 +1216,20 @@
             tableBody.appendChild(tr);
         });
 
-        // Update Summary Row
-        document.getElementById('tfCount').textContent = data.length;
-        document.getElementById('tfAmount').textContent = formatCurrency(totalAmount);
+        // Update Summary Row (grand totals across all filtered data)
+        document.getElementById('tfCount').textContent = totalRecords;
+        document.getElementById('tfBefore').textContent = formatCurrency(totalBefore);
+        document.getElementById('tfAfter').textContent = formatCurrency(totalAfter);
         document.getElementById('tfPaid').textContent = formatCurrency(totalPaid);
         document.getElementById('tfBalance').textContent = formatCurrency(totalVal);
 
-        recordCountDisplay.textContent = `Showing ${data.length} records`;
+        recordCountDisplay.textContent = `Showing ${startIdx + 1}-${endIdx} of ${totalRecords} records`;
         totalAmountDisplay.textContent = `Total Balance: ${formatCurrency(totalVal)}`;
+
+        // Pagination controls
+        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+        document.getElementById('btnPrevPage').disabled = currentPage <= 1;
+        document.getElementById('btnNextPage').disabled = currentPage >= totalPages;
 
         updateStickyPositions();
     };
@@ -813,141 +1243,210 @@
     };
 
     // ===========================
-    //  EVENT LISTENERS
+    //  PAGINATION EVENT LISTENERS
     // ===========================
-    tableBody.addEventListener('click', (e) => {
-        const itemEl = e.target.closest('.action-dd-item');
-        if (!itemEl) return;
-        e.preventDefault();
+    document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+        const val = e.target.value;
+        pageSize = val === 'all' ? 'all' : parseInt(val);
+        currentPage = 1;
+        renderTable();
+    });
 
-        const id = parseInt(itemEl.getAttribute('data-id'));
-        const action = itemEl.getAttribute('data-action');
-        const item = invoicesData.find(i => i.id === id);
-        if (!item) return;
-
-        if (action === 'SENT') {
-            selectedIds.clear();
-            selectedIds.add(id);
-            document.getElementById('sdItemCount').textContent = '1';
-            // Pre-fill ref_no if exists
-            document.getElementById('inputRefNo').value = item.ref_no || '';
-            sendDocModal?.show();
-        } else if (action === 'RECEIVED') {
-            selectedIds.clear();
-            selectedIds.add(id);
-            document.getElementById('rcItemCount').textContent = '1';
-            setReceivedModal?.show();
-        } else if (action === 'REMARKS') {
-            selectedIds.clear();
-            selectedIds.add(id);
-            document.getElementById('rmItemCount').textContent = '1';
-            document.getElementById('inputRemarks').value = item.remarks || '';
-            remarksModal?.show();
-        } else if (action === 'CANCEL') {
-            selectedIds.clear();
-            selectedIds.add(id);
-            document.getElementById('ccItemCount').textContent = '1';
-            document.getElementById('inputCancelReason').value = '';
-            cancelInvModal?.show();
-        } else {
-            // For BATCHING, REVISE, PAID -> direct update
-            invoicesData = invoicesData.map(inv => {
-                if (inv.id === id) return { ...inv, status: action };
-                return inv;
-            });
-            updateUI();
+    document.getElementById('btnPrevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
         }
     });
 
-    payerFilter.addEventListener('change', () => renderTable());
-    searchFilter.addEventListener('input', () => renderTable());
-    dateFrom.addEventListener('change', () => renderTable());
-    dateTo.addEventListener('change', () => renderTable());
+    document.getElementById('btnNextPage').addEventListener('click', () => {
+        const data = getFilteredData();
+        const totalPages = pageSize === 'all' ? 1 : Math.ceil(data.length / pageSize);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    });
+
+    // ===========================
+    //  EVENT LISTENERS
+    // ===========================
+    document.getElementById('rowActionButtons').addEventListener('click', (e) => {
+        const rowActionTrigger = e.target.closest('[data-row-action]');
+        if (!rowActionTrigger) return;
+
+        e.preventDefault();
+        const id = parseInt(rowActionTrigger.getAttribute('data-id'));
+        const action = rowActionTrigger.getAttribute('data-row-action');
+        const item = invoicesData.find(i => i.id === id);
+        openActionFlow(action, item);
+    });
+
+    tableBody.addEventListener('click', (e) => {
+        const itemEl = e.target.closest('.action-dd-item');
+        if (itemEl) {
+            e.preventDefault();
+
+            const id = parseInt(itemEl.getAttribute('data-id'));
+            const action = itemEl.getAttribute('data-action');
+            const item = invoicesData.find(i => i.id === id);
+            if (!item) return;
+
+            if (itemEl.classList.contains('disabled') || itemEl.getAttribute('aria-disabled') === 'true') {
+                return;
+            }
+
+            openActionFlow(action, item);
+            return;
+        }
+
+        const rowEl = e.target.closest('tr[data-id]');
+        if (rowEl && !e.target.closest('.dropdown') && !e.target.closest('button') && !e.target.closest('a') && !e.target.closest('input') && !e.target.closest('select') && !e.target.closest('textarea')) {
+            const id = parseInt(rowEl.dataset.id);
+            const item = invoicesData.find(i => i.id === id);
+            openRowActionModal(item);
+            return;
+        }
+    });
+
+    payerFilter.addEventListener('change', () => { currentPage = 1; updateUI(); });
+    searchFilter.addEventListener('input', () => { currentPage = 1; updateUI(); });
+    batchDateFrom.addEventListener('change', () => { currentPage = 1; updateUI(); });
+    batchDateTo.addEventListener('change', () => { currentPage = 1; updateUI(); });
+    invDateFrom.addEventListener('change', () => { currentPage = 1; updateUI(); });
+    invDateTo.addEventListener('change', () => { currentPage = 1; updateUI(); });
 
     document.getElementById('resetBtn').addEventListener('click', () => {
         payerFilter.value = 'All';
         searchFilter.value = '';
-        dateFrom.value = '';
-        dateTo.value = '';
+        batchDateFrom.value = toDateStr(firstDay);
+        batchDateTo.value = toDateStr(lastDay);
+        invDateFrom.value = '';
+        invDateTo.value = '';
         activeTab = 'ALL';
+        currentPage = 1;
         updateUI();
     });
 
     // ===========================
     //  MODAL ACTIONS
     // ===========================
-    document.getElementById('btnSubmitSendDoc').addEventListener('click', () => {
+    document.getElementById('btnSubmitSendDoc').addEventListener('click', async () => {
         const refNo = document.getElementById('inputRefNo').value;
         const via = document.getElementById('inputVia').value;
         const tracking = document.getElementById('inputTrackingNo').value;
         const sDate = document.getElementById('inputSentDate').value;
         if (!tracking) return alert('Tracking Number is required');
 
-        invoicesData = invoicesData.map(inv => {
-            if (selectedIds.has(inv.id)) {
-                return { ...inv, status: 'SENT', ref_no: refNo || inv.ref_no, courier_via: via, tracking_no: tracking, sent_date: sDate };
-            }
-            return inv;
-        });
+        const selectedItem = invoicesData.find(inv => selectedIds.has(inv.id));
+        if (!selectedItem) return alert('Invoice not found.');
 
-        sendDocModal?.hide();
-        document.getElementById('inputTrackingNo').value = '';
-        document.getElementById('inputRefNo').value = '';
-        selectedIds.clear();
-        updateUI();
+        try {
+            await persistTrackingUpdate({
+                invoice_no: selectedItem.invoice_no,
+                status: 'SENT',
+                ref_no: refNo || selectedItem.ref_no || null,
+                courier_via: via,
+                tracking_no: tracking,
+                sent_date: sDate || null,
+                received_date: selectedItem.received_date || null,
+                paid_on: selectedItem.paid_on || null,
+                cancelled_date: selectedItem.cancelled_date || null,
+                due_days: selectedItem.due_days ?? null,
+                remarks: selectedItem.remarks || null
+            });
+
+            sendDocModal?.hide();
+            document.getElementById('inputTrackingNo').value = '';
+            document.getElementById('inputRefNo').value = '';
+            selectedIds.clear();
+        } catch (error) {
+            alert(error.message || 'Failed to update tracking.');
+        }
     });
 
-    document.getElementById('btnSubmitReceived').addEventListener('click', () => {
+    document.getElementById('btnSubmitReceived').addEventListener('click', async () => {
         const rDate = document.getElementById('inputReceivedDate').value;
+        const selectedItem = invoicesData.find(inv => selectedIds.has(inv.id));
+        if (!selectedItem) return alert('Invoice not found.');
 
-        invoicesData = invoicesData.map(inv => {
-            if (selectedIds.has(inv.id)) {
-                return { ...inv, status: 'RECEIVED', received_date: rDate };
-            }
-            return inv;
-        });
+        try {
+            await persistTrackingUpdate({
+                invoice_no: selectedItem.invoice_no,
+                status: 'RECEIVED',
+                ref_no: selectedItem.ref_no || null,
+                courier_via: selectedItem.courier_via || null,
+                tracking_no: selectedItem.tracking_no || null,
+                sent_date: selectedItem.sent_date || null,
+                received_date: rDate || null,
+                paid_on: selectedItem.paid_on || null,
+                cancelled_date: selectedItem.cancelled_date || null,
+                due_days: selectedItem.due_days ?? null,
+                remarks: selectedItem.remarks || null
+            });
 
-        setReceivedModal?.hide();
-        selectedIds.clear();
-        updateUI();
+            setReceivedModal?.hide();
+            selectedIds.clear();
+        } catch (error) {
+            alert(error.message || 'Failed to update tracking.');
+        }
     });
 
-    document.getElementById('btnSubmitRemarks').addEventListener('click', () => {
+    document.getElementById('btnSubmitRemarks').addEventListener('click', async () => {
         const rmVal = document.getElementById('inputRemarks').value;
+        const selectedItem = invoicesData.find(inv => selectedIds.has(inv.id));
+        if (!selectedItem) return alert('Invoice not found.');
 
-        invoicesData = invoicesData.map(inv => {
-            if (selectedIds.has(inv.id)) {
-                return { ...inv, remarks: rmVal };
-            }
-            return inv;
-        });
+        try {
+            await persistTrackingUpdate({
+                invoice_no: selectedItem.invoice_no,
+                status: selectedItem.status || 'BATCHING',
+                ref_no: selectedItem.ref_no || null,
+                courier_via: selectedItem.courier_via || null,
+                tracking_no: selectedItem.tracking_no || null,
+                sent_date: selectedItem.sent_date || null,
+                received_date: selectedItem.received_date || null,
+                paid_on: selectedItem.paid_on || null,
+                cancelled_date: selectedItem.cancelled_date || null,
+                due_days: selectedItem.due_days ?? null,
+                remarks: rmVal || null
+            });
 
-        remarksModal?.hide();
-        document.getElementById('inputRemarks').value = '';
-        selectedIds.clear();
-        updateUI();
+            remarksModal?.hide();
+            document.getElementById('inputRemarks').value = '';
+            selectedIds.clear();
+        } catch (error) {
+            alert(error.message || 'Failed to save remarks.');
+        }
     });
 
-    document.getElementById('btnSubmitCancel').addEventListener('click', () => {
+    document.getElementById('btnSubmitCancel').addEventListener('click', async () => {
         const reason = document.getElementById('inputCancelReason').value;
+        const selectedItem = invoicesData.find(inv => selectedIds.has(inv.id));
+        if (!selectedItem) return alert('Invoice not found.');
         const today = new Date().toISOString().slice(0, 10);
 
-        invoicesData = invoicesData.map(inv => {
-            if (selectedIds.has(inv.id)) {
-                return {
-                    ...inv,
-                    is_cancelled: true,
-                    cancelled_date: today,
-                    remarks: reason ? `[CANCELLED] ${reason}` : (inv.remarks ? `[CANCELLED] ${inv.remarks}` : '[CANCELLED]')
-                };
-            }
-            return inv;
-        });
+        try {
+            await persistTrackingUpdate({
+                invoice_no: selectedItem.invoice_no,
+                status: selectedItem.status || 'BATCHING',
+                ref_no: selectedItem.ref_no || null,
+                courier_via: selectedItem.courier_via || null,
+                tracking_no: selectedItem.tracking_no || null,
+                sent_date: selectedItem.sent_date || null,
+                received_date: selectedItem.received_date || null,
+                paid_on: selectedItem.paid_on || null,
+                cancelled_date: today,
+                due_days: selectedItem.due_days ?? null,
+                remarks: reason ? `[CANCELLED] ${reason}` : (selectedItem.remarks ? `[CANCELLED] ${selectedItem.remarks}` : '[CANCELLED]')
+            });
 
-        cancelInvModal?.hide();
-        document.getElementById('inputCancelReason').value = '';
-        selectedIds.clear();
-        updateUI();
+            cancelInvModal?.hide();
+            document.getElementById('inputCancelReason').value = '';
+            selectedIds.clear();
+        } catch (error) {
+            alert(error.message || 'Failed to save cancellation note.');
+        }
     });
 
     // ===========================
@@ -985,7 +1484,7 @@
                     item.amount || 0,
                     item.paid_amount || 0,
                     displayBalance,
-                    item.due_days || 0,
+                    item.due_days ?? '',
                     item.status || '',
                     item.ref_no || '',
                     item.courier_via || '',

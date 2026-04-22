@@ -2,304 +2,234 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TcmonArTracking;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ArTrackingController extends Controller
 {
     public function index()
     {
-        // Dummy Data for UI Development
-        // In production, this comes from API or Import
-        $dummyInvoices = [
-            // --- BATCHING ---
-            [
-                'id' => 1,
-                'payer_name' => 'Admedika',
-                'patient_name' => 'John Doe',
-                'mrn' => '009988',
-                'invoice_no' => '561000',
-                'invoice_date' => '2026-02-10',
-                'amount' => 1500000,
-                'paid_amount' => 0,
-                'balance' => 1500000,
-                'due_days' => 0,
-                'status' => 'BATCHING',
-                'ref_no' => null,
-                'courier_via' => null,
-                'tracking_no' => null,
-                'sent_date' => null,
-                'received_date' => null,
-                'paid_on' => null,
-                'remarks' => 'Menunggu rincian obat dari apotek.',
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            [
-                'id' => 2,
-                'payer_name' => 'Admedika',
-                'patient_name' => 'Sarah Connor',
-                'mrn' => '009990',
-                'invoice_no' => '561005',
-                'invoice_date' => '2026-03-01',
-                'amount' => 3200000,
-                'paid_amount' => 0,
-                'balance' => 3200000,
-                'due_days' => 0,
-                'status' => 'BATCHING',
-                'ref_no' => null,
-                'courier_via' => null,
-                'tracking_no' => null,
-                'sent_date' => null,
-                'received_date' => null,
-                'paid_on' => null,
-                'remarks' => null,
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            // --- SENT ---
-            [
-                'id' => 3,
-                'payer_name' => 'Global Excel',
-                'patient_name' => 'Christopher Parr',
-                'mrn' => '062215',
-                'invoice_no' => '558653',
-                'invoice_date' => '2025-12-24',
-                'amount' => 1200000,
-                'paid_amount' => 0,
-                'balance' => 1200000,
-                'due_days' => 30,
-                'status' => 'SENT',
-                'ref_no' => '25-JKT001',
-                'courier_via' => 'JNE',
-                'tracking_no' => '3592363150005',
-                'sent_date' => '2026-01-03',
-                'received_date' => null,
-                'paid_on' => null,
-                'remarks' => null,
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            [
-                'id' => 4,
-                'payer_name' => 'Global Excel',
-                'patient_name' => 'Christopher Parr',
-                'mrn' => '062215',
-                'invoice_no' => '558974',
-                'invoice_date' => '2025-12-27',
-                'amount' => 1180793,
-                'paid_amount' => 0,
-                'balance' => 1180793,
-                'due_days' => 30,
-                'status' => 'SENT',
-                'ref_no' => '25-JKT002',
-                'courier_via' => 'JNE',
-                'tracking_no' => '3592363150005',
-                'sent_date' => '2026-01-03',
-                'received_date' => null,
-                'paid_on' => null,
-                'remarks' => null,
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            [
-                'id' => 5,
-                'payer_name' => 'Global Excel',
-                'patient_name' => 'Christopher Parr',
-                'mrn' => '062215',
-                'invoice_no' => '559321',
-                'invoice_date' => '2025-12-31',
-                'amount' => 1595658,
-                'paid_amount' => 0,
-                'balance' => 1595658,
-                'due_days' => 30,
-                'status' => 'SENT',
-                'ref_no' => '25-JKT003',
-                'courier_via' => 'JNE',
-                'tracking_no' => '3590558460007',
-                'sent_date' => '2026-01-31',
-                'received_date' => null,
-                'paid_on' => null,
-                'remarks' => null,
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            // --- SENT + CANCELLED ---
-            [
-                'id' => 6,
-                'payer_name' => 'Global Excel',
-                'patient_name' => 'Michael Torres',
-                'mrn' => '062300',
-                'invoice_no' => '559400',
-                'invoice_date' => '2026-01-15',
-                'amount' => 850000,
-                'paid_amount' => 0,
-                'balance' => 850000,
-                'due_days' => 30,
-                'status' => 'SENT',
-                'ref_no' => '25-JKT010',
-                'courier_via' => 'TIKI',
-                'tracking_no' => '9988776655',
-                'sent_date' => '2026-01-20',
-                'received_date' => null,
-                'paid_on' => null,
-                'remarks' => 'Invoice cancelled - pasien pindah asuransi.',
-                'is_cancelled' => true,
-                'cancelled_date' => '2026-02-10',
-            ],
-            // --- RECEIVED ---
-            [
-                'id' => 7,
-                'payer_name' => 'Admedika',
-                'patient_name' => 'Maria Garcia',
-                'mrn' => '009991',
-                'invoice_no' => '560100',
-                'invoice_date' => '2026-01-05',
-                'amount' => 4500000,
-                'paid_amount' => 0,
-                'balance' => 4500000,
-                'due_days' => 45,
-                'status' => 'RECEIVED',
-                'ref_no' => '26-ADM001',
-                'courier_via' => 'Pos Indonesia',
-                'tracking_no' => 'POS123456789',
-                'sent_date' => '2026-01-10',
-                'received_date' => '2026-01-15',
-                'paid_on' => null,
-                'remarks' => 'Menunggu review dari pihak asuransi.',
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            // --- REVISE ---
-            [
-                'id' => 8,
-                'payer_name' => 'Admedika',
-                'patient_name' => 'Jane Smith',
-                'mrn' => '009989',
-                'invoice_no' => '561001',
-                'invoice_date' => '2026-02-12',
-                'amount' => 2500000,
-                'paid_amount' => 0,
-                'balance' => 2500000,
-                'due_days' => 30,
-                'status' => 'REVISE',
-                'ref_no' => '25-JKT008',
-                'courier_via' => 'JNE',
-                'tracking_no' => '3590558460009',
-                'sent_date' => '2026-02-15',
-                'received_date' => '2026-02-20',
-                'paid_on' => null,
-                'remarks' => 'Invoice dikembalikan karena salah tarif.',
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            // --- PAID ---
-            [
-                'id' => 9,
-                'payer_name' => 'Global Excel',
-                'patient_name' => 'Edward Gareth Andrews',
-                'mrn' => '007403',
-                'invoice_no' => '516339',
-                'invoice_date' => '2024-09-02',
-                'amount' => 3604561,
-                'paid_amount' => 3604561,
-                'balance' => 0,
-                'due_days' => 30,
-                'status' => 'PAID',
-                'ref_no' => '24-JKT004',
-                'courier_via' => 'JNE',
-                'tracking_no' => '3578056480000',
-                'sent_date' => '2024-09-06',
-                'received_date' => '2024-09-10',
-                'paid_on' => '2024-10-23',
-                'remarks' => 'Ditelepon tanggal 15, kata asuransi sedang diproses.',
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            [
-                'id' => 10,
-                'payer_name' => 'Global Excel',
-                'patient_name' => 'Edward Gareth Andrews',
-                'mrn' => '007403',
-                'invoice_no' => '516340',
-                'invoice_date' => '2024-09-05',
-                'amount' => 5000000,
-                'paid_amount' => 5000000,
-                'balance' => 0,
-                'due_days' => 30,
-                'status' => 'PAID',
-                'ref_no' => '24-JKT005',
-                'courier_via' => 'JNE',
-                'tracking_no' => '3578056480001',
-                'sent_date' => '2024-09-08',
-                'received_date' => '2024-09-12',
-                'paid_on' => '2024-11-01',
-                'remarks' => null,
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            [
-                'id' => 11,
-                'payer_name' => 'Global Excel',
-                'patient_name' => 'Christopher Parr',
-                'mrn' => '062215',
-                'invoice_no' => '462311',
-                'invoice_date' => '2022-11-28',
-                'amount' => 700000,
-                'paid_amount' => 700000,
-                'balance' => 0,
-                'due_days' => 30,
-                'status' => 'PAID',
-                'ref_no' => '21-JKT044811',
-                'courier_via' => 'JNE',
-                'tracking_no' => '3532666250002',
-                'sent_date' => '2023-01-19',
-                'received_date' => '2023-01-25',
-                'paid_on' => '2023-03-08',
-                'remarks' => null,
-                'is_cancelled' => false,
-                'cancelled_date' => null,
-            ],
-            // --- CANCELLED (old, balance already zeroed) ---
-            [
-                'id' => 12,
-                'payer_name' => 'Admedika',
-                'patient_name' => 'Robert Wilson',
-                'mrn' => '009992',
-                'invoice_no' => '555100',
-                'invoice_date' => '2025-10-15',
-                'amount' => 2000000,
-                'paid_amount' => 0,
-                'balance' => 2000000,
-                'due_days' => 0,
-                'status' => 'BATCHING',
-                'ref_no' => null,
-                'courier_via' => null,
-                'tracking_no' => null,
-                'sent_date' => null,
-                'received_date' => null,
-                'paid_on' => null,
-                'remarks' => 'Dibatalkan karena double entry.',
-                'is_cancelled' => true,
-                'cancelled_date' => '2025-11-01',
-            ],
-        ];
+        // Query from tcmon_ar_billing LEFT JOIN tcmon_ar_tracking
+        // tcmon_ar_billing = source of billing/invoice data
+        // tcmon_ar_tracking = local tracking metadata (status, courier, ref_no, etc.)
+        $rows = DB::table('tcmon_ar_billing as b')
+            ->leftJoin('tcmon_ar_tracking as t', 'b.invoiceno', '=', 't.invoice_no')
+            ->select([
+                // From billing (grouped per invoice)
+                DB::raw('MIN(b.id) as id'),
+                'b.bat_number',
+                'b.bat_datecreated',
+                'b.inst_desc',
+                'b.firstname',
+                'b.lastname',
+                'b.nationality',
+                'b.admdate',
+                'b.paadm_type',
+                'b.urn',
+                'b.episodeno',
+                'b.invoiceno',
+                'b.arpbl_dateprinted',
+                'b.arpbl_datecancelled',
+                DB::raw('SUM(b.beforediscount) as beforediscount'),
+                DB::raw('SUM(b.afterdiscount) as afterdiscount'),
+                DB::raw('SUM(b.outstanding) as outstanding'),
+                // From tracking
+                't.id as tracking_id',
+                't.status as tracking_status',
+                't.ref_no',
+                't.courier_via',
+                't.tracking_no',
+                't.sent_date',
+                't.received_date',
+                't.paid_on',
+                't.cancelled_date as tracking_cancelled_date',
+                't.due_days',
+                't.remarks',
+            ])
+            ->groupBy(
+                'b.bat_number', 'b.bat_datecreated', 'b.inst_desc',
+                'b.firstname', 'b.lastname', 'b.nationality',
+                'b.admdate', 'b.paadm_type', 'b.urn', 'b.episodeno',
+                'b.invoiceno', 'b.arpbl_dateprinted', 'b.arpbl_datecancelled',
+                't.id', 't.status', 't.ref_no', 't.courier_via',
+                't.tracking_no', 't.sent_date', 't.received_date',
+                't.paid_on', 't.cancelled_date', 't.due_days', 't.remarks'
+            )
+            ->orderBy('b.bat_datecreated', 'desc')
+            ->get();
 
-        // Auto-zero balance logic for cancelled invoices
-        // Rule: if cancelled and today >= 5th of the month after cancelled_date, balance = 0
-        $today = Carbon::now();
-        foreach ($dummyInvoices as &$inv) {
-            if ($inv['is_cancelled'] && $inv['cancelled_date']) {
-                $cancelDate = Carbon::parse($inv['cancelled_date']);
-                // The "zeroing deadline" is the 5th of the next month from cancel date
-                $zeroDate = $cancelDate->copy()->addMonth()->startOfMonth()->addDays(4); // 5th day
-                if ($today->gte($zeroDate)) {
-                    $inv['balance'] = 0;
-                }
-            }
+        // Transform to the JSON structure expected by the frontend
+        $invoices = $rows->map(fn ($row) => $this->mapInvoiceRow($row))->values()->toArray();
+
+        return view('track.index', compact('invoices'));
+    }
+
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'invoice_no' => ['required', 'string', 'max:50'],
+            'status' => ['required', 'string', 'in:BATCHING,SENT,RECEIVED,REVISE,PAID'],
+            'ref_no' => ['nullable', 'string', 'max:100'],
+            'courier_via' => ['nullable', 'string', 'max:50'],
+            'tracking_no' => ['nullable', 'string', 'max:100'],
+            'sent_date' => ['nullable', 'date'],
+            'received_date' => ['nullable', 'date'],
+            'paid_on' => ['nullable', 'date'],
+            'cancelled_date' => ['nullable', 'date'],
+            'due_days' => ['nullable', 'integer'],
+            'remarks' => ['nullable', 'string'],
+        ]);
+
+        $tracking = TcmonArTracking::updateOrCreate(
+            ['invoice_no' => $validated['invoice_no']],
+            [
+                'status' => $validated['status'],
+                'ref_no' => $validated['ref_no'] ?? null,
+                'courier_via' => $validated['courier_via'] ?? null,
+                'tracking_no' => $validated['tracking_no'] ?? null,
+                'sent_date' => $validated['sent_date'] ?? null,
+                'received_date' => $validated['received_date'] ?? null,
+                'paid_on' => $validated['paid_on'] ?? null,
+                'cancelled_date' => $validated['cancelled_date'] ?? null,
+                'due_days' => $validated['due_days'] ?? null,
+                'remarks' => $validated['remarks'] ?? null,
+            ]
+        );
+
+        $row = DB::table('tcmon_ar_billing as b')
+            ->leftJoin('tcmon_ar_tracking as t', 'b.invoiceno', '=', 't.invoice_no')
+            ->select([
+                DB::raw('MIN(b.id) as id'),
+                'b.bat_number',
+                'b.bat_datecreated',
+                'b.inst_desc',
+                'b.firstname',
+                'b.lastname',
+                'b.nationality',
+                'b.admdate',
+                'b.paadm_type',
+                'b.urn',
+                'b.episodeno',
+                'b.invoiceno',
+                'b.arpbl_dateprinted',
+                'b.arpbl_datecancelled',
+                DB::raw('SUM(b.beforediscount) as beforediscount'),
+                DB::raw('SUM(b.afterdiscount) as afterdiscount'),
+                DB::raw('SUM(b.outstanding) as outstanding'),
+                't.id as tracking_id',
+                't.status as tracking_status',
+                't.ref_no',
+                't.courier_via',
+                't.tracking_no',
+                't.sent_date',
+                't.received_date',
+                't.paid_on',
+                't.cancelled_date as tracking_cancelled_date',
+                't.due_days',
+                't.remarks',
+            ])
+            ->where('b.invoiceno', $tracking->invoice_no)
+            ->groupBy(
+                'b.bat_number',
+                'b.bat_datecreated',
+                'b.inst_desc',
+                'b.firstname',
+                'b.lastname',
+                'b.nationality',
+                'b.admdate',
+                'b.paadm_type',
+                'b.urn',
+                'b.episodeno',
+                'b.invoiceno',
+                'b.arpbl_dateprinted',
+                'b.arpbl_datecancelled',
+                't.id',
+                't.status',
+                't.ref_no',
+                't.courier_via',
+                't.tracking_no',
+                't.sent_date',
+                't.received_date',
+                't.paid_on',
+                't.cancelled_date',
+                't.due_days',
+                't.remarks'
+            )
+            ->first();
+
+        if (!$row) {
+            return response()->json([
+                'message' => 'Invoice tidak ditemukan setelah update.',
+            ], 404);
         }
-        unset($inv);
 
-        return view('track.index', compact('dummyInvoices'));
+        return response()->json([
+            'message' => 'Tracking berhasil disimpan.',
+            'item' => $this->mapInvoiceRow($row),
+        ]);
+    }
+
+    private function mapInvoiceRow(object $row): array
+    {
+        $billingCancelledDate = $row->arpbl_datecancelled ?? null;
+        $trackingCancelledDate = $row->tracking_cancelled_date ?? null;
+        $cancelledDate = $billingCancelledDate ?? $trackingCancelledDate;
+        $isCancelled = !empty($cancelledDate);
+        $cancelSource = null;
+        if (!empty($billingCancelledDate) && !empty($trackingCancelledDate)) {
+            $cancelSource = 'BOTH';
+        } elseif (!empty($billingCancelledDate)) {
+            $cancelSource = 'BILLING';
+        } elseif (!empty($trackingCancelledDate)) {
+            $cancelSource = 'TRACKING';
+        }
+        $status = $row->tracking_status ?? 'BATCHING';
+        $outstanding = floatval($row->outstanding ?? 0);
+
+        $paidAmount = 0;
+        $balance = $outstanding;
+        if ($status === 'PAID') {
+            $paidAmount = $outstanding;
+            $balance = 0;
+        }
+
+        if ($isCancelled) {
+            $balance = 0;
+        }
+
+        return [
+            'id' => $row->id,
+            'batch_number' => $row->bat_number,
+            'batch_date' => $row->bat_datecreated,
+            'payer_name' => $row->inst_desc,
+            'patient_name' => trim(($row->firstname ?? '') . ' ' . ($row->lastname ?? '')),
+            'nationality' => $row->nationality,
+            'adm_date' => $row->admdate,
+            'adm_type' => $row->paadm_type,
+            'mrn' => $row->urn,
+            'episode_no' => $row->episodeno,
+            'invoice_no' => $row->invoiceno,
+            'invoice_date' => $row->arpbl_dateprinted,
+            'invoice_printed' => $row->arpbl_dateprinted,
+            'cancelled_date' => $cancelledDate,
+            'before_discount' => floatval($row->beforediscount ?? 0),
+            'after_discount' => floatval($row->afterdiscount ?? 0),
+            'paid_amount' => $paidAmount,
+            'balance' => $balance,
+            'amount' => $outstanding,
+            'total_insurance' => $outstanding,
+            'due_days' => $row->due_days,
+            'status' => $status,
+            'ref_no' => $row->ref_no,
+            'courier_via' => $row->courier_via,
+            'tracking_no' => $row->tracking_no,
+            'sent_date' => $row->sent_date,
+            'received_date' => $row->received_date,
+            'paid_on' => $row->paid_on,
+            'remarks' => $row->remarks,
+            'is_cancelled' => $isCancelled,
+            'cancel_source' => $cancelSource,
+        ];
     }
 }

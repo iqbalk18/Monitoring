@@ -13,7 +13,7 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'username',
         'password',
-        'roles',
+        'role',
     ];
 
     protected $hidden = [
@@ -21,7 +21,7 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     protected $casts = [
-        'roles' => 'array',
+        // 'role' could be casted, but we handle it in getRolesList
     ];
 
     /**
@@ -29,8 +29,8 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getRolesList(): array
     {
-        $roles = $this->roles;
-        return is_array($roles) ? $roles : [];
+        $role = $this->role;
+        return $role ? [$role] : [];
     }
 
     /**
