@@ -1010,6 +1010,14 @@
         return new Date() >= zeroDate;
     };
 
+    const getAutoZeroDate = (item) => {
+        if (!item.is_cancelled || !item.cancelled_date) return null;
+        const cancelDate = new Date(item.cancelled_date);
+        const zeroMonth = cancelDate.getMonth() + 1;
+        const zeroYear = cancelDate.getFullYear() + (zeroMonth > 11 ? 1 : 0);
+        return new Date(zeroYear, zeroMonth % 12, 5);
+    };
+
     // ===========================
     //  DOM REFS
     // ===========================
@@ -1156,8 +1164,12 @@
         document.getElementById('rowActionPatient').textContent = item.patient_name || '-';
         document.getElementById('rowActionPayer').textContent = item.payer_name || '-';
         document.getElementById('rowActionStatus').innerHTML = `<span class="badge-status ${item.status}" style="font-size: 0.68rem; padding: 0.24rem 0.5rem;">${item.status || '-'}</span>`;
+        const autoZeroDate = getAutoZeroDate(item);
         document.getElementById('rowActionCancelInfo').innerHTML = item.is_cancelled
-            ? `<span class="cancel-flag">Cancelled ${formatDate(item.cancelled_date)}</span>`
+            ? `<div style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-end;">
+                    <span class="cancel-flag">Cancelled ${formatDate(item.cancelled_date)}</span>
+                    ${autoZeroDate ? `<span class="small" style="color: var(--muted-foreground); font-size: 0.72rem;">Auto-zero ${formatDate(autoZeroDate)}</span>` : ''}
+               </div>`
             : '';
 
         const buttons = [];

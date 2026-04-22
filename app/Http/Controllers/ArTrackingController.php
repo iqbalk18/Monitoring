@@ -194,10 +194,6 @@ class ArTrackingController extends Controller
             $balance = 0;
         }
 
-        if ($isCancelled) {
-            $balance = 0;
-        }
-
         return [
             'id' => $row->id,
             'batch_number' => $row->bat_number,
