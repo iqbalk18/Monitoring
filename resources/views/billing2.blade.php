@@ -199,6 +199,7 @@
                     <thead>
                         <tr>
                             <th>Ref ID</th>
+                            <th>Encounter ID</th>
                             <th>Document Date</th>
                             <th>Order Type</th>
                             <th style="cursor: pointer; min-width: 200px;" onclick="sortByRecapCode()">Recap Code <span
@@ -235,6 +236,7 @@
                             @foreach($refs as $ref)
                                 <tr>
                                     <td style="font-family: monospace; font-size: 0.8125rem;">{{ $ref['refId'] ?? '-' }}</td>
+                                    <td>{{ $ref['encounterId'] ?? '-' }}</td>
                                     <td>{{ $ref['documentDate'] ?? '-' }}</td>
                                     <td>{{ $recap['orderType'] ?? '-' }}</td>
                                     <td class="list-recap" style="font-weight: 600; color: var(--brand);">{{ $recap['recapCode'] }}
@@ -278,7 +280,7 @@
                             @endforeach
                         @empty
                             <tr>
-                                <td colspan="12" class="text-center text-muted" style="padding: 2rem;">No data found.</td>
+                                <td colspan="14" class="text-center text-muted" style="padding: 2rem;">No data found.</td>
                             </tr>
                         @endforelse
                     </tbody>

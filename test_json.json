@@ -1,0 +1,36 @@
+{
+    "success": true,
+    "process_time": "0.037318 second(s)",
+    "message": "Operation Success.",
+    "data": [
+        {
+            "id": 23899,
+            "recapCode": "BIH-20251231-C-RJ-1126-C",
+            "items": [
+                {
+                    "recapAccrualId": 23899,
+                    "itemNumber": 100,
+                    "belongsToRefs": [
+                        {
+                            "refId": "EBI00002344",
+                            "encounterId": "EBI00002344"
+                        },
+                        {
+                            "refId": "EBI00002543",
+                            "encounterId": "EBI00002543"
+                        }
+                    ]
+                },
+                {
+                    "recapAccrualId": 23899,
+                    "itemNumber": 200,
+                    "belongsToRefs": [
+                        {
+                            "refId": "OBI00017992"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -175,37 +175,61 @@
                         <tr>
                             <th>Recap Code</th>
                             <th>SAP SO Number</th>
+                            <th>Payer</th>
                             <th>Accrual Type</th>
                             <th>Period</th>
                             <th>Document Date</th>
                             <th style="text-align: right;">Final Amount</th>
                             <th style="text-align: right;">Amount Free</th>
                             <th style="text-align: right;">Total Amount</th>
+                            <th>Material</th>
+                            <th>Ref ID</th>
+                            <th>Qty</th>
+                            <th style="text-align: right;">Amount item</th>
+                            <th style="text-align: right;">Amount free item</th>
                             <th>Status</th>
                             <th>Created At</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($recaps as $recap)
-                            <tr>
-                                <td class="fw-semibold text-brand">{{ $recap['recapCode'] }}</td>
-                                <td style="font-family: monospace;">{{ $recap['sapSoNumber'] ?? '-' }}</td>
-                                <td>{{ $recap['accrualType'] ?? '-' }}</td>
-                                <td>{{ $recap['accrualPeriod'] ?? '-' }}</td>
-                                <td>{{ $recap['documentDate'] ?? '-' }}</td>
-                                <td style="text-align: right;">Rp{{ number_format($recap['totalFinalAmount'] ?? 0, 0, ',', '.') }}</td>
-                                <td style="text-align: right;">Rp{{ number_format($recap['totalAmountFree'] ?? 0, 0, ',', '.') }}</td>
-                                <td style="text-align: right;">Rp{{ number_format($recap['totalAmount'] ?? 0, 0, ',', '.') }}</td>
-                                <td>
-                                    <span class="badge-shadcn {{ strtolower($recap['status']) === 'success' ? 'badge-shadcn-success' : 'badge-shadcn-secondary' }}">
-                                        {{ $recap['status'] }}
-                                    </span>
-                                </td>
-                                <td style="font-size: 0.8125rem;">{{ $recap['createdAt'] ?? '-' }}</td>
-                            </tr>
+                            @php
+                                $items = $recap['items'] ?? [[]];
+                                if(empty($items)) $items = [[]];
+                            @endphp
+                            @foreach($items as $item)
+                                @php
+                                    $refs = $item['belongsToRefs'] ?? [[]];
+                                    if(empty($refs)) $refs = [[]];
+                                @endphp
+                                @foreach($refs as $ref)
+                                    <tr>
+                                        <td class="fw-semibold text-brand">{{ $recap['recapCode'] }}</td>
+                                        <td style="font-family: monospace;">{{ $recap['sapSoNumber'] ?? '-' }}</td>
+                                        <td>{{ $recap['payer'] ?? '-' }}</td>
+                                        <td>{{ $recap['accrualType'] ?? '-' }}</td>
+                                        <td>{{ $recap['accrualPeriod'] ?? '-' }}</td>
+                                        <td>{{ $recap['documentDate'] ?? '-' }}</td>
+                                        <td style="text-align: right;">Rp{{ number_format($recap['totalFinalAmount'] ?? 0, 0, ',', '.') }}</td>
+                                        <td style="text-align: right;">Rp{{ number_format($recap['totalAmountFree'] ?? 0, 0, ',', '.') }}</td>
+                                        <td style="text-align: right;">Rp{{ number_format($recap['totalAmount'] ?? 0, 0, ',', '.') }}</td>
+                                        <td>{{ $item['material'] ?? '-' }}</td>
+                                        <td>{{ $ref['refId'] ?? '-' }}</td>
+                                        <td>{{ $item['quantity'] ?? 0 }}</td>
+                                        <td style="text-align: right;">{{ number_format($item['finalAmount'] ?? 0, 0, ',', '.') }}</td>
+                                        <td style="text-align: right;">{{ number_format($item['amountFree'] ?? 0, 0, ',', '.') }}</td>
+                                        <td>
+                                            <span class="badge-shadcn {{ strtolower($recap['status']) === 'success' ? 'badge-shadcn-success' : 'badge-shadcn-secondary' }}">
+                                                {{ $recap['status'] }}
+                                            </span>
+                                        </td>
+                                        <td style="font-size: 0.8125rem;">{{ $recap['createdAt'] ?? '-' }}</td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
                         @empty
                             <tr>
-                                <td colspan="11" class="text-center text-muted" style="padding: 3rem;">No accrual data found.</td>
+                                <td colspan="17" class="text-center text-muted" style="padding: 3rem;">No accrual data found.</td>
                             </tr>
                         @endforelse
                     </tbody>

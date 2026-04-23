@@ -42,7 +42,7 @@ class Billing2Controller extends Controller
         }
 
         $statusOptions = ['success', 'failed', 'ready to rerun', 'reversed'];
-        $status = $request->query('status', 'success', 'failed', 'ready to rerun');
+        $status = $request->query('status', ['success', 'failed', 'ready to rerun']);
         if (!is_array($status))
             $status = [$status];
 
@@ -261,6 +261,7 @@ class Billing2Controller extends Controller
 
         $headers = [
             'Ref ID',
+            'Encounter ID',
             'Document Date',
             'Order Type',
             'Recap Code',
@@ -279,7 +280,7 @@ class Billing2Controller extends Controller
             $sheet->setCellValue($col . '1', $header);
             $col++;
         }
-        $sheet->getStyle('A1:M1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:N1')->getFont()->setBold(true);
 
         $row = 2;
         $page = 1;
@@ -371,20 +372,21 @@ class Billing2Controller extends Controller
                     }
 
                     foreach ($refs as $ref) {
-                        // Columns: Ref ID, Document Date, Order Type, Recap Code, FB Status, Recap Status, Payer, Assignment, Deposit Amount, Final Amount, Amount Free, Total Amount, SAP Error Message
+                        // Columns: Ref ID, Encounter ID, Document Date, Order Type, Recap Code, FB Status, Recap Status, Payer, Assignment, Deposit Amount, Final Amount, Amount Free, Total Amount, SAP Error Message
                         $sheet->setCellValue("A{$row}", $ref['refId'] ?? '-');
-                        $sheet->setCellValue("B{$row}", $ref['documentDate'] ?? '-');
-                        $sheet->setCellValue("C{$row}", $recap['orderType'] ?? '-');
-                        $sheet->setCellValue("D{$row}", $recap['recapCode'] ?? '-');
-                        $sheet->setCellValue("E{$row}", $recap['fbStatus'] ?? '-');
-                        $sheet->setCellValue("F{$row}", $recap['status'] ?? '-');
-                        $sheet->setCellValue("G{$row}", $recap['payer'] ?? '-');
-                        $sheet->setCellValue("H{$row}", $recap['assignment'] ?? '-');
-                        $sheet->setCellValue("I{$row}", $ref['depositAmount'] ?? 0);
-                        $sheet->setCellValue("J{$row}", $ref['totalFinalAmount'] ?? 0);
-                        $sheet->setCellValue("K{$row}", $ref['totalAmountFree'] ?? 0);
-                        $sheet->setCellValue("L{$row}", $ref['totalAmount'] ?? 0);
-                        $sheet->setCellValue("M{$row}", $sapError);
+                        $sheet->setCellValue("B{$row}", $ref['encounterId'] ?? '-');
+                        $sheet->setCellValue("C{$row}", $ref['documentDate'] ?? '-');
+                        $sheet->setCellValue("D{$row}", $recap['orderType'] ?? '-');
+                        $sheet->setCellValue("E{$row}", $recap['recapCode'] ?? '-');
+                        $sheet->setCellValue("F{$row}", $recap['fbStatus'] ?? '-');
+                        $sheet->setCellValue("G{$row}", $recap['status'] ?? '-');
+                        $sheet->setCellValue("H{$row}", $recap['payer'] ?? '-');
+                        $sheet->setCellValue("I{$row}", $recap['assignment'] ?? '-');
+                        $sheet->setCellValue("J{$row}", $ref['depositAmount'] ?? 0);
+                        $sheet->setCellValue("K{$row}", $ref['totalFinalAmount'] ?? 0);
+                        $sheet->setCellValue("L{$row}", $ref['totalAmountFree'] ?? 0);
+                        $sheet->setCellValue("M{$row}", $ref['totalAmount'] ?? 0);
+                        $sheet->setCellValue("N{$row}", $sapError);
                         $row++;
                     }
                 }
@@ -402,7 +404,7 @@ class Billing2Controller extends Controller
             return back()->withErrors(['export' => 'No data available for export']);
         }
 
-        foreach (range('A', 'F') as $col) {
+        foreach (range('A', 'G') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
